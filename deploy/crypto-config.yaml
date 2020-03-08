@@ -1,0 +1,34 @@
+# "OrdererOrgs" - 定义管理排序节点的组织
+OrdererOrgs:
+  - Name: Orderer # 组织的名字
+    Domain: blockchainrealestate.com # 域名
+    Specs: # 定义组织的节点信息
+      - Hostname: orderer # 单个orderer(solo)，节点域名：orderer.blockchainrealestate.com
+
+# "PeerOrgs" - 定义管理peer节点的组织
+PeerOrgs:
+  # Org0 组织0
+  - Name: Org0
+    Domain: org0.blockchainrealestate.com
+    Template: # 使用模板定义peer节点
+      Count: 2 # peer0.org0.blockchainrealestate.com & peer1.org0.blockchainrealestate.com
+      # Start: 5 # index计数的起始
+      # Hostname: {{.Prefix}}{{.Index}} # default
+    Users: # 组织的用户信息
+      Count: 1 # Admin & User1 & User2
+
+  # Org1 组织1
+  - Name: Org1
+    Domain: org1.blockchainrealestate.com
+    Template: # 使用模版定义1个节点，从2开始
+      Count: 2
+    Users:
+      Count: 1 # Admin & User1 & User2 & User3
+
+  # Org2 组织2
+  - Name: Org2
+    Domain: org2.blockchainrealestate.com
+    Template: # 使用模版定义1个节点，从2开始
+      Count: 2
+    Users:
+      Count: 1 # Admin & User1 & User2 & User3

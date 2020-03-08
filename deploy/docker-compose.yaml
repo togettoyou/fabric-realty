@@ -1,0 +1,170 @@
+version: '2'
+services:
+
+  # 关注点
+  # 1. 如何注入系统配置到容器中 环境变量注入
+  # 2. 端口的映射关系
+  # 3. 文件的映射
+
+  orderer.blockchainrealestate.com:
+    container_name: orderer.blockchainrealestate.com
+    image: hyperledger/fabric-orderer:1.4.2
+    environment:
+      - ORDERER_GENERAL_LOGLEVEL=info # general.loglevel: debug
+      - ORDERER_GENERAL_LISTENADDRESS=0.0.0.0 # 服务暴露地址
+      - ORDERER_GENERAL_GENESISMETHOD=file
+      - ORDERER_GENERAL_GENESISFILE=/etc/hyperledger/config/genesis.block # 注入创世区块
+      - ORDERER_GENERAL_LOCALMSPID=OrdererMSP
+      - ORDERER_GENERAL_LOCALMSPDIR=/etc/hyperledger/orderer/msp # 证书相关
+    working_dir: /opt/gopath/src/github.com/hyperledger/fabric/orderer
+    command: orderer
+    ports:
+      - 7050:7050 # 17050:7050
+    volumes:
+      #- ./config/:/etc/hyperledger/config
+      - ./config/genesis.block:/etc/hyperledger/config/genesis.block
+      - ./crypto-config/ordererOrganizations/blockchainrealestate.com/orderers/orderer.blockchainrealestate.com/:/etc/hyperledger/orderer
+
+  peer0.org0.blockchainrealestate.com:
+    #    extends:
+    #      service: peer.base
+    extends:
+      file: docker-compose-base.yaml
+      service: peer-base
+    container_name: peer0.org0.blockchainrealestate.com
+    environment:
+      - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
+      - CORE_PEER_ID=peer0.org0.blockchainrealestate.com
+      - CORE_PEER_LOCALMSPID=Org0MSP
+      - CORE_PEER_ADDRESS=peer0.org0.blockchainrealestate.com:7051
+    ports:
+      - 7051:7051 # grpc服务端口
+      - 7053:7053 # eventhub端口
+    volumes:
+      - /var/run/:/host/var/run/
+      - ./crypto-config/peerOrganizations/org0.blockchainrealestate.com/peers/peer0.org0.blockchainrealestate.com:/etc/hyperledger/peer
+    depends_on:
+      - orderer.blockchainrealestate.com
+
+  peer1.org0.blockchainrealestate.com:
+    #    extends:
+    #      service: peer.base
+    extends:
+      file: docker-compose-base.yaml
+      service: peer-base
+    container_name: peer1.org0.blockchainrealestate.com
+    environment:
+      - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
+      - CORE_PEER_ID=peer1.org0.blockchainrealestate.com
+      - CORE_PEER_LOCALMSPID=Org0MSP
+      - CORE_PEER_ADDRESS=peer1.org0.blockchainrealestate.com:7051
+    ports:
+      - 17051:7051
+      - 17053:7053
+    volumes:
+      - /var/run/:/host/var/run/
+      - ./crypto-config/peerOrganizations/org0.blockchainrealestate.com/peers/peer1.org0.blockchainrealestate.com:/etc/hyperledger/peer
+    depends_on:
+      - orderer.blockchainrealestate.com
+
+  peer0.org1.blockchainrealestate.com:
+    #    extends:
+    #      service: peer.base
+    extends:
+      file: docker-compose-base.yaml
+      service: peer-base
+    container_name: peer0.org1.blockchainrealestate.com
+    environment:
+      - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
+      - CORE_PEER_ID=peer0.org1.blockchainrealestate.com
+      - CORE_PEER_LOCALMSPID=Org1MSP
+      - CORE_PEER_ADDRESS=peer0.org1.blockchainrealestate.com:7051
+    ports:
+      - 27051:7051
+      - 27053:7053
+    volumes:
+      - /var/run/:/host/var/run/
+      - ./crypto-config/peerOrganizations/org1.blockchainrealestate.com/peers/peer0.org1.blockchainrealestate.com:/etc/hyperledger/peer
+    depends_on:
+      - orderer.blockchainrealestate.com
+
+  peer1.org1.blockchainrealestate.com:
+    #    extends:
+    #      service: peer.base
+    extends:
+      file: docker-compose-base.yaml
+      service: peer-base
+    container_name: peer1.org1.blockchainrealestate.com
+    environment:
+      - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
+      - CORE_PEER_ID=peer1.org1.blockchainrealestate.com
+      - CORE_PEER_LOCALMSPID=Org1MSP
+      - CORE_PEER_ADDRESS=peer1.org1.blockchainrealestate.com:7051
+    ports:
+      - 37051:7051
+      - 37053:7053
+    volumes:
+      - /var/run/:/host/var/run/
+      - ./crypto-config/peerOrganizations/org1.blockchainrealestate.com/peers/peer1.org1.blockchainrealestate.com:/etc/hyperledger/peer
+    depends_on:
+      - orderer.blockchainrealestate.com
+
+  peer0.org2.blockchainrealestate.com:
+    #    extends:
+    #      service: peer.base
+    extends:
+      file: docker-compose-base.yaml
+      service: peer-base
+    container_name: peer0.org2.blockchainrealestate.com
+    environment:
+      - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
+      - CORE_PEER_ID=peer0.org2.blockchainrealestate.com
+      - CORE_PEER_LOCALMSPID=Org2MSP
+      - CORE_PEER_ADDRESS=peer0.org2.blockchainrealestate.com:7051
+    ports:
+      - 47051:7051
+      - 47053:7053
+    volumes:
+      - /var/run/:/host/var/run/
+      - ./crypto-config/peerOrganizations/org2.blockchainrealestate.com/peers/peer0.org2.blockchainrealestate.com:/etc/hyperledger/peer
+    depends_on:
+      - orderer.blockchainrealestate.com
+
+  peer1.org2.blockchainrealestate.com:
+    #    extends:
+    #      service: peer.base
+    extends:
+      file: docker-compose-base.yaml
+      service: peer-base
+    container_name: peer1.org2.blockchainrealestate.com
+    environment:
+      - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
+      - CORE_PEER_ID=peer1.org2.blockchainrealestate.com
+      - CORE_PEER_LOCALMSPID=Org2MSP
+      - CORE_PEER_ADDRESS=peer1.org2.blockchainrealestate.com:7051
+    ports:
+      - 57051:7051
+      - 57053:7053
+    volumes:
+      - /var/run/:/host/var/run/
+      - ./crypto-config/peerOrganizations/org2.blockchainrealestate.com/peers/peer1.org2.blockchainrealestate.com:/etc/hyperledger/peer
+    depends_on:
+      - orderer.blockchainrealestate.com
+
+  cli: # peer节点客户端 交易都是从客户端发起 需要用到User证书
+    container_name: cli
+    image: hyperledger/fabric-tools:1.4.2
+    tty: true
+    environment:
+      - GOPATH=/opt/gopath
+      - CORE_LOGGING_LEVEL=INFO
+      - CORE_PEER_ID=cli
+      - CORE_PEER_ADDRESS=peer0.org1.blockchainrealestate.com:7051
+      - CORE_PEER_LOCALMSPID=Org1MSP
+      - CORE_PEER_MSPCONFIGPATH=/etc/hyperledger/peer/users/Admin@org1.blockchainrealestate.com/msp
+    working_dir: /opt/gopath/src/github.com/hyperledger/fabric/
+    command: /bin/bash
+    volumes:
+      - ./../chaincode:/opt/gopath/src/github.com/togettoyou/blockchain-real-estate/chaincode # 链码路径注入
+      - ./config:/etc/hyperledger/config
+      - ./crypto-config/peerOrganizations/org1.blockchainrealestate.com/:/etc/hyperledger/peer

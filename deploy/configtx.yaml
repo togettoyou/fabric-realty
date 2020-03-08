@@ -1,0 +1,89 @@
+---
+
+Organizations:  # Organizations配置段用来定义组织机构实体，以便在后续配置中引用。 下面的配置文件中，定义了三个机构，可以分别使用OrdererOrg、 Org0、Org1和Org2引用其配置：
+  - &OrdererOrg
+    Name: OrdererOrg # 组织的名字
+    ID: OrdererMSP # 组织的MSPID
+    MSPDir: crypto-config/ordererOrganizations/blockchainrealestate.com/msp #组织的证书相对位置（生成的crypto-config)
+
+  - &Org0
+    Name: Org0MSP
+    ID: Org0MSP
+    MSPDir: crypto-config/peerOrganizations/org0.blockchainrealestate.com/msp
+    AnchorPeers: # 组织锚节点的配置
+      - Host: peer0.org0.blockchainrealestate.com
+        Port: 7051
+
+  - &Org1
+    Name: Org1MSP
+    ID: Org1MSP
+    MSPDir: crypto-config/peerOrganizations/org1.blockchainrealestate.com/msp
+    AnchorPeers:
+      - Host: peer0.org1.blockchainrealestate.com
+        Port: 7051
+
+  - &Org2
+    Name: Org2MSP
+    ID: Org2MSP
+    MSPDir: crypto-config/peerOrganizations/org2.blockchainrealestate.com/msp
+    AnchorPeers:
+      - Host: peer0.org2.blockchainrealestate.com
+        Port: 7051
+
+Orderer: &OrdererDefaults
+  # Orderer配置段用来定义要编码写入创世区块或通道交易的排序节点参数。
+  # 排序节点类型用来指定要启用的排序节点实现，不同的实现对应不同的共识算法。
+  # 可选的共识机制为solo和kafka，我们采用solo
+  OrdererType: solo # 共识机制
+  Addresses: #Orderer的 域名（用于连接）
+    - orderer.blockchainrealestate.com:7050
+  BatchTimeout: 2s # 出块时间间隔
+
+  BatchSize: # 用于控制每个block的信息量
+    MaxMessageCount: 10 #每个区块的消息个数
+    AbsoluteMaxBytes: 99 MB #每个区块最大的信息大小
+    PreferredMaxBytes: 512 KB #每个区块包含的一条信息最大长度
+  #当共识算法是kafka的时候，还会有这个Broker
+  # Kafka:
+  #     # Brokers: A list of Kafka brokers to which the orderer connects
+  #     # NOTE: Use IP:port notation
+  #     Brokers:
+  #         - 127.0.0.1:9092
+  Organizations:
+
+
+#Application配置段用来定义要写入创世区块或配置交易的应用参数。
+Application: &ApplicationDefaults
+  Organizations:
+
+
+################################################################################
+#
+#   Profiles配置段用来定义用于configtxgen工具的配置入口。
+#   包含委员会（consortium）的配置入口 可以用来生成排序节点的创世区块。
+#   如果在排序节点的创世区块中正确定义了consortium 的成员，
+#   那么可以仅使用机构成员名称和委员会的名称来生成通道创建请求。
+#
+################################################################################
+Profiles: # 联盟配置 联盟：在联盟内的组织才能对区块链进行操作
+
+  OneOrgOrdererGenesis: # 系统链 全局组织信息
+    Orderer:
+      <<: *OrdererDefaults
+      Organizations:
+        - *OrdererOrg
+    Consortiums:
+      SampleConsortium:
+        Organizations: # 该系统链包含了Org0、Org1、Org2
+          - *Org0
+          - *Org1
+          - *Org2
+
+  TwoOrgChannel: # 业务相关的联盟
+    Consortium: SampleConsortium
+    Application:
+      <<: *ApplicationDefaults
+      Organizations: # 该业务链包含了Org0、Org1、Org2
+        - *Org0
+        - *Org1
+        - *Org2

@@ -1,0 +1,14 @@
+version: '2'
+
+services:
+  peer-base: # peer的公共服务
+    image: hyperledger/fabric-peer:1.4.2
+    environment: # 前缀：CORE
+      - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock # docker的服务端注入
+      - CORE_LOGGING_PEER=info
+      - CORE_CHAINCODE_LOGGING_LEVEL=INFO
+      - CORE_PEER_MSPCONFIGPATH=/etc/hyperledger/peer/msp # msp证书（节点证书）
+      - CORE_LEDGER_STATE_STATEDATABASE=goleveldb # 状态数据库的存储引擎（or CouchDB）
+      - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=deploy_default # cc与peer节点使用同一个网络
+    working_dir: /opt/gopath/src/github.com/hyperledger/fabric
+    command: peer node start
