@@ -41,7 +41,7 @@ func TestBlockChainRealEstate_Init(t *testing.T) {
 // 测试获取账户信息
 func Test_QueryAccountList(t *testing.T) {
 	stub := initTest(t)
-	// 测试获取所有数据
+	fmt.Println("1、测试获取所有数据")
 	response := checkInvoke(t, stub, [][]byte{[]byte("queryAccountList")})
 	var allAccountList []lib.Account
 	err := json.Unmarshal(response.Payload, &allAccountList)
@@ -51,7 +51,7 @@ func Test_QueryAccountList(t *testing.T) {
 	}
 	fmt.Println(allAccountList)
 
-	// 测试获取多个数据
+	fmt.Println("2、测试获取多个数据")
 	response = checkInvoke(t, stub, [][]byte{[]byte("queryAccountList"), []byte("5feceb66ffc8"), []byte("6b86b273ff34")})
 	var accounts []lib.Account
 	err = json.Unmarshal(response.Payload, &accounts)
@@ -61,7 +61,7 @@ func Test_QueryAccountList(t *testing.T) {
 	}
 	fmt.Println(accounts)
 
-	// 测试获取单个数据
+	fmt.Println("3、测试获取单个数据")
 	response = checkInvoke(t, stub, [][]byte{[]byte("queryAccountList"), []byte("4e07408562be")})
 	var account []lib.Account
 	err = json.Unmarshal(response.Payload, &account)
@@ -71,7 +71,7 @@ func Test_QueryAccountList(t *testing.T) {
 	}
 	fmt.Println(account)
 
-	// 测试获取无效数据
+	fmt.Println("4、测试获取无效数据")
 	response = checkInvoke(t, stub, [][]byte{[]byte("queryAccountList"), []byte("0")})
 	var noneAccount []lib.Account
 	err = json.Unmarshal(response.Payload, &noneAccount)
@@ -124,4 +124,60 @@ func Test_CreateRealEstate(t *testing.T) {
 		[]byte("50f"),          //总面积
 		[]byte("30"),           //生活空间
 	})
+}
+
+// 测试获取房地产信息
+func Test_QueryRealEstateList(t *testing.T) {
+	stub := initTest(t)
+	//成功
+	checkInvoke(t, stub, [][]byte{
+		[]byte("createRealEstate"),
+		[]byte("5feceb66ffc8"), //操作人
+		[]byte("6b86b273ff34"), //所有者
+		[]byte("50"),           //总面积
+		[]byte("30"),           //生活空间
+	})
+	checkInvoke(t, stub, [][]byte{
+		[]byte("createRealEstate"),
+		[]byte("5feceb66ffc8"), //操作人
+		[]byte("4e07408562be"), //所有者
+		[]byte("60"),           //总面积
+		[]byte("40"),           //生活空间
+	})
+	checkInvoke(t, stub, [][]byte{
+		[]byte("createRealEstate"),
+		[]byte("5feceb66ffc8"), //操作人
+		[]byte("ef2d127de37b"), //所有者
+		[]byte("80"),           //总面积
+		[]byte("60"),           //生活空间
+	})
+	fmt.Println("1、测试获取所有数据")
+	response := checkInvoke(t, stub, [][]byte{[]byte("queryRealEstateList")})
+	var allRealEstateList []lib.RealEstate
+	err := json.Unmarshal(response.Payload, &allRealEstateList)
+	if err != nil {
+		fmt.Printf("Unmarshal err: %s\n", err.Error())
+		t.FailNow()
+	}
+	fmt.Println(allRealEstateList)
+
+	fmt.Println("2、测试获取指定数据")
+	response = checkInvoke(t, stub, [][]byte{[]byte("queryRealEstateList"), []byte("ef2d127de37b")})
+	var realEstates []lib.RealEstate
+	err = json.Unmarshal(response.Payload, &realEstates)
+	if err != nil {
+		fmt.Printf("Unmarshal err: %s\n", err.Error())
+		t.FailNow()
+	}
+	fmt.Println(realEstates)
+
+	fmt.Println("3、测试获取无效数据")
+	response = checkInvoke(t, stub, [][]byte{[]byte("queryAccountList"), []byte("0")})
+	var noneRealEstate []lib.RealEstate
+	err = json.Unmarshal(response.Payload, &noneRealEstate)
+	if err != nil {
+		fmt.Printf("Unmarshal err: %s\n", err.Error())
+		t.FailNow()
+	}
+	fmt.Println(noneRealEstate)
 }

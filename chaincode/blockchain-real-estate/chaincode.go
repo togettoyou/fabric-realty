@@ -48,6 +48,8 @@ func (t *BlockChainRealEstate) Invoke(stub shim.ChaincodeStubInterface) pb.Respo
 		return routers.QueryAccountList(stub, args)
 	case "createRealEstate":
 		return routers.CreateRealEstate(stub, args)
+	case "queryRealEstateList":
+		return routers.QueryRealEstateList(stub, args)
 	default:
 		return shim.Error(fmt.Sprintf("没有该功能: %s", funcName))
 	}

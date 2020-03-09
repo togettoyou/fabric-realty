@@ -12,9 +12,9 @@ import (
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 	pb "github.com/hyperledger/fabric/protos/peer"
 	"github.com/togettoyou/blockchain-real-estate/chaincode/blockchain-real-estate/lib"
-	snowflake "github.com/togettoyou/blockchain-real-estate/chaincode/blockchain-real-estate/pkg"
 	"github.com/togettoyou/blockchain-real-estate/chaincode/blockchain-real-estate/utils"
 	"strconv"
+	"time"
 )
 
 //新建房地产(管理员)
@@ -58,24 +58,41 @@ func CreateRealEstate(stub shim.ChaincodeStubInterface, args []string) pb.Respon
 	if account.UserName != "管理员" {
 		return shim.Error(fmt.Sprintf("操作人权限不足%s", err))
 	}
-	//生成唯一ID
-	node, err := snowflake.NewNode(1)
-	if err != nil {
-		fmt.Println(err)
-		return shim.Error(fmt.Sprintf("生成唯一ID出错: %s", err))
-	}
-	id := node.Generate()
 	realEstate := &lib.RealEstate{
-		RealEstateID: id.Base64(),
+		RealEstateID: fmt.Sprintf("%d", time.Now().UnixNano()),
 		Proprietor:   proprietor,
 		Encumbrance:  false,
 		TotalArea:    formattedTotalArea,
 		LivingSpace:  formattedLivingSpace,
 	}
 	// 写入账本
-	if err := utils.WriteLedger(realEstate, stub, lib.RealEstateKey, []string{realEstate.RealEstateID, realEstate.Proprietor}); err != nil {
+	if err := utils.WriteLedger(realEstate, stub, lib.RealEstateKey, []string{realEstate.Proprietor, realEstate.RealEstateID}); err != nil {
 		return shim.Error(fmt.Sprintf("%s", err))
 	}
 	// 成功返回
 	return shim.Success(nil)
+}
+
+//查询房地产(可查询所有，也可根据所有人查询名下房产)
+func QueryRealEstateList(stub shim.ChaincodeStubInterface, args []string) pb.Response {
+	var realEstateList []lib.RealEstate
+	results, err := utils.GetStateByPartialCompositeKeys2(stub, lib.RealEstateKey, args)
+	if err != nil {
+		return shim.Error(fmt.Sprintf("%s", err))
+	}
+	for _, v := range results {
+		if v != nil {
+			var realEstate lib.RealEstate
+			err := json.Unmarshal(v, &realEstate)
+			if err != nil {
+				return shim.Error(fmt.Sprintf("QueryRealEstateList-反序列化出错: %s", err))
+			}
+			realEstateList = append(realEstateList, realEstate)
+		}
+	}
+	realEstateListByte, err := json.Marshal(realEstateList)
+	if err != nil {
+		return shim.Error(fmt.Sprintf("QueryRealEstateList-序列化出错: %s", err))
+	}
+	return shim.Success(realEstateListByte)
 }
