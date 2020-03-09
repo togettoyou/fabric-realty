@@ -13,7 +13,8 @@ type Account struct {
 	Balance   float64 `json:"balance"`    //余额
 }
 
-//房地产可以作为担保(当Encumbrance为true时)出售、捐赠或质押。
+//房地产作为担保出售、捐赠或质押时Encumbrance为true，默认状态false。
+//仅当Encumbrance为false时，才可发起出售、捐赠或质押
 type RealEstate struct {
 	RealEstateID string  `json:"realEstateId"` //房地产ID
 	Proprietor   string  `json:"proprietor"`   //所有者
@@ -92,3 +93,7 @@ var PledgeStatusConstant = func() map[string]string {
 		"done":                "已完成", //质押期限到期，完成质押，如若业主尚未返还资金,质押对象将成为质押人的财产
 	}
 }
+
+const (
+	AccountKey = "account-key"
+)
