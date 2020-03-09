@@ -81,3 +81,47 @@ func Test_QueryAccountList(t *testing.T) {
 	}
 	fmt.Println(noneAccount)
 }
+
+// 测试创建房地产
+func Test_CreateRealEstate(t *testing.T) {
+	stub := initTest(t)
+	//成功
+	checkInvoke(t, stub, [][]byte{
+		[]byte("createRealEstate"),
+		[]byte("5feceb66ffc8"), //操作人
+		[]byte("6b86b273ff34"), //所有者
+		[]byte("50"),           //总面积
+		[]byte("30"),           //生活空间
+	})
+	//操作人权限不足
+	checkInvoke(t, stub, [][]byte{
+		[]byte("createRealEstate"),
+		[]byte("6b86b273ff34"), //操作人
+		[]byte("4e07408562be"), //所有者
+		[]byte("50"),           //总面积
+		[]byte("30"),           //生活空间
+	})
+	//操作人应为管理员且与所有人不能相同
+	checkInvoke(t, stub, [][]byte{
+		[]byte("createRealEstate"),
+		[]byte("5feceb66ffc8"), //操作人
+		[]byte("5feceb66ffc8"), //所有者
+		[]byte("50"),           //总面积
+		[]byte("30"),           //生活空间
+	})
+	//参数个数不满足
+	checkInvoke(t, stub, [][]byte{
+		[]byte("createRealEstate"),
+		[]byte("5feceb66ffc8"), //操作人
+		[]byte("6b86b273ff34"), //所有者
+		[]byte("50"),           //总面积
+	})
+	//参数格式转换出错
+	checkInvoke(t, stub, [][]byte{
+		[]byte("createRealEstate"),
+		[]byte("5feceb66ffc8"), //操作人
+		[]byte("6b86b273ff34"), //所有者
+		[]byte("50f"),          //总面积
+		[]byte("30"),           //生活空间
+	})
+}
