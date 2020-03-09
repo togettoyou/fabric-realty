@@ -8,6 +8,18 @@ definitions:
       msg:
         type: string
     type: object
+  v1.AccountIdBody:
+    properties:
+      accountId:
+        type: string
+    type: object
+  v1.AccountRequestBody:
+    properties:
+      args:
+        items:
+          $ref: '#/definitions/v1.AccountIdBody'
+        type: array
+    type: object
 info:
   contact:
     email: zoujh99@qq.com
@@ -34,7 +46,14 @@ paths:
             $ref: '#/definitions/app.Response'
       summary: 测试输出Hello
   /api/v1/queryAccountList:
-    get:
+    post:
+      parameters:
+      - description: account
+        in: body
+        name: account
+        required: true
+        schema:
+          $ref: '#/definitions/v1.AccountRequestBody'
       produces:
       - application/json
       responses:

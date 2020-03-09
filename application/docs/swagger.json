@@ -37,11 +37,22 @@
             }
         },
         "/api/v1/queryAccountList": {
-            "get": {
+            "post": {
                 "produces": [
                     "application/json"
                 ],
                 "summary": "获取账户信息",
+                "parameters": [
+                    {
+                        "description": "account",
+                        "name": "account",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/v1.AccountRequestBody"
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -71,6 +82,25 @@
                 },
                 "msg": {
                     "type": "string"
+                }
+            }
+        },
+        "v1.AccountIdBody": {
+            "type": "object",
+            "properties": {
+                "accountId": {
+                    "type": "string"
+                }
+            }
+        },
+        "v1.AccountRequestBody": {
+            "type": "object",
+            "properties": {
+                "args": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/v1.AccountIdBody"
+                    }
                 }
             }
         }
