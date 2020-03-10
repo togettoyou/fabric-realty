@@ -14,6 +14,39 @@
         "version": "1.0"
     },
     "paths": {
+        "/api/v1/createRealEstate": {
+            "post": {
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "新建房地产(管理员)",
+                "parameters": [
+                    {
+                        "description": "realEstate",
+                        "name": "realEstate",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/v1.RealEstateRequestBody"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/app.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/app.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/hello": {
             "get": {
                 "produces": [
@@ -101,6 +134,27 @@
                     "items": {
                         "$ref": "#/definitions/v1.AccountIdBody"
                     }
+                }
+            }
+        },
+        "v1.RealEstateRequestBody": {
+            "type": "object",
+            "properties": {
+                "accountId": {
+                    "description": "操作人ID",
+                    "type": "string"
+                },
+                "livingSpace": {
+                    "description": "生活空间",
+                    "type": "number"
+                },
+                "proprietor": {
+                    "description": "所有者(业主)(业主AccountId)",
+                    "type": "string"
+                },
+                "totalArea": {
+                    "description": "总面积",
+                    "type": "number"
                 }
             }
         }

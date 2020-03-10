@@ -20,6 +20,21 @@ definitions:
           $ref: '#/definitions/v1.AccountIdBody'
         type: array
     type: object
+  v1.RealEstateRequestBody:
+    properties:
+      accountId:
+        description: 操作人ID
+        type: string
+      livingSpace:
+        description: 生活空间
+        type: number
+      proprietor:
+        description: 所有者(业主)(业主AccountId)
+        type: string
+      totalArea:
+        description: 总面积
+        type: number
+    type: object
 info:
   contact:
     email: zoujh99@qq.com
@@ -31,6 +46,27 @@ info:
   title: 基于区块链技术的房地产交易系统api文档
   version: "1.0"
 paths:
+  /api/v1/createRealEstate:
+    post:
+      parameters:
+      - description: realEstate
+        in: body
+        name: realEstate
+        required: true
+        schema:
+          $ref: '#/definitions/v1.RealEstateRequestBody'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/app.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/app.Response'
+      summary: 新建房地产(管理员)
   /api/v1/hello:
     get:
       produces:

@@ -109,6 +109,14 @@ func Test_CreateRealEstate(t *testing.T) {
 		[]byte("50"),           //总面积
 		[]byte("30"),           //生活空间
 	})
+	//业主proprietor信息验证失败
+	checkInvoke(t, stub, [][]byte{
+		[]byte("createRealEstate"),
+		[]byte("5feceb66ffc8"),    //操作人
+		[]byte("6b86b273ff34555"), //所有者
+		[]byte("50"),              //总面积
+		[]byte("30"),              //生活空间
+	})
 	//参数个数不满足
 	checkInvoke(t, stub, [][]byte{
 		[]byte("createRealEstate"),
