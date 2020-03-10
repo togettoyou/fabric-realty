@@ -20,6 +20,12 @@ definitions:
           $ref: '#/definitions/v1.AccountIdBody'
         type: array
     type: object
+  v1.RealEstateQueryRequestBody:
+    properties:
+      proprietor:
+        description: 所有者(业主)(业主AccountId)
+        type: string
+    type: object
   v1.RealEstateRequestBody:
     properties:
       accountId:
@@ -102,4 +108,25 @@ paths:
           schema:
             $ref: '#/definitions/app.Response'
       summary: 获取账户信息
+  /api/v1/queryRealEstateList:
+    post:
+      parameters:
+      - description: realEstateQuery
+        in: body
+        name: realEstateQuery
+        required: true
+        schema:
+          $ref: '#/definitions/v1.RealEstateQueryRequestBody'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/app.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/app.Response'
+      summary: 获取房地产信息(空json{}可以查询所有，指定proprietor可以查询指定业主名下房产)
 swagger: "2.0"

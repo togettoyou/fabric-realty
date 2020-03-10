@@ -101,6 +101,39 @@
                     }
                 }
             }
+        },
+        "/api/v1/queryRealEstateList": {
+            "post": {
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "获取房地产信息(空json{}可以查询所有，指定proprietor可以查询指定业主名下房产)",
+                "parameters": [
+                    {
+                        "description": "realEstateQuery",
+                        "name": "realEstateQuery",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/v1.RealEstateQueryRequestBody"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/app.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/app.Response"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -134,6 +167,15 @@
                     "items": {
                         "$ref": "#/definitions/v1.AccountIdBody"
                     }
+                }
+            }
+        },
+        "v1.RealEstateQueryRequestBody": {
+            "type": "object",
+            "properties": {
+                "proprietor": {
+                    "description": "所有者(业主)(业主AccountId)",
+                    "type": "string"
                 }
             }
         },
