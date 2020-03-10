@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"github.com/hyperledger/fabric/core/chaincode/shim"
@@ -134,31 +135,54 @@ func Test_CreateRealEstate(t *testing.T) {
 	})
 }
 
-// 测试获取房地产信息
-func Test_QueryRealEstateList(t *testing.T) {
-	stub := initTest(t)
+//手动创建一些房地产
+func checkCreateRealEstate(stub *shim.MockStub, t *testing.T) []lib.RealEstate {
+	var realEstateList []lib.RealEstate
+	var realEstate lib.RealEstate
 	//成功
-	checkInvoke(t, stub, [][]byte{
+	resp1 := checkInvoke(t, stub, [][]byte{
 		[]byte("createRealEstate"),
 		[]byte("5feceb66ffc8"), //操作人
 		[]byte("6b86b273ff34"), //所有者
 		[]byte("50"),           //总面积
 		[]byte("30"),           //生活空间
 	})
-	checkInvoke(t, stub, [][]byte{
+	resp2 := checkInvoke(t, stub, [][]byte{
+		[]byte("createRealEstate"),
+		[]byte("5feceb66ffc8"), //操作人
+		[]byte("6b86b273ff34"), //所有者
+		[]byte("80"),           //总面积
+		[]byte("60.8"),         //生活空间
+	})
+	resp3 := checkInvoke(t, stub, [][]byte{
 		[]byte("createRealEstate"),
 		[]byte("5feceb66ffc8"), //操作人
 		[]byte("4e07408562be"), //所有者
 		[]byte("60"),           //总面积
 		[]byte("40"),           //生活空间
 	})
-	checkInvoke(t, stub, [][]byte{
+	resp4 := checkInvoke(t, stub, [][]byte{
 		[]byte("createRealEstate"),
 		[]byte("5feceb66ffc8"), //操作人
 		[]byte("ef2d127de37b"), //所有者
 		[]byte("80"),           //总面积
 		[]byte("60"),           //生活空间
 	})
+	json.Unmarshal(bytes.NewBuffer(resp1.Payload).Bytes(), &realEstate)
+	realEstateList = append(realEstateList, realEstate)
+	json.Unmarshal(bytes.NewBuffer(resp2.Payload).Bytes(), &realEstate)
+	realEstateList = append(realEstateList, realEstate)
+	json.Unmarshal(bytes.NewBuffer(resp3.Payload).Bytes(), &realEstate)
+	realEstateList = append(realEstateList, realEstate)
+	json.Unmarshal(bytes.NewBuffer(resp4.Payload).Bytes(), &realEstate)
+	realEstateList = append(realEstateList, realEstate)
+	return realEstateList
+}
+
+// 测试获取房地产信息
+func Test_QueryRealEstateList(t *testing.T) {
+	stub := initTest(t)
+	realEstateList := checkCreateRealEstate(stub, t)
 	fmt.Println("1、测试获取所有数据")
 	response := checkInvoke(t, stub, [][]byte{[]byte("queryRealEstateList")})
 	var allRealEstateList []lib.RealEstate
@@ -170,7 +194,11 @@ func Test_QueryRealEstateList(t *testing.T) {
 	fmt.Println(allRealEstateList)
 
 	fmt.Println("2、测试获取指定数据")
-	response = checkInvoke(t, stub, [][]byte{[]byte("queryRealEstateList"), []byte("ef2d127de37b")})
+	response = checkInvoke(t, stub, [][]byte{
+		[]byte("queryRealEstateList"),
+		[]byte(realEstateList[0].Proprietor),
+		[]byte(realEstateList[0].RealEstateID),
+	})
 	var realEstates []lib.RealEstate
 	err = json.Unmarshal(response.Payload, &realEstates)
 	if err != nil {
@@ -188,4 +216,47 @@ func Test_QueryRealEstateList(t *testing.T) {
 		t.FailNow()
 	}
 	fmt.Println(noneRealEstate)
+}
+
+// 测试发起销售
+func Test_CreateSelling(t *testing.T) {
+	stub := initTest(t)
+	realEstateList := checkCreateRealEstate(stub, t)
+	//成功
+	checkInvoke(t, stub, [][]byte{
+		[]byte("createSelling"),
+		[]byte(realEstateList[0].RealEstateID), //销售对象(正在出售的房地产RealEstateID)
+		[]byte(realEstateList[0].Proprietor),   //卖家(卖家AccountId)
+		[]byte("50"),                           //价格
+		[]byte("30"),                           //智能合约的有效期(单位为天)
+	})
+	//验证销售对象objectOfSale属于卖家seller失败
+	checkInvoke(t, stub, [][]byte{
+		[]byte("createSelling"),
+		[]byte(realEstateList[0].RealEstateID), //销售对象(正在出售的房地产RealEstateID)
+		[]byte(realEstateList[2].Proprietor),   //卖家(卖家AccountId)
+		[]byte("50"),                           //价格
+		[]byte("30"),                           //智能合约的有效期(单位为天)
+	})
+	checkInvoke(t, stub, [][]byte{
+		[]byte("createSelling"),
+		[]byte("123"),                        //销售对象(正在出售的房地产RealEstateID)
+		[]byte(realEstateList[0].Proprietor), //卖家(卖家AccountId)
+		[]byte("50"),                         //价格
+		[]byte("30"),                         //智能合约的有效期(单位为天)
+	})
+	//参数错误
+	checkInvoke(t, stub, [][]byte{
+		[]byte("createSelling"),
+		[]byte(realEstateList[0].RealEstateID), //销售对象(正在出售的房地产RealEstateID)
+		[]byte(realEstateList[0].Proprietor),   //卖家(卖家AccountId)
+		[]byte("50"),                           //价格
+	})
+	checkInvoke(t, stub, [][]byte{
+		[]byte("createSelling"),
+		[]byte(""),                           //销售对象(正在出售的房地产RealEstateID)
+		[]byte(realEstateList[0].Proprietor), //卖家(卖家AccountId)
+		[]byte("50"),                         //价格
+		[]byte("30"),                         //智能合约的有效期(单位为天)
+	})
 }

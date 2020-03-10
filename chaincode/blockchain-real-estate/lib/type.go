@@ -43,7 +43,8 @@ type Selling struct {
 var SellingStatusConstant = func() map[string]string {
 	return map[string]string{
 		"saleStart": "销售中", //正在销售状态,等待买家光顾
-		"cancelled": "已取消", //被卖家取消销售或销售期限到期或买家退款操作导致取消
+		"cancelled": "已取消", //被卖家取消销售或买家退款操作导致取消
+		"expired":   "已过期", //销售期限到期
 		"delivery":  "交付中", //买家买下并付款,处于等待卖家确认收款状态,如若卖家未能确认收款，买家可以取消并退款
 		"done":      "完成",  //卖家确认接收资金，交易完成
 	}
@@ -101,4 +102,5 @@ var PledgeStatusConstant = func() map[string]string {
 const (
 	AccountKey    = "account-key"
 	RealEstateKey = "real-estate-key"
+	SellingKey    = "selling-key"
 )
