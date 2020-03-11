@@ -257,23 +257,68 @@ func Test_QuerySellingList(t *testing.T) {
 		[]byte("queryAccountList"),
 		[]byte(realEstateList[2].Proprietor),
 	}).Payload)))
-	fmt.Println(fmt.Sprintf("开始购买\n%s", string(checkInvoke(t, stub, [][]byte{
-		[]byte("createSellingBuy"),
+	fmt.Println(fmt.Sprintf("4、开始购买\n%s", string(checkInvoke(t, stub, [][]byte{
+		[]byte("createSellingByBuy"),
 		[]byte(realEstateList[0].RealEstateID), //销售对象(正在出售的房地产RealEstateID)
 		[]byte(realEstateList[0].Proprietor),   //卖家(卖家AccountId)
 		[]byte(realEstateList[2].Proprietor),   //买家(买家AccountId)
 	}).Payload)))
-	fmt.Println(fmt.Sprintf("购买后再次查询%s的账户余额\n%s", realEstateList[2].Proprietor, string(checkInvoke(t, stub, [][]byte{
+	fmt.Println(fmt.Sprintf("》购买后再次查询%s的账户余额\n%s", realEstateList[2].Proprietor, string(checkInvoke(t, stub, [][]byte{
 		[]byte("queryAccountList"),
 		[]byte(realEstateList[2].Proprietor),
 	}).Payload)))
-	fmt.Println(fmt.Sprintf("卖家查询购买成功信息\n%s", string(checkInvoke(t, stub, [][]byte{
+	fmt.Println(fmt.Sprintf("》卖家查询购买成功信息\n%s", string(checkInvoke(t, stub, [][]byte{
 		[]byte("querySellingList"),
 		[]byte(realEstateList[0].Proprietor), //买家(买家AccountId)
 	}).Payload)))
-	fmt.Println(fmt.Sprintf("买家查询购买成功信息\n%s", string(checkInvoke(t, stub, [][]byte{
+	fmt.Println(fmt.Sprintf("》买家查询购买成功信息\n%s", string(checkInvoke(t, stub, [][]byte{
 		[]byte("querySellingListByBuyer"),
 		[]byte(realEstateList[2].Proprietor), //买家(买家AccountId)
 	}).Payload)))
-
+	fmt.Println(fmt.Sprintf("》确认收款前卖家%s的账户余额\n%s", realEstateList[0].Proprietor, string(checkInvoke(t, stub, [][]byte{
+		[]byte("queryAccountList"),
+		[]byte(realEstateList[0].Proprietor),
+	}).Payload)))
+	fmt.Println(fmt.Sprintf("》确认收款前买家%s的账户余额\n%s", realEstateList[2].Proprietor, string(checkInvoke(t, stub, [][]byte{
+		[]byte("queryAccountList"),
+		[]byte(realEstateList[2].Proprietor),
+	}).Payload)))
+	fmt.Println(fmt.Sprintf("》确认收款前卖家%s的房产信息\n%s", realEstateList[0].Proprietor, string(checkInvoke(t, stub, [][]byte{
+		[]byte("queryRealEstateList"),
+		[]byte(realEstateList[0].Proprietor),
+	}).Payload)))
+	fmt.Println(fmt.Sprintf("》确认收款前买家%s的房产信息\n%s", realEstateList[2].Proprietor, string(checkInvoke(t, stub, [][]byte{
+		[]byte("queryRealEstateList"),
+		[]byte(realEstateList[2].Proprietor),
+	}).Payload)))
+	fmt.Println(fmt.Sprintf("》卖家确认收款\n%s", string(checkInvoke(t, stub, [][]byte{
+		[]byte("updateSellingBySeller"),
+		[]byte(realEstateList[0].RealEstateID), //销售对象(正在出售的房地产RealEstateID)
+		[]byte(realEstateList[0].Proprietor),   //卖家(卖家AccountId)
+		[]byte(realEstateList[2].Proprietor),   //买家(买家AccountId)
+		[]byte("done"),                         //确认收款
+	}).Payload)))
+	//fmt.Println(fmt.Sprintf("》卖家取消收款\n%s", string(checkInvoke(t, stub, [][]byte{
+	//	[]byte("updateSellingBySeller"),
+	//	[]byte(realEstateList[0].RealEstateID), //销售对象(正在出售的房地产RealEstateID)
+	//	[]byte(realEstateList[0].Proprietor),   //卖家(卖家AccountId)
+	//	[]byte(realEstateList[2].Proprietor),   //买家(买家AccountId)
+	//	[]byte("cancelled"),                    //取消收款
+	//}).Payload)))
+	fmt.Println(fmt.Sprintf("》确认收款后卖家%s的账户余额\n%s", realEstateList[0].Proprietor, string(checkInvoke(t, stub, [][]byte{
+		[]byte("queryAccountList"),
+		[]byte(realEstateList[0].Proprietor),
+	}).Payload)))
+	fmt.Println(fmt.Sprintf("》确认收款后买家%s的账户余额\n%s", realEstateList[2].Proprietor, string(checkInvoke(t, stub, [][]byte{
+		[]byte("queryAccountList"),
+		[]byte(realEstateList[2].Proprietor),
+	}).Payload)))
+	fmt.Println(fmt.Sprintf("》确认收款后卖家%s的房产信息\n%s", realEstateList[0].Proprietor, string(checkInvoke(t, stub, [][]byte{
+		[]byte("queryRealEstateList"),
+		[]byte(realEstateList[0].Proprietor),
+	}).Payload)))
+	fmt.Println(fmt.Sprintf("》确认收款后买家%s的房产信息\n%s", realEstateList[2].Proprietor, string(checkInvoke(t, stub, [][]byte{
+		[]byte("queryRealEstateList"),
+		[]byte(realEstateList[2].Proprietor),
+	}).Payload)))
 }

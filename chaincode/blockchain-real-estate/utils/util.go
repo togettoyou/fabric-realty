@@ -34,6 +34,22 @@ func WriteLedger(obj interface{}, stub shim.ChaincodeStubInterface, objectType s
 	return nil
 }
 
+//删除账本
+func DelLedger(stub shim.ChaincodeStubInterface, objectType string, keys []string) error {
+	//创建复合主键
+	var key string
+	if val, err := stub.CreateCompositeKey(objectType, keys); err != nil {
+		return errors.New(fmt.Sprintf("%s-创建复合主键出错 %s", objectType, err))
+	} else {
+		key = val
+	}
+	//写入区块链账本
+	if err := stub.DelState(key); err != nil {
+		return errors.New(fmt.Sprintf("%s-删除区块链账本出错: %s", objectType, err))
+	}
+	return nil
+}
+
 //根据复合主键查询数据(适合获取全部，多个，单个数据)
 //将keys拆分查询
 func GetStateByPartialCompositeKeys(stub shim.ChaincodeStubInterface, objectType string, keys []string) (results [][]byte, err error) {

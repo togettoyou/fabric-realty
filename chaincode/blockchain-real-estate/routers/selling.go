@@ -44,9 +44,18 @@ func CreateSelling(stub shim.ChaincodeStubInterface, args []string) pb.Response 
 		formattedSalePeriod = val
 	}
 	//判断objectOfSale是否属于seller
-	resultsSeller, err := utils.GetStateByPartialCompositeKeys2(stub, lib.RealEstateKey, []string{seller, objectOfSale})
-	if err != nil || len(resultsSeller) != 1 {
+	resultsRealEstate, err := utils.GetStateByPartialCompositeKeys2(stub, lib.RealEstateKey, []string{seller, objectOfSale})
+	if err != nil || len(resultsRealEstate) != 1 {
 		return shim.Error(fmt.Sprintf("验证%s属于%s失败: %s", objectOfSale, seller, err))
+	}
+	var realEstate lib.RealEstate
+	if err = json.Unmarshal(resultsRealEstate[0], &realEstate); err != nil {
+		return shim.Error(fmt.Sprintf("CreateSelling-反序列化出错: %s", err))
+	}
+	//判断记录是否已存在，不能重复发起销售
+	//若Encumbrance为true即说明此房产已经正在担保状态
+	if realEstate.Encumbrance {
+		return shim.Error("此房地产已经作为担保状态，不能重复发起销售")
 	}
 	selling := &lib.Selling{
 		ObjectOfSale:  objectOfSale,
@@ -61,6 +70,11 @@ func CreateSelling(stub shim.ChaincodeStubInterface, args []string) pb.Response 
 	if err := utils.WriteLedger(selling, stub, lib.SellingKey, []string{selling.Seller, selling.ObjectOfSale}); err != nil {
 		return shim.Error(fmt.Sprintf("%s", err))
 	}
+	//将房子状态设置为正在担保状态
+	realEstate.Encumbrance = true
+	if err := utils.WriteLedger(realEstate, stub, lib.RealEstateKey, []string{realEstate.Proprietor, realEstate.RealEstateID}); err != nil {
+		return shim.Error(fmt.Sprintf("%s", err))
+	}
 	//将成功创建的信息返回
 	sellingByte, err := json.Marshal(selling)
 	if err != nil {
@@ -71,7 +85,7 @@ func CreateSelling(stub shim.ChaincodeStubInterface, args []string) pb.Response 
 }
 
 //参与销售(买家购买)
-func CreateSellingBuy(stub shim.ChaincodeStubInterface, args []string) pb.Response {
+func CreateSellingByBuy(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 	// 验证参数
 	if len(args) != 3 {
 		return shim.Error("参数个数不满足")
@@ -101,7 +115,7 @@ func CreateSellingBuy(stub shim.ChaincodeStubInterface, args []string) pb.Respon
 	}
 	//判断selling的状态是否为销售中
 	if selling.SellingStatus != lib.SellingStatusConstant()["saleStart"] {
-		return shim.Error("此交易已经正在进行中，购买失败")
+		return shim.Error("此交易不属于销售中状态，已经无法购买")
 	}
 	//根据buyer获取买家信息
 	resultsAccount, err := utils.GetStateByPartialCompositeKeys(stub, lib.AccountKey, []string{buyer})
@@ -193,4 +207,167 @@ func QuerySellingListByBuyer(stub shim.ChaincodeStubInterface, args []string) pb
 		return shim.Error(fmt.Sprintf("QuerySellingListByBuyer-序列化出错: %s", err))
 	}
 	return shim.Success(sellingBuyListByte)
+}
+
+// 买家更新销售状态（确认、取消）
+func UpdateSellingBySeller(stub shim.ChaincodeStubInterface, args []string) pb.Response {
+	// 验证参数
+	if len(args) != 4 {
+		return shim.Error("参数个数不满足")
+	}
+	objectOfSale := args[0]
+	seller := args[1]
+	buyer := args[2]
+	status := args[3]
+	if objectOfSale == "" || seller == "" || buyer == "" || status == "" {
+		return shim.Error("参数存在空值")
+	}
+	//根据objectOfSale和seller获取想要购买的房产信息，确认存在该房产
+	resultsRealEstate, err := utils.GetStateByPartialCompositeKeys2(stub, lib.RealEstateKey, []string{seller, objectOfSale})
+	if err != nil || len(resultsRealEstate) != 1 {
+		return shim.Error(fmt.Sprintf("根据%s和%s获取想要购买的房产信息失败: %s", objectOfSale, seller, err))
+	}
+	var realEstate lib.RealEstate
+	if err = json.Unmarshal(resultsRealEstate[0], &realEstate); err != nil {
+		return shim.Error(fmt.Sprintf("UpdateSellingBySeller-反序列化出错: %s", err))
+	}
+	//根据objectOfSale和seller获取销售信息
+	resultsSelling, err := utils.GetStateByPartialCompositeKeys2(stub, lib.SellingKey, []string{seller, objectOfSale})
+	if err != nil || len(resultsSelling) != 1 {
+		return shim.Error(fmt.Sprintf("根据%s和%s获取销售信息失败: %s", objectOfSale, seller, err))
+	}
+	var selling lib.Selling
+	if err = json.Unmarshal(resultsSelling[0], &selling); err != nil {
+		return shim.Error(fmt.Sprintf("UpdateSellingBySeller-反序列化出错: %s", err))
+	}
+	//根据buyer获取买家购买信息sellingBuy
+	var sellingBuy lib.SellingBuy
+	//如果当前状态是saleStart销售中，是不存在买家的
+	if selling.SellingStatus != lib.SellingStatusConstant()["saleStart"] {
+		resultsSellingByBuyer, err := utils.GetStateByPartialCompositeKeys2(stub, lib.SellingBuyKey, []string{buyer})
+		if err != nil || len(resultsSellingByBuyer) == 0 {
+			return shim.Error(fmt.Sprintf("根据%s获取买家购买信息失败: %s", buyer, err))
+		}
+		for _, v := range resultsSellingByBuyer {
+			if v != nil {
+				var s lib.SellingBuy
+				err := json.Unmarshal(v, &s)
+				if err != nil {
+					return shim.Error(fmt.Sprintf("UpdateSellingBySeller-反序列化出错: %s", err))
+				}
+				if s.Selling.ObjectOfSale == objectOfSale && s.Selling.Seller == seller {
+					sellingBuy = s
+					break
+				}
+			}
+		}
+		if sellingBuy.Buyer != buyer {
+			return shim.Error("验证买家信息出错")
+		}
+	}
+	//根据seller获取卖家信息
+	resultsSellerAccount, err := utils.GetStateByPartialCompositeKeys(stub, lib.AccountKey, []string{seller})
+	if err != nil || len(resultsSellerAccount) != 1 {
+		return shim.Error(fmt.Sprintf("seller卖家信息验证失败%s", err))
+	}
+	var accountSeller lib.Account
+	if err = json.Unmarshal(resultsSellerAccount[0], &accountSeller); err != nil {
+		return shim.Error(fmt.Sprintf("查询seller卖家信息-反序列化出错: %s", err))
+	}
+
+	var data []byte
+	//判断销售状态
+	switch status {
+	case "done":
+		//如果是买家确认收款操作,必须确保销售处于交付状态
+		if selling.SellingStatus != lib.SellingStatusConstant()["delivery"] {
+			return shim.Error("此交易并不处于交付中，确认收款失败")
+		}
+		//确认收款,将款项加入到卖家账户
+		accountSeller.Balance += selling.Price
+		if err := utils.WriteLedger(accountSeller, stub, lib.AccountKey, []string{accountSeller.AccountId}); err != nil {
+			return shim.Error(fmt.Sprintf("卖家确认接收资金失败%s", err))
+		}
+		//将房产信息转入买家，并重置担保状态
+		realEstate.Proprietor = buyer
+		realEstate.Encumbrance = false
+		//加多一个seller键是为了确保原买家中的房产信息不会冲突,即不会有相同的RealEstateID存在
+		if err := utils.WriteLedger(realEstate, stub, lib.RealEstateKey, []string{realEstate.Proprietor, realEstate.RealEstateID, seller}); err != nil {
+			return shim.Error(fmt.Sprintf("%s", err))
+		}
+		//清除原来的房产信息
+		if err := utils.DelLedger(stub, lib.RealEstateKey, []string{seller, objectOfSale}); err != nil {
+			return shim.Error(fmt.Sprintf("%s", err))
+		}
+		//订单状态设置为完成，写入账本
+		selling.SellingStatus = lib.SellingStatusConstant()["done"]
+		if err := utils.WriteLedger(selling, stub, lib.SellingKey, []string{selling.Seller, selling.ObjectOfSale}); err != nil {
+			return shim.Error(fmt.Sprintf("%s", err))
+		}
+		sellingBuy.Selling = selling
+		if err := utils.WriteLedger(sellingBuy, stub, lib.SellingBuyKey, []string{sellingBuy.Buyer, sellingBuy.CreateTime.String()}); err != nil {
+			return shim.Error(fmt.Sprintf("将本次购买交易写入账本失败%s", err))
+		}
+		data, err = json.Marshal(sellingBuy)
+		if err != nil {
+			return shim.Error(fmt.Sprintf("序列化购买交易的信息出错: %s", err))
+		}
+		break
+	case "cancelled":
+		//如果是买家取消操作,根据当前状态分情况
+		switch selling.SellingStatus {
+		//情况①，当前处于saleStart销售状态
+		case lib.SellingStatusConstant()["saleStart"]:
+			selling.SellingStatus = lib.SellingStatusConstant()["cancelled"]
+			if err := utils.WriteLedger(selling, stub, lib.SellingKey, []string{selling.Seller, selling.ObjectOfSale}); err != nil {
+				return shim.Error(fmt.Sprintf("%s", err))
+			}
+			data, err = json.Marshal(selling)
+			if err != nil {
+				return shim.Error(fmt.Sprintf("序列化取消交易的信息出错: %s", err))
+			}
+			break
+		//情况②，当前处于delivery交付中状态
+		case lib.SellingStatusConstant()["delivery"]:
+			//根据buyer获取卖家信息
+			resultsBuyerAccount, err := utils.GetStateByPartialCompositeKeys(stub, lib.AccountKey, []string{buyer})
+			if err != nil || len(resultsBuyerAccount) != 1 {
+				return shim.Error(fmt.Sprintf("buyer买家信息验证失败%s", err))
+			}
+			var accountBuyer lib.Account
+			if err = json.Unmarshal(resultsBuyerAccount[0], &accountBuyer); err != nil {
+				return shim.Error(fmt.Sprintf("查询buyer买家信息-反序列化出错: %s", err))
+			}
+			//此时取消操作，需要将资金退还给买家
+			accountBuyer.Balance += selling.Price
+			if err := utils.WriteLedger(accountSeller, stub, lib.AccountKey, []string{accountBuyer.AccountId}); err != nil {
+				return shim.Error(fmt.Sprintf("退还买家资金失败%s", err))
+			}
+			//重置房产信息担保状态
+			realEstate.Encumbrance = false
+			if err := utils.WriteLedger(realEstate, stub, lib.RealEstateKey, []string{realEstate.Proprietor, realEstate.RealEstateID}); err != nil {
+				return shim.Error(fmt.Sprintf("%s", err))
+			}
+			//更新销售状态
+			selling.SellingStatus = lib.SellingStatusConstant()["cancelled"]
+			if err := utils.WriteLedger(selling, stub, lib.SellingKey, []string{selling.Seller, selling.ObjectOfSale}); err != nil {
+				return shim.Error(fmt.Sprintf("%s", err))
+			}
+			sellingBuy.Selling = selling
+			if err := utils.WriteLedger(sellingBuy, stub, lib.SellingBuyKey, []string{sellingBuy.Buyer, sellingBuy.CreateTime.String()}); err != nil {
+				return shim.Error(fmt.Sprintf("将本次取消交易写入账本失败%s", err))
+			}
+			data, err = json.Marshal(sellingBuy)
+			if err != nil {
+				return shim.Error(fmt.Sprintf("序列化取消交易的信息出错: %s", err))
+			}
+			break
+		default:
+			return shim.Error(fmt.Sprintf("当前销售状态为%s,已不能取消", selling.SellingStatus))
+		}
+		break
+	default:
+		return shim.Error(fmt.Sprintf("%s状态不支持", status))
+	}
+	return shim.Success(data)
 }
