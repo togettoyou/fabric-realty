@@ -42,45 +42,26 @@ func TestBlockChainRealEstate_Init(t *testing.T) {
 // 测试获取账户信息
 func Test_QueryAccountList(t *testing.T) {
 	stub := initTest(t)
-	fmt.Println("1、测试获取所有数据")
-	response := checkInvoke(t, stub, [][]byte{[]byte("queryAccountList")})
-	var allAccountList []lib.Account
-	err := json.Unmarshal(response.Payload, &allAccountList)
-	if err != nil {
-		fmt.Printf("Unmarshal err: %s\n", err.Error())
-		t.FailNow()
-	}
-	fmt.Println(allAccountList)
-
-	fmt.Println("2、测试获取多个数据")
-	response = checkInvoke(t, stub, [][]byte{[]byte("queryAccountList"), []byte("5feceb66ffc8"), []byte("6b86b273ff34")})
-	var accounts []lib.Account
-	err = json.Unmarshal(response.Payload, &accounts)
-	if err != nil {
-		fmt.Printf("Unmarshal err: %s\n", err.Error())
-		t.FailNow()
-	}
-	fmt.Println(accounts)
-
-	fmt.Println("3、测试获取单个数据")
-	response = checkInvoke(t, stub, [][]byte{[]byte("queryAccountList"), []byte("4e07408562be")})
-	var account []lib.Account
-	err = json.Unmarshal(response.Payload, &account)
-	if err != nil {
-		fmt.Printf("Unmarshal err: %s\n", err.Error())
-		t.FailNow()
-	}
-	fmt.Println(account)
-
-	fmt.Println("4、测试获取无效数据")
-	response = checkInvoke(t, stub, [][]byte{[]byte("queryAccountList"), []byte("0")})
-	var noneAccount []lib.Account
-	err = json.Unmarshal(response.Payload, &noneAccount)
-	if err != nil {
-		fmt.Printf("Unmarshal err: %s\n", err.Error())
-		t.FailNow()
-	}
-	fmt.Println(noneAccount)
+	fmt.Println(fmt.Sprintf("1、测试获取所有数据\n%s",
+		string(checkInvoke(t, stub, [][]byte{
+			[]byte("queryAccountList"),
+		}).Payload)))
+	fmt.Println(fmt.Sprintf("2、测试获取多个数据\n%s",
+		string(checkInvoke(t, stub, [][]byte{
+			[]byte("queryAccountList"),
+			[]byte("5feceb66ffc8"),
+			[]byte("6b86b273ff34"),
+		}).Payload)))
+	fmt.Println(fmt.Sprintf("3、测试获取单个数据\n%s",
+		string(checkInvoke(t, stub, [][]byte{
+			[]byte("queryAccountList"),
+			[]byte("4e07408562be"),
+		}).Payload)))
+	fmt.Println(fmt.Sprintf("4、测试获取无效数据\n%s",
+		string(checkInvoke(t, stub, [][]byte{
+			[]byte("queryAccountList"),
+			[]byte("0"),
+		}).Payload)))
 }
 
 // 测试创建房地产
@@ -183,39 +164,22 @@ func checkCreateRealEstate(stub *shim.MockStub, t *testing.T) []lib.RealEstate {
 func Test_QueryRealEstateList(t *testing.T) {
 	stub := initTest(t)
 	realEstateList := checkCreateRealEstate(stub, t)
-	fmt.Println("1、测试获取所有数据")
-	response := checkInvoke(t, stub, [][]byte{[]byte("queryRealEstateList")})
-	var allRealEstateList []lib.RealEstate
-	err := json.Unmarshal(response.Payload, &allRealEstateList)
-	if err != nil {
-		fmt.Printf("Unmarshal err: %s\n", err.Error())
-		t.FailNow()
-	}
-	fmt.Println(allRealEstateList)
 
-	fmt.Println("2、测试获取指定数据")
-	response = checkInvoke(t, stub, [][]byte{
-		[]byte("queryRealEstateList"),
-		[]byte(realEstateList[0].Proprietor),
-		[]byte(realEstateList[0].RealEstateID),
-	})
-	var realEstates []lib.RealEstate
-	err = json.Unmarshal(response.Payload, &realEstates)
-	if err != nil {
-		fmt.Printf("Unmarshal err: %s\n", err.Error())
-		t.FailNow()
-	}
-	fmt.Println(realEstates)
-
-	fmt.Println("3、测试获取无效数据")
-	response = checkInvoke(t, stub, [][]byte{[]byte("queryAccountList"), []byte("0")})
-	var noneRealEstate []lib.RealEstate
-	err = json.Unmarshal(response.Payload, &noneRealEstate)
-	if err != nil {
-		fmt.Printf("Unmarshal err: %s\n", err.Error())
-		t.FailNow()
-	}
-	fmt.Println(noneRealEstate)
+	fmt.Println(fmt.Sprintf("1、测试获取所有数据\n%s",
+		string(checkInvoke(t, stub, [][]byte{
+			[]byte("queryRealEstateList"),
+		}).Payload)))
+	fmt.Println(fmt.Sprintf("2、测试获取指定数据\n%s",
+		string(checkInvoke(t, stub, [][]byte{
+			[]byte("queryRealEstateList"),
+			[]byte(realEstateList[0].Proprietor),
+			[]byte(realEstateList[0].RealEstateID),
+		}).Payload)))
+	fmt.Println(fmt.Sprintf("3、测试获取无效数据\n%s",
+		string(checkInvoke(t, stub, [][]byte{
+			[]byte("queryRealEstateList"),
+			[]byte("0"),
+		}).Payload)))
 }
 
 // 测试发起销售
@@ -259,4 +223,57 @@ func Test_CreateSelling(t *testing.T) {
 		[]byte("50"),                         //价格
 		[]byte("30"),                         //智能合约的有效期(单位为天)
 	})
+}
+
+// 测试销售发起、购买等操作
+func Test_QuerySellingList(t *testing.T) {
+	stub := initTest(t)
+	realEstateList := checkCreateRealEstate(stub, t)
+	//先发起
+	fmt.Println(fmt.Sprintf("发起\n%s", string(checkInvoke(t, stub, [][]byte{
+		[]byte("createSelling"),
+		[]byte(realEstateList[0].RealEstateID), //销售对象(正在出售的房地产RealEstateID)
+		[]byte(realEstateList[0].Proprietor),   //卖家(卖家AccountId)
+		[]byte("500000"),                       //价格
+		[]byte("30"),                           //智能合约的有效期(单位为天)
+	}).Payload)))
+	fmt.Println(fmt.Sprintf("发起\n%s", string(checkInvoke(t, stub, [][]byte{
+		[]byte("createSelling"),
+		[]byte(realEstateList[2].RealEstateID), //销售对象(正在出售的房地产RealEstateID)
+		[]byte(realEstateList[2].Proprietor),   //卖家(卖家AccountId)
+		[]byte("600000"),                       //价格
+		[]byte("40"),                           //智能合约的有效期(单位为天)
+	}).Payload)))
+	//查询成功
+	fmt.Println(fmt.Sprintf("1、查询所有\n%s", string(checkInvoke(t, stub, [][]byte{
+		[]byte("querySellingList"),
+	}).Payload)))
+	fmt.Println(fmt.Sprintf("2、查询指定%s\n%s", realEstateList[0].Proprietor, string(checkInvoke(t, stub, [][]byte{
+		[]byte("querySellingList"),
+		[]byte(realEstateList[0].Proprietor),
+	}).Payload)))
+	//购买
+	fmt.Println(fmt.Sprintf("3、购买前先查询%s的账户余额\n%s", realEstateList[2].Proprietor, string(checkInvoke(t, stub, [][]byte{
+		[]byte("queryAccountList"),
+		[]byte(realEstateList[2].Proprietor),
+	}).Payload)))
+	fmt.Println(fmt.Sprintf("开始购买\n%s", string(checkInvoke(t, stub, [][]byte{
+		[]byte("createSellingBuy"),
+		[]byte(realEstateList[0].RealEstateID), //销售对象(正在出售的房地产RealEstateID)
+		[]byte(realEstateList[0].Proprietor),   //卖家(卖家AccountId)
+		[]byte(realEstateList[2].Proprietor),   //买家(买家AccountId)
+	}).Payload)))
+	fmt.Println(fmt.Sprintf("购买后再次查询%s的账户余额\n%s", realEstateList[2].Proprietor, string(checkInvoke(t, stub, [][]byte{
+		[]byte("queryAccountList"),
+		[]byte(realEstateList[2].Proprietor),
+	}).Payload)))
+	fmt.Println(fmt.Sprintf("卖家查询购买成功信息\n%s", string(checkInvoke(t, stub, [][]byte{
+		[]byte("querySellingList"),
+		[]byte(realEstateList[0].Proprietor), //买家(买家AccountId)
+	}).Payload)))
+	fmt.Println(fmt.Sprintf("买家查询购买成功信息\n%s", string(checkInvoke(t, stub, [][]byte{
+		[]byte("querySellingListByBuyer"),
+		[]byte(realEstateList[2].Proprietor), //买家(买家AccountId)
+	}).Payload)))
+
 }
