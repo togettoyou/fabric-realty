@@ -58,8 +58,8 @@ func (t *BlockChainRealEstate) Invoke(stub shim.ChaincodeStubInterface) pb.Respo
 		return routers.QuerySellingList(stub, args)
 	case "querySellingListByBuyer":
 		return routers.QuerySellingListByBuyer(stub, args)
-	case "updateSellingBySeller":
-		return routers.UpdateSellingBySeller(stub, args)
+	case "updateSelling":
+		return routers.UpdateSelling(stub, args)
 	default:
 		return shim.Error(fmt.Sprintf("没有该功能: %s", funcName))
 	}

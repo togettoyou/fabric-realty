@@ -292,14 +292,14 @@ func Test_QuerySellingList(t *testing.T) {
 		[]byte(realEstateList[2].Proprietor),
 	}).Payload)))
 	fmt.Println(fmt.Sprintf("》卖家确认收款\n%s", string(checkInvoke(t, stub, [][]byte{
-		[]byte("updateSellingBySeller"),
+		[]byte("updateSelling"),
 		[]byte(realEstateList[0].RealEstateID), //销售对象(正在出售的房地产RealEstateID)
 		[]byte(realEstateList[0].Proprietor),   //卖家(卖家AccountId)
 		[]byte(realEstateList[2].Proprietor),   //买家(买家AccountId)
 		[]byte("done"),                         //确认收款
 	}).Payload)))
 	//fmt.Println(fmt.Sprintf("》卖家取消收款\n%s", string(checkInvoke(t, stub, [][]byte{
-	//	[]byte("updateSellingBySeller"),
+	//	[]byte("updateSelling"),
 	//	[]byte(realEstateList[0].RealEstateID), //销售对象(正在出售的房地产RealEstateID)
 	//	[]byte(realEstateList[0].Proprietor),   //卖家(卖家AccountId)
 	//	[]byte(realEstateList[2].Proprietor),   //买家(买家AccountId)
@@ -320,5 +320,13 @@ func Test_QuerySellingList(t *testing.T) {
 	fmt.Println(fmt.Sprintf("》确认收款后买家%s的房产信息\n%s", realEstateList[2].Proprietor, string(checkInvoke(t, stub, [][]byte{
 		[]byte("queryRealEstateList"),
 		[]byte(realEstateList[2].Proprietor),
+	}).Payload)))
+	fmt.Println(fmt.Sprintf("》卖家查询购买成功信息\n%s", string(checkInvoke(t, stub, [][]byte{
+		[]byte("querySellingList"),
+		[]byte(realEstateList[0].Proprietor), //买家(买家AccountId)
+	}).Payload)))
+	fmt.Println(fmt.Sprintf("》买家查询购买成功信息\n%s", string(checkInvoke(t, stub, [][]byte{
+		[]byte("querySellingListByBuyer"),
+		[]byte(realEstateList[2].Proprietor), //买家(买家AccountId)
 	}).Payload)))
 }

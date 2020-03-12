@@ -41,6 +41,60 @@ definitions:
         description: 总面积
         type: number
     type: object
+  v1.SellingByBuyRequestBody:
+    properties:
+      buyer:
+        description: 买家(买家AccountId)
+        type: string
+      objectOfSale:
+        description: 销售对象(正在出售的房地产RealEstateID)
+        type: string
+      seller:
+        description: 发起销售人、卖家(卖家AccountId)
+        type: string
+    type: object
+  v1.SellingListQueryByBuyRequestBody:
+    properties:
+      buyer:
+        description: 买家(买家AccountId)
+        type: string
+    type: object
+  v1.SellingListQueryRequestBody:
+    properties:
+      seller:
+        description: 发起销售人、卖家(卖家AccountId)
+        type: string
+    type: object
+  v1.SellingRequestBody:
+    properties:
+      objectOfSale:
+        description: 销售对象(正在出售的房地产RealEstateID)
+        type: string
+      price:
+        description: 价格
+        type: number
+      salePeriod:
+        description: 智能合约的有效期(单位为天)
+        type: integer
+      seller:
+        description: 发起销售人、卖家(卖家AccountId)
+        type: string
+    type: object
+  v1.UpdateSellingRequestBody:
+    properties:
+      buyer:
+        description: 买家(买家AccountId)
+        type: string
+      objectOfSale:
+        description: 销售对象(正在出售的房地产RealEstateID)
+        type: string
+      seller:
+        description: 发起销售人、卖家(卖家AccountId)
+        type: string
+      status:
+        description: 需要更改的状态
+        type: string
+    type: object
 info:
   contact:
     email: zoujh99@qq.com
@@ -73,6 +127,48 @@ paths:
           schema:
             $ref: '#/definitions/app.Response'
       summary: 新建房地产(管理员)
+  /api/v1/createSelling:
+    post:
+      parameters:
+      - description: selling
+        in: body
+        name: selling
+        required: true
+        schema:
+          $ref: '#/definitions/v1.SellingRequestBody'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/app.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/app.Response'
+      summary: 发起销售
+  /api/v1/createSellingByBuy:
+    post:
+      parameters:
+      - description: sellingByBuy
+        in: body
+        name: sellingByBuy
+        required: true
+        schema:
+          $ref: '#/definitions/v1.SellingByBuyRequestBody'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/app.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/app.Response'
+      summary: 买家购买
   /api/v1/hello:
     get:
       produces:
@@ -129,4 +225,67 @@ paths:
           schema:
             $ref: '#/definitions/app.Response'
       summary: 获取房地产信息(空json{}可以查询所有，指定proprietor可以查询指定业主名下房产)
+  /api/v1/querySellingList:
+    post:
+      parameters:
+      - description: sellingListQuery
+        in: body
+        name: sellingListQuery
+        required: true
+        schema:
+          $ref: '#/definitions/v1.SellingListQueryRequestBody'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/app.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/app.Response'
+      summary: 查询销售(可查询所有，也可根据发起销售人查询)(发起的)(供卖家查询)
+  /api/v1/querySellingListByBuyer:
+    post:
+      parameters:
+      - description: sellingListQueryByBuy
+        in: body
+        name: sellingListQueryByBuy
+        required: true
+        schema:
+          $ref: '#/definitions/v1.SellingListQueryByBuyRequestBody'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/app.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/app.Response'
+      summary: 根据参与销售人、买家(买家AccountId)查询销售(参与的)(供买家查询)
+  /api/v1/updateSelling:
+    post:
+      parameters:
+      - description: updateSelling
+        in: body
+        name: updateSelling
+        required: true
+        schema:
+          $ref: '#/definitions/v1.UpdateSellingRequestBody'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/app.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/app.Response'
+      summary: 更新销售状态（买家确认、买卖家取消）Status取值为 完成"done"、取消"cancelled" 当处于销售中状态，卖家要取消时，buyer为""空
 swagger: "2.0"

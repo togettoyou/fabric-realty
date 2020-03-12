@@ -47,6 +47,72 @@
                 }
             }
         },
+        "/api/v1/createSelling": {
+            "post": {
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "发起销售",
+                "parameters": [
+                    {
+                        "description": "selling",
+                        "name": "selling",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/v1.SellingRequestBody"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/app.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/app.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/createSellingByBuy": {
+            "post": {
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "买家购买",
+                "parameters": [
+                    {
+                        "description": "sellingByBuy",
+                        "name": "sellingByBuy",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/v1.SellingByBuyRequestBody"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/app.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/app.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/hello": {
             "get": {
                 "produces": [
@@ -134,6 +200,105 @@
                     }
                 }
             }
+        },
+        "/api/v1/querySellingList": {
+            "post": {
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "查询销售(可查询所有，也可根据发起销售人查询)(发起的)(供卖家查询)",
+                "parameters": [
+                    {
+                        "description": "sellingListQuery",
+                        "name": "sellingListQuery",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/v1.SellingListQueryRequestBody"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/app.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/app.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/querySellingListByBuyer": {
+            "post": {
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "根据参与销售人、买家(买家AccountId)查询销售(参与的)(供买家查询)",
+                "parameters": [
+                    {
+                        "description": "sellingListQueryByBuy",
+                        "name": "sellingListQueryByBuy",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/v1.SellingListQueryByBuyRequestBody"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/app.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/app.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/updateSelling": {
+            "post": {
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "更新销售状态（买家确认、买卖家取消）Status取值为 完成\"done\"、取消\"cancelled\" 当处于销售中状态，卖家要取消时，buyer为\"\"空",
+                "parameters": [
+                    {
+                        "description": "updateSelling",
+                        "name": "updateSelling",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/v1.UpdateSellingRequestBody"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/app.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/app.Response"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -197,6 +362,83 @@
                 "totalArea": {
                     "description": "总面积",
                     "type": "number"
+                }
+            }
+        },
+        "v1.SellingByBuyRequestBody": {
+            "type": "object",
+            "properties": {
+                "buyer": {
+                    "description": "买家(买家AccountId)",
+                    "type": "string"
+                },
+                "objectOfSale": {
+                    "description": "销售对象(正在出售的房地产RealEstateID)",
+                    "type": "string"
+                },
+                "seller": {
+                    "description": "发起销售人、卖家(卖家AccountId)",
+                    "type": "string"
+                }
+            }
+        },
+        "v1.SellingListQueryByBuyRequestBody": {
+            "type": "object",
+            "properties": {
+                "buyer": {
+                    "description": "买家(买家AccountId)",
+                    "type": "string"
+                }
+            }
+        },
+        "v1.SellingListQueryRequestBody": {
+            "type": "object",
+            "properties": {
+                "seller": {
+                    "description": "发起销售人、卖家(卖家AccountId)",
+                    "type": "string"
+                }
+            }
+        },
+        "v1.SellingRequestBody": {
+            "type": "object",
+            "properties": {
+                "objectOfSale": {
+                    "description": "销售对象(正在出售的房地产RealEstateID)",
+                    "type": "string"
+                },
+                "price": {
+                    "description": "价格",
+                    "type": "number"
+                },
+                "salePeriod": {
+                    "description": "智能合约的有效期(单位为天)",
+                    "type": "integer"
+                },
+                "seller": {
+                    "description": "发起销售人、卖家(卖家AccountId)",
+                    "type": "string"
+                }
+            }
+        },
+        "v1.UpdateSellingRequestBody": {
+            "type": "object",
+            "properties": {
+                "buyer": {
+                    "description": "买家(买家AccountId)",
+                    "type": "string"
+                },
+                "objectOfSale": {
+                    "description": "销售对象(正在出售的房地产RealEstateID)",
+                    "type": "string"
+                },
+                "seller": {
+                    "description": "发起销售人、卖家(卖家AccountId)",
+                    "type": "string"
+                },
+                "status": {
+                    "description": "需要更改的状态",
+                    "type": "string"
                 }
             }
         }
