@@ -7,6 +7,7 @@ import (
 	"github.com/togettoyou/blockchain-real-estate/chaincode/blockchain-real-estate/lib"
 	"github.com/togettoyou/blockchain-real-estate/chaincode/blockchain-real-estate/routers"
 	"github.com/togettoyou/blockchain-real-estate/chaincode/blockchain-real-estate/utils"
+	"time"
 )
 
 type BlockChainRealEstate struct {
@@ -15,6 +16,11 @@ type BlockChainRealEstate struct {
 //链码初始化
 func (t *BlockChainRealEstate) Init(stub shim.ChaincodeStubInterface) pb.Response {
 	fmt.Println("链码初始化")
+	timeLocal, err := time.LoadLocation("Asia/Chongqing")
+	if err != nil {
+		return shim.Error(fmt.Sprintf("时区设置失败%s", err))
+	}
+	time.Local = timeLocal
 	//初始化默认数据
 	var accountIds = [6]string{
 		"5feceb66ffc8",

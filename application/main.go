@@ -16,6 +16,7 @@ import (
 	"github.com/togettoyou/blockchain-real-estate/application/service"
 	"log"
 	"net/http"
+	"time"
 )
 
 func init() {
@@ -30,6 +31,11 @@ func init() {
 // @license.name Apache 2.0
 // @license.url http://www.apache.org/licenses/LICENSE-2.0.html
 func main() {
+	timeLocal, err := time.LoadLocation("Asia/Chongqing")
+	if err != nil {
+		log.Printf("时区设置失败 %s", err)
+	}
+	time.Local = timeLocal
 	blockchain.Init()
 	go service.Init()
 	gin.SetMode(setting.ServerSetting.RunMode)

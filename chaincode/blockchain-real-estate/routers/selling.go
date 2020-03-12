@@ -62,7 +62,7 @@ func CreateSelling(stub shim.ChaincodeStubInterface, args []string) pb.Response 
 		Seller:        seller,
 		Buyer:         "",
 		Price:         formattedPrice,
-		CreateTime:    time.Now(),
+		CreateTime:    time.Now().Local().Format("2006-01-02 15:04:05"),
 		SalePeriod:    formattedSalePeriod,
 		SellingStatus: lib.SellingStatusConstant()["saleStart"],
 	}
@@ -139,10 +139,12 @@ func CreateSellingByBuy(stub shim.ChaincodeStubInterface, args []string) pb.Resp
 	//将本次购买交易写入账本,可供买家查询
 	sellingBuy := &lib.SellingBuy{
 		Buyer:      buyer,
-		CreateTime: time.Now(),
+		CreateTime: time.Now().Local().Format("2006-01-02 15:04:05"),
 		Selling:    selling,
 	}
-	if err := utils.WriteLedger(sellingBuy, stub, lib.SellingBuyKey, []string{sellingBuy.Buyer, fmt.Sprintf("%d", sellingBuy.CreateTime.UnixNano())}); err != nil {
+	local, _ := time.LoadLocation("Local")
+	createTimeUnixNano, _ := time.ParseInLocation("2006-01-02 15:04:05", sellingBuy.CreateTime, local)
+	if err := utils.WriteLedger(sellingBuy, stub, lib.SellingBuyKey, []string{sellingBuy.Buyer, fmt.Sprintf("%d", createTimeUnixNano.UnixNano())}); err != nil {
 		return shim.Error(fmt.Sprintf("将本次购买交易写入账本失败%s", err))
 	}
 	sellingBuyByte, err := json.Marshal(sellingBuy)
@@ -293,7 +295,7 @@ func UpdateSelling(stub shim.ChaincodeStubInterface, args []string) pb.Response 
 		//将房产信息转入买家，并重置担保状态
 		realEstate.Proprietor = buyer
 		realEstate.Encumbrance = false
-		realEstate.RealEstateID = fmt.Sprintf("%d", time.Now().UnixNano()) //重新更新房产ID
+		realEstate.RealEstateID = fmt.Sprintf("%d", time.Now().Local().UnixNano()) //重新更新房产ID
 		if err := utils.WriteLedger(realEstate, stub, lib.RealEstateKey, []string{realEstate.Proprietor, realEstate.RealEstateID}); err != nil {
 			return shim.Error(fmt.Sprintf("%s", err))
 		}
@@ -308,7 +310,9 @@ func UpdateSelling(stub shim.ChaincodeStubInterface, args []string) pb.Response 
 			return shim.Error(fmt.Sprintf("%s", err))
 		}
 		sellingBuy.Selling = selling
-		if err := utils.WriteLedger(sellingBuy, stub, lib.SellingBuyKey, []string{sellingBuy.Buyer, fmt.Sprintf("%d", sellingBuy.CreateTime.UnixNano())}); err != nil {
+		local, _ := time.LoadLocation("Local")
+		sellingBuyCreateTimeUnixNano, _ := time.ParseInLocation("2006-01-02 15:04:05", sellingBuy.CreateTime, local)
+		if err := utils.WriteLedger(sellingBuy, stub, lib.SellingBuyKey, []string{sellingBuy.Buyer, fmt.Sprintf("%d", sellingBuyCreateTimeUnixNano.UnixNano())}); err != nil {
 			return shim.Error(fmt.Sprintf("将本次购买交易写入账本失败%s", err))
 		}
 		data, err = json.Marshal(sellingBuy)
@@ -405,7 +409,9 @@ func closeByDelivery(closeStart string, selling lib.Selling, realEstate lib.Real
 		return nil, err
 	}
 	sellingBuy.Selling = selling
-	if err := utils.WriteLedger(sellingBuy, stub, lib.SellingBuyKey, []string{sellingBuy.Buyer, fmt.Sprintf("%d", sellingBuy.CreateTime.UnixNano())}); err != nil {
+	local, _ := time.LoadLocation("Local")
+	sellingBuyCreateTimeUnixNano, _ := time.ParseInLocation("2006-01-02 15:04:05", sellingBuy.CreateTime, local)
+	if err := utils.WriteLedger(sellingBuy, stub, lib.SellingBuyKey, []string{sellingBuy.Buyer, fmt.Sprintf("%d", sellingBuyCreateTimeUnixNano.UnixNano())}); err != nil {
 		return nil, err
 	}
 	data, err := json.Marshal(sellingBuy)

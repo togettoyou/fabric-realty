@@ -21,7 +21,8 @@ const spec = "0 0 0 * * ?" // 每天0点执行
 //const spec = "*/10 * * * * ?" //10秒执行一次，用于测试
 
 func Init() {
-	c := cron.New(cron.WithSeconds())
+	c := cron.New()
+	//c := cron.New(cron.WithSeconds())//秒级别
 	_, err := c.AddFunc(spec, GoRun)
 	if err != nil {
 		log.Printf("start cron failed %s", err)
@@ -50,9 +51,11 @@ func GoRun() {
 			v.SellingStatus == lib.SellingStatusConstant()["delivery"] {
 			//有效期天数
 			day, _ := time.ParseDuration(fmt.Sprintf("%dh", v.SalePeriod*24))
-			vTime := v.CreateTime.Add(day)
+			local, _ := time.LoadLocation("Local")
+			t, _ := time.ParseInLocation("2006-01-02 15:04:05", v.CreateTime, local)
+			vTime := t.Add(day)
 			//如果 time.Now()大于 vTime 说明过期
-			if time.Now().After(vTime) {
+			if time.Now().Local().After(vTime) {
 				//将状态更改为已过期
 				var bodyBytes [][]byte
 				bodyBytes = append(bodyBytes, []byte(v.ObjectOfSale))

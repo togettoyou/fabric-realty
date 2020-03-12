@@ -6,20 +6,18 @@
  */
 package lib
 
-import "time"
-
 //销售要约
 //需要确定ObjectOfSale是否属于Seller
 //买家初始为空
 //Seller和ObjectOfSale一起作为复合键,保证可以通过seller查询到名下所有发起的销售
 type Selling struct {
-	ObjectOfSale  string    `json:"objectOfSale"`  //销售对象(正在出售的房地产RealEstateID)
-	Seller        string    `json:"seller"`        //发起销售人、卖家(卖家AccountId)
-	Buyer         string    `json:"buyer"`         //参与销售人、买家(买家AccountId)
-	Price         float64   `json:"price"`         //价格
-	CreateTime    time.Time `json:"createTime"`    //创建时间
-	SalePeriod    int       `json:"salePeriod"`    //智能合约的有效期(单位为天)
-	SellingStatus string    `json:"sellingStatus"` //销售状态
+	ObjectOfSale  string  `json:"objectOfSale"`  //销售对象(正在出售的房地产RealEstateID)
+	Seller        string  `json:"seller"`        //发起销售人、卖家(卖家AccountId)
+	Buyer         string  `json:"buyer"`         //参与销售人、买家(买家AccountId)
+	Price         float64 `json:"price"`         //价格
+	CreateTime    string  `json:"createTime"`    //创建时间
+	SalePeriod    int     `json:"salePeriod"`    //智能合约的有效期(单位为天)
+	SellingStatus string  `json:"sellingStatus"` //销售状态
 }
 
 //销售状态
@@ -37,11 +35,11 @@ var SellingStatusConstant = func() map[string]string {
 //需要确定ObjectOfDonating是否属于Donor
 //需要指定受赠人Grantee，并等待受赠人同意接收
 type Donating struct {
-	ObjectOfDonating string    `json:"objectOfDonating"` //捐赠对象(正在捐赠的房地产RealEstateID)
-	Donor            string    `json:"donor"`            //捐赠人(捐赠人AccountId)
-	Grantee          string    `json:"grantee"`          //受赠人(受赠人AccountId)
-	CreateTime       time.Time `json:"createTime"`       //创建时间
-	DonatingStatus   string    `json:"donatingStatus"`   //捐赠状态
+	ObjectOfDonating string `json:"objectOfDonating"` //捐赠对象(正在捐赠的房地产RealEstateID)
+	Donor            string `json:"donor"`            //捐赠人(捐赠人AccountId)
+	Grantee          string `json:"grantee"`          //受赠人(受赠人AccountId)
+	CreateTime       string `json:"createTime"`       //创建时间
+	DonatingStatus   string `json:"donatingStatus"`   //捐赠状态
 }
 
 //捐赠状态
@@ -62,13 +60,13 @@ var DonatingStatusConstant = func() map[string]string {
 //业主可以随时取消报价,直到他们确认收到资金
 //质押人可在业主确认收到上述资金之前,随时提取资金
 type Pledge struct {
-	ObjectOfPledge string    `json:"objectOfPledge"` //质押对象(正在质押的房地产RealEstateID)
-	Owner          string    `json:"owner"`          //业主(业主AccountId)
-	Pledge         string    `json:"pledge"`         //质押人(质押人AccountId)
-	Money          float64   `json:"money"`          //质押金额
-	CreateTime     time.Time `json:"createTime"`     //创建时间
-	PledgePeriod   int       `json:"pledgePeriod"`   //质押期(单位为天)
-	PledgeStatus   string    `json:"pledgeStatus"`   //质押状态
+	ObjectOfPledge string  `json:"objectOfPledge"` //质押对象(正在质押的房地产RealEstateID)
+	Owner          string  `json:"owner"`          //业主(业主AccountId)
+	Pledge         string  `json:"pledge"`         //质押人(质押人AccountId)
+	Money          float64 `json:"money"`          //质押金额
+	CreateTime     string  `json:"createTime"`     //创建时间
+	PledgePeriod   int     `json:"pledgePeriod"`   //质押期(单位为天)
+	PledgeStatus   string  `json:"pledgeStatus"`   //质押状态
 }
 
 //质押状态
