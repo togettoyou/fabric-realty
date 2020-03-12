@@ -206,7 +206,7 @@
                 "produces": [
                     "application/json"
                 ],
-                "summary": "查询销售(可查询所有，也可根据发起销售人查询)(发起的)(供卖家查询)",
+                "summary": "查询销售(可查询所有，也可根据发起销售人查询)(发起的)",
                 "parameters": [
                     {
                         "description": "sellingListQuery",
@@ -239,7 +239,7 @@
                 "produces": [
                     "application/json"
                 ],
-                "summary": "根据参与销售人、买家(买家AccountId)查询销售(参与的)(供买家查询)",
+                "summary": "根据参与销售人、买家(买家AccountId)查询销售(参与的)",
                 "parameters": [
                     {
                         "description": "sellingListQueryByBuy",

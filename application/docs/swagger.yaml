@@ -245,7 +245,7 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/app.Response'
-      summary: 查询销售(可查询所有，也可根据发起销售人查询)(发起的)(供卖家查询)
+      summary: 查询销售(可查询所有，也可根据发起销售人查询)(发起的)
   /api/v1/querySellingListByBuyer:
     post:
       parameters:
@@ -266,7 +266,7 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/app.Response'
-      summary: 根据参与销售人、买家(买家AccountId)查询销售(参与的)(供买家查询)
+      summary: 根据参与销售人、买家(买家AccountId)查询销售(参与的)
   /api/v1/updateSelling:
     post:
       parameters:

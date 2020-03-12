@@ -13,6 +13,7 @@ import (
 	_ "github.com/togettoyou/blockchain-real-estate/application/docs"
 	"github.com/togettoyou/blockchain-real-estate/application/pkg/setting"
 	"github.com/togettoyou/blockchain-real-estate/application/routers"
+	"github.com/togettoyou/blockchain-real-estate/application/service"
 	"log"
 	"net/http"
 )
@@ -30,6 +31,7 @@ func init() {
 // @license.url http://www.apache.org/licenses/LICENSE-2.0.html
 func main() {
 	blockchain.Init()
+	go service.Init()
 	gin.SetMode(setting.ServerSetting.RunMode)
 	routersInit := routers.InitRouter()
 	readTimeout := setting.ServerSetting.ReadTimeout
@@ -47,5 +49,7 @@ func main() {
 
 	log.Printf("[info] start http server listening %s", endPoint)
 
-	server.ListenAndServe()
+	if err := server.ListenAndServe(); err != nil {
+		log.Printf("start http server failed %s", err)
+	}
 }

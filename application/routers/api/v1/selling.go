@@ -119,7 +119,7 @@ func CreateSellingByBuy(c *gin.Context) {
 	appG.Response(http.StatusOK, "成功", data)
 }
 
-// @Summary 查询销售(可查询所有，也可根据发起销售人查询)(发起的)(供卖家查询)
+// @Summary 查询销售(可查询所有，也可根据发起销售人查询)(发起的)
 // @Param sellingListQuery body SellingListQueryRequestBody true "sellingListQuery"
 // @Produce  json
 // @Success 200 {object} app.Response
@@ -152,7 +152,7 @@ func QuerySellingList(c *gin.Context) {
 	appG.Response(http.StatusOK, "成功", data)
 }
 
-// @Summary 根据参与销售人、买家(买家AccountId)查询销售(参与的)(供买家查询)
+// @Summary 根据参与销售人、买家(买家AccountId)查询销售(参与的)
 // @Param sellingListQueryByBuy body SellingListQueryByBuyRequestBody true "sellingListQueryByBuy"
 // @Produce  json
 // @Success 200 {object} app.Response
