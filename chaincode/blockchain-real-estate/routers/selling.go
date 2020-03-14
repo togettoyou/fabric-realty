@@ -321,43 +321,15 @@ func UpdateSelling(stub shim.ChaincodeStubInterface, args []string) pb.Response 
 		}
 		break
 	case "cancelled":
-		//如果是买卖家取消操作,根据当前状态分情况
-		switch selling.SellingStatus {
-		//情况①，当前处于saleStart销售状态
-		case lib.SellingStatusConstant()["saleStart"]:
-			data, err = closeBySaleStart("cancelled", selling, realEstate, stub)
-			if err != nil {
-				return shim.Error(fmt.Sprintf("%s", err))
-			}
-			break
-		//情况②，当前处于delivery交付中状态
-		case lib.SellingStatusConstant()["delivery"]:
-			data, err = closeByDelivery("cancelled", selling, realEstate, sellingBuy, buyer, stub)
-			if err != nil {
-				return shim.Error(fmt.Sprintf("%s", err))
-			}
-			break
-		default:
-			return shim.Error(fmt.Sprintf("当前销售状态为%s,已不能取消", selling.SellingStatus))
+		data, err = closeSelling("cancelled", selling, realEstate, sellingBuy, buyer, stub)
+		if err != nil {
+			return shim.Error(fmt.Sprintf("%s", err))
 		}
 		break
 	case "expired":
-		//如果是买家确认收款操作,必须确保销售处于销售状态或者交付状态
-		switch selling.SellingStatus {
-		case lib.SellingStatusConstant()["saleStart"]:
-			data, err = closeBySaleStart("expired", selling, realEstate, stub)
-			if err != nil {
-				return shim.Error(fmt.Sprintf("%s", err))
-			}
-			break
-		case lib.SellingStatusConstant()["delivery"]:
-			data, err = closeByDelivery("expired", selling, realEstate, sellingBuy, buyer, stub)
-			if err != nil {
-				return shim.Error(fmt.Sprintf("%s", err))
-			}
-			break
-		default:
-			return shim.Error(fmt.Sprintf("当前销售状态为%s,已不能过期操作", selling.SellingStatus))
+		data, err = closeSelling("expired", selling, realEstate, sellingBuy, buyer, stub)
+		if err != nil {
+			return shim.Error(fmt.Sprintf("%s", err))
 		}
 		break
 	default:
@@ -366,57 +338,63 @@ func UpdateSelling(stub shim.ChaincodeStubInterface, args []string) pb.Response 
 	return shim.Success(data)
 }
 
-func closeBySaleStart(closeStart string, selling lib.Selling, realEstate lib.RealEstate, stub shim.ChaincodeStubInterface) ([]byte, error) {
-	selling.SellingStatus = lib.SellingStatusConstant()[closeStart]
-	//重置房产信息担保状态
-	realEstate.Encumbrance = false
-	if err := utils.WriteLedger(realEstate, stub, lib.RealEstateKey, []string{realEstate.Proprietor, realEstate.RealEstateID}); err != nil {
-		return nil, err
+//不管是取消还是过期，都分两种情况
+//1、当前处于saleStart销售状态
+//2、当前处于delivery交付中状态
+func closeSelling(closeStart string, selling lib.Selling, realEstate lib.RealEstate, sellingBuy lib.SellingBuy, buyer string, stub shim.ChaincodeStubInterface) ([]byte, error) {
+	switch selling.SellingStatus {
+	case lib.SellingStatusConstant()["saleStart"]:
+		selling.SellingStatus = lib.SellingStatusConstant()[closeStart]
+		//重置房产信息担保状态
+		realEstate.Encumbrance = false
+		if err := utils.WriteLedger(realEstate, stub, lib.RealEstateKey, []string{realEstate.Proprietor, realEstate.RealEstateID}); err != nil {
+			return nil, err
+		}
+		if err := utils.WriteLedger(selling, stub, lib.SellingKey, []string{selling.Seller, selling.ObjectOfSale}); err != nil {
+			return nil, err
+		}
+		data, err := json.Marshal(selling)
+		if err != nil {
+			return nil, err
+		}
+		return data, nil
+	case lib.SellingStatusConstant()["delivery"]:
+		//根据buyer获取卖家信息
+		resultsBuyerAccount, err := utils.GetStateByPartialCompositeKeys(stub, lib.AccountKey, []string{buyer})
+		if err != nil || len(resultsBuyerAccount) != 1 {
+			return nil, err
+		}
+		var accountBuyer lib.Account
+		if err = json.Unmarshal(resultsBuyerAccount[0], &accountBuyer); err != nil {
+			return nil, err
+		}
+		//此时取消操作，需要将资金退还给买家
+		accountBuyer.Balance += selling.Price
+		if err := utils.WriteLedger(accountBuyer, stub, lib.AccountKey, []string{accountBuyer.AccountId}); err != nil {
+			return nil, err
+		}
+		//重置房产信息担保状态
+		realEstate.Encumbrance = false
+		if err := utils.WriteLedger(realEstate, stub, lib.RealEstateKey, []string{realEstate.Proprietor, realEstate.RealEstateID}); err != nil {
+			return nil, err
+		}
+		//更新销售状态
+		selling.SellingStatus = lib.SellingStatusConstant()[closeStart]
+		if err := utils.WriteLedger(selling, stub, lib.SellingKey, []string{selling.Seller, selling.ObjectOfSale}); err != nil {
+			return nil, err
+		}
+		sellingBuy.Selling = selling
+		local, _ := time.LoadLocation("Local")
+		sellingBuyCreateTimeUnixNano, _ := time.ParseInLocation("2006-01-02 15:04:05", sellingBuy.CreateTime, local)
+		if err := utils.WriteLedger(sellingBuy, stub, lib.SellingBuyKey, []string{sellingBuy.Buyer, fmt.Sprintf("%d", sellingBuyCreateTimeUnixNano.UnixNano())}); err != nil {
+			return nil, err
+		}
+		data, err := json.Marshal(sellingBuy)
+		if err != nil {
+			return nil, err
+		}
+		return data, nil
+	default:
+		return nil, nil
 	}
-	if err := utils.WriteLedger(selling, stub, lib.SellingKey, []string{selling.Seller, selling.ObjectOfSale}); err != nil {
-		return nil, err
-	}
-	data, err := json.Marshal(selling)
-	if err != nil {
-		return nil, err
-	}
-	return data, nil
-}
-
-func closeByDelivery(closeStart string, selling lib.Selling, realEstate lib.RealEstate, sellingBuy lib.SellingBuy, buyer string, stub shim.ChaincodeStubInterface) ([]byte, error) {
-	//根据buyer获取卖家信息
-	resultsBuyerAccount, err := utils.GetStateByPartialCompositeKeys(stub, lib.AccountKey, []string{buyer})
-	if err != nil || len(resultsBuyerAccount) != 1 {
-		return nil, err
-	}
-	var accountBuyer lib.Account
-	if err = json.Unmarshal(resultsBuyerAccount[0], &accountBuyer); err != nil {
-		return nil, err
-	}
-	//此时取消操作，需要将资金退还给买家
-	accountBuyer.Balance += selling.Price
-	if err := utils.WriteLedger(accountBuyer, stub, lib.AccountKey, []string{accountBuyer.AccountId}); err != nil {
-		return nil, err
-	}
-	//重置房产信息担保状态
-	realEstate.Encumbrance = false
-	if err := utils.WriteLedger(realEstate, stub, lib.RealEstateKey, []string{realEstate.Proprietor, realEstate.RealEstateID}); err != nil {
-		return nil, err
-	}
-	//更新销售状态
-	selling.SellingStatus = lib.SellingStatusConstant()[closeStart]
-	if err := utils.WriteLedger(selling, stub, lib.SellingKey, []string{selling.Seller, selling.ObjectOfSale}); err != nil {
-		return nil, err
-	}
-	sellingBuy.Selling = selling
-	local, _ := time.LoadLocation("Local")
-	sellingBuyCreateTimeUnixNano, _ := time.ParseInLocation("2006-01-02 15:04:05", sellingBuy.CreateTime, local)
-	if err := utils.WriteLedger(sellingBuy, stub, lib.SellingBuyKey, []string{sellingBuy.Buyer, fmt.Sprintf("%d", sellingBuyCreateTimeUnixNano.UnixNano())}); err != nil {
-		return nil, err
-	}
-	data, err := json.Marshal(sellingBuy)
-	if err != nil {
-		return nil, err
-	}
-	return data, nil
 }
