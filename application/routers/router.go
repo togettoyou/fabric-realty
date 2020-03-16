@@ -36,6 +36,8 @@ func InitRouter() *gin.Engine {
 		apiV1.POST("/querySellingListByBuyer", v1.QuerySellingListByBuyer)
 		apiV1.POST("/updateSelling", v1.UpdateSelling)
 	}
+	// 静态文件路由
+	r.StaticFS("/web", http.Dir("./dist/"))
 	return r
 }
 
