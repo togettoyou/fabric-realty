@@ -166,7 +166,7 @@ export default {
                 })
               }
               setTimeout(() => {
-                this.$router.go(0)
+                window.location.reload()
               }, 1000)
             }).catch(_ => {
               this.loadingDialog = false
