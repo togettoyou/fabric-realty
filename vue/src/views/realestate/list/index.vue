@@ -43,9 +43,7 @@
           <div v-if="!val.encumbrance&&roles[0] !== 'admin'">
             <el-button type="text" @click="openDialog(val)">出售</el-button>
             <el-divider direction="vertical" />
-            <el-button type="text">捐赠</el-button>
-            <el-divider direction="vertical" />
-            <el-button type="text">质押</el-button>
+            <el-button type="text" @click="openDonatingDialog(val)">捐赠</el-button>
           </div>
           <el-rate v-if="roles[0] === 'admin'" />
         </el-card>
@@ -65,13 +63,36 @@
         <el-button @click="dialogCreateSelling = false">取 消</el-button>
       </div>
     </el-dialog>
+    <el-dialog v-loading="loadingDialog" :visible.sync="dialogCreateDonating" :close-on-click-modal="false" @close="resetForm('DonatingForm')">
+      <el-form ref="DonatingForm" :model="DonatingForm" :rules="rulesDonating" label-width="100px">
+        <el-form-item label="业主" prop="proprietor">
+          <el-select v-model="DonatingForm.proprietor" placeholder="请选择业主" @change="selectGet">
+            <el-option
+              v-for="item in accountList"
+              :key="item.accountId"
+              :label="item.userName"
+              :value="item.accountId"
+            >
+              <span style="float: left">{{ item.userName }}</span>
+              <span style="float: right; color: #8492a6; font-size: 13px">{{ item.accountId }}</span>
+            </el-option>
+          </el-select>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button type="primary" @click="createDonating('DonatingForm')">立即捐赠</el-button>
+        <el-button @click="dialogCreateDonating = false">取 消</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
 <script>
 import { mapGetters } from 'vuex'
+import { queryAccountList } from '@/api/account'
 import { queryRealEstateList } from '@/api/realEstate'
 import { createSelling } from '@/api/selling'
+import { createDonating } from '@/api/donating'
 
 export default {
   name: 'RealeState',
@@ -88,6 +109,7 @@ export default {
       loadingDialog: false,
       realEstateList: [],
       dialogCreateSelling: false,
+      dialogCreateDonating: false,
       realForm: {
         price: 0,
         salePeriod: 0
@@ -100,6 +122,15 @@ export default {
           { validator: checkArea, trigger: 'blur' }
         ]
       },
+      DonatingForm: {
+        proprietor: ''
+      },
+      rulesDonating: {
+        proprietor: [
+          { required: true, message: '请选择业主', trigger: 'change' }
+        ]
+      },
+      accountList: [],
       valItem: {}
     }
   },
@@ -136,6 +167,20 @@ export default {
     openDialog(item) {
       this.dialogCreateSelling = true
       this.valItem = item
+    },
+    openDonatingDialog(item) {
+      this.dialogCreateDonating = true
+      this.valItem = item
+      queryAccountList().then(response => {
+        if (response !== null) {
+          this.accountList = response
+          for (var i in this.accountList) {
+            if (this.accountList[i].userName === '管理员' || this.accountList[i].accountId === this.accountId) {
+              this.accountList.splice(i, 1)
+            }
+          }
+        }
+      })
     },
     createSelling(formName) {
       this.$refs[formName].validate((valid) => {
@@ -185,8 +230,58 @@ export default {
         }
       })
     },
+    createDonating(formName) {
+      this.$refs[formName].validate((valid) => {
+        if (valid) {
+          this.$confirm('是否立即捐赠?', '提示', {
+            confirmButtonText: '确定',
+            cancelButtonText: '取消',
+            type: 'success'
+          }).then(() => {
+            this.loadingDialog = true
+            createDonating({
+              objectOfDonating: this.valItem.realEstateId,
+              donor: this.valItem.proprietor,
+              grantee: this.DonatingForm.proprietor
+            }).then(response => {
+              this.loadingDialog = false
+              this.dialogCreateDonating = false
+              if (response !== null) {
+                this.$message({
+                  type: 'success',
+                  message: '捐赠成功!'
+                })
+              } else {
+                this.$message({
+                  type: 'error',
+                  message: '捐赠失败!'
+                })
+              }
+              setTimeout(() => {
+                window.location.reload()
+              }, 1000)
+            }).catch(_ => {
+              this.loadingDialog = false
+              this.dialogCreateDonating = false
+            })
+          }).catch(() => {
+            this.loadingDialog = false
+            this.dialogCreateDonating = false
+            this.$message({
+              type: 'info',
+              message: '已取消捐赠'
+            })
+          })
+        } else {
+          return false
+        }
+      })
+    },
     resetForm(formName) {
       this.$refs[formName].resetFields()
+    },
+    selectGet(accountId) {
+      this.ruleForm.proprietor = accountId
     }
   }
 }
