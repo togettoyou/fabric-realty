@@ -7,20 +7,24 @@
     <div class="right-menu">
       <el-dropdown class="avatar-container" trigger="click">
         <div class="avatar-wrapper">
-          <img :src="'https://ss1.bdstatic.com/70cFuXSh_Q1YnxGkpoWK1HF6hhy/it/u=1637075864,254316057&fm=26&gp=0.jpg'" class="user-avatar">
+          <img :src="'https://s1.ax1x.com/2020/03/18/8w2Z2F.jpg'" class="user-avatar">
           <i class="el-icon-caret-bottom" />
         </div>
         <el-dropdown-menu slot="dropdown" class="user-dropdown">
-          <router-link to="/">
-            <el-dropdown-item>
-              首页
-            </el-dropdown-item>
-          </router-link>
+          <el-dropdown-item>
+            账户ID: {{ accountId }}
+          </el-dropdown-item>
+          <el-dropdown-item>
+            用户名: {{ userName }}
+          </el-dropdown-item>
+          <el-dropdown-item>
+            余额: ￥{{ balance }} 元
+          </el-dropdown-item>
           <a target="_blank" href="https://github.com/togettoyou/blockchain-real-estate">
             <el-dropdown-item>项目地址</el-dropdown-item>
           </a>
           <el-dropdown-item divided @click.native="logout">
-            <span style="display:block;">Log Out</span>
+            <span style="display:block;">切换账户</span>
           </el-dropdown-item>
         </el-dropdown-menu>
       </el-dropdown>
@@ -40,7 +44,10 @@ export default {
   },
   computed: {
     ...mapGetters([
-      'sidebar'
+      'sidebar',
+      'accountId',
+      'userName',
+      'balance'
     ])
   },
   methods: {

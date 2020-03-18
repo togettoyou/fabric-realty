@@ -1,1 +1,0 @@
-(window["webpackJsonp"]=window["webpackJsonp"]||[]).push([["chunk-2d21d90c"],{d29a:function(n,e,l){"use strict";l.r(e);var t=function(){var n=this,e=n.$createElement,l=n._self._c||e;return l("h1",[n._v("所有")])},c=[],u={name:"AllSelling"},a=u,r=l("2877"),s=Object(r["a"])(a,t,c,!1,null,null,null);e["default"]=s.exports}}]);

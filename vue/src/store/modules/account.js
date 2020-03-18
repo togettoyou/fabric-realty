@@ -79,9 +79,9 @@ const actions = {
           roles = ['editor']
         }
         commit('SET_ROLES', roles)
-        commit('SET_ACCOUNTID', [response[0].accountId])
-        commit('SET_USERNAME', [response[0].userName])
-        commit('SET_BALANCE', [response[0].balance])
+        commit('SET_ACCOUNTID', response[0].accountId)
+        commit('SET_USERNAME', response[0].userName)
+        commit('SET_BALANCE', response[0].balance)
         resolve(roles)
       }).catch(error => {
         reject(error)

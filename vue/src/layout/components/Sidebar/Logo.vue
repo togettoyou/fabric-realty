@@ -25,7 +25,7 @@ export default {
   data() {
     return {
       title: '基于区块链的房地产交易系统',
-      logo: 'https://wpimg.wallstcn.com/69a1c46c-eb1c-4b46-8bd4-e9e686ef5251.png'
+      logo: 'https://s1.ax1x.com/2020/03/18/8w22rj.png'
     }
   }
 }

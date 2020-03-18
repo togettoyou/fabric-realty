@@ -23,13 +23,21 @@ service.interceptors.response.use(
     }
   },
   error => {
-    console.log('err' + error)
-    Message({
-      message: error.message,
-      type: 'error',
-      duration: 5 * 1000
-    })
-    return Promise.reject(error)
+    if (error.response === undefined) {
+      Message({
+        message: '请求失败 ' + error.message,
+        type: 'error',
+        duration: 5 * 1000
+      })
+      return Promise.reject(error)
+    } else {
+      Message({
+        message: '失败 ' + error.response.data.data,
+        type: 'error',
+        duration: 5 * 1000
+      })
+      return Promise.reject(error.response)
+    }
   }
 )
 

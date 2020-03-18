@@ -50,7 +50,9 @@ export default {
   },
   created() {
     queryAccountList().then(response => {
-      this.accountList = response
+      if (response !== null) {
+        this.accountList = response
+      }
     })
   },
   methods: {
@@ -69,12 +71,6 @@ export default {
     },
     selectGet(accountId) {
       this.value = accountId
-      // let obj = {}
-      // obj = this.accountList.find((item) => {
-      //   return item.accountId === accountId
-      // })
-      // console.log(obj)
-      console.log(accountId)
     }
   }
 }
@@ -100,7 +96,7 @@ $light_gray:#eee;
     overflow: hidden;
   }
   .login-select{
-    padding: 20px 0px 30px 0px;
+   padding: 20px 0px 30px 0px;
    min-height: 100%;
    width: 100%;
    background-color: $bg;
