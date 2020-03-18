@@ -20,6 +20,28 @@ definitions:
           $ref: '#/definitions/v1.AccountIdBody'
         type: array
     type: object
+  v1.DonatingListQueryByGranteeRequestBody:
+    properties:
+      grantee:
+        type: string
+    type: object
+  v1.DonatingListQueryRequestBody:
+    properties:
+      donor:
+        type: string
+    type: object
+  v1.DonatingRequestBody:
+    properties:
+      donor:
+        description: 捐赠人
+        type: string
+      grantee:
+        description: 受赠人
+        type: string
+      objectOfDonating:
+        description: 捐赠对象
+        type: string
+    type: object
   v1.RealEstateQueryRequestBody:
     properties:
       proprietor:
@@ -80,6 +102,21 @@ definitions:
         description: 发起销售人、卖家(卖家AccountId)
         type: string
     type: object
+  v1.UpdateDonatingRequestBody:
+    properties:
+      donor:
+        description: 捐赠人
+        type: string
+      grantee:
+        description: 受赠人
+        type: string
+      objectOfDonating:
+        description: 捐赠对象
+        type: string
+      status:
+        description: 需要更改的状态
+        type: string
+    type: object
   v1.UpdateSellingRequestBody:
     properties:
       buyer:
@@ -106,6 +143,27 @@ info:
   title: 基于区块链技术的房地产交易系统api文档
   version: "1.0"
 paths:
+  /api/v1/createDonating:
+    post:
+      parameters:
+      - description: donating
+        in: body
+        name: donating
+        required: true
+        schema:
+          $ref: '#/definitions/v1.DonatingRequestBody'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/app.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/app.Response'
+      summary: 发起捐赠
   /api/v1/createRealEstate:
     post:
       parameters:
@@ -204,6 +262,48 @@ paths:
           schema:
             $ref: '#/definitions/app.Response'
       summary: 获取账户信息
+  /api/v1/queryDonatingList:
+    post:
+      parameters:
+      - description: donatingListQuery
+        in: body
+        name: donatingListQuery
+        required: true
+        schema:
+          $ref: '#/definitions/v1.DonatingListQueryRequestBody'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/app.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/app.Response'
+      summary: 查询捐赠列表(可查询所有，也可根据发起捐赠人查询)
+  /api/v1/queryDonatingListByGrantee:
+    post:
+      parameters:
+      - description: donatingListQueryByGrantee
+        in: body
+        name: donatingListQueryByGrantee
+        required: true
+        schema:
+          $ref: '#/definitions/v1.DonatingListQueryByGranteeRequestBody'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/app.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/app.Response'
+      summary: 根据受赠人(受赠人AccountId)查询捐赠(受赠的)(供受赠人查询)
   /api/v1/queryRealEstateList:
     post:
       parameters:
@@ -267,6 +367,27 @@ paths:
           schema:
             $ref: '#/definitions/app.Response'
       summary: 根据参与销售人、买家(买家AccountId)查询销售(参与的)
+  /api/v1/updateDonating:
+    post:
+      parameters:
+      - description: updateDonating
+        in: body
+        name: updateDonating
+        required: true
+        schema:
+          $ref: '#/definitions/v1.UpdateDonatingRequestBody'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/app.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/app.Response'
+      summary: 更新捐赠状态（确认受赠、取消）
   /api/v1/updateSelling:
     post:
       parameters:

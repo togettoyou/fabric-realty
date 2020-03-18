@@ -330,3 +330,58 @@ func Test_QuerySellingList(t *testing.T) {
 		[]byte(realEstateList[2].Proprietor), //买家(买家AccountId)
 	}).Payload)))
 }
+
+// 测试捐赠合约
+func Test_Donating(t *testing.T) {
+	stub := initTest(t)
+	realEstateList := checkCreateRealEstate(stub, t)
+
+	fmt.Println(fmt.Sprintf("获取房地产信息\n%s",
+		string(checkInvoke(t, stub, [][]byte{
+			[]byte("queryRealEstateList"),
+		}).Payload)))
+	//先发起
+	fmt.Println(fmt.Sprintf("发起捐赠\n%s", string(checkInvoke(t, stub, [][]byte{
+		[]byte("createDonating"),
+		[]byte(realEstateList[0].RealEstateID),
+		[]byte(realEstateList[0].Proprietor),
+		[]byte(realEstateList[2].Proprietor),
+	}).Payload)))
+
+	fmt.Println(fmt.Sprintf("获取房地产信息\n%s",
+		string(checkInvoke(t, stub, [][]byte{
+			[]byte("queryRealEstateList"),
+		}).Payload)))
+
+	fmt.Println(fmt.Sprintf("1、查询所有\n%s", string(checkInvoke(t, stub, [][]byte{
+		[]byte("queryDonatingList"),
+	}).Payload)))
+	fmt.Println(fmt.Sprintf("2、查询指定%s\n%s", realEstateList[0].Proprietor, string(checkInvoke(t, stub, [][]byte{
+		[]byte("queryDonatingList"),
+		[]byte(realEstateList[2].Proprietor),
+	}).Payload)))
+	fmt.Println(fmt.Sprintf("3、查询指定受赠%s\n%s", realEstateList[0].Proprietor, string(checkInvoke(t, stub, [][]byte{
+		[]byte("queryDonatingListByGrantee"),
+		[]byte(realEstateList[2].Proprietor),
+	}).Payload)))
+
+	//fmt.Println(fmt.Sprintf("4、接受受赠%s\n%s", realEstateList[0].Proprietor, string(checkInvoke(t, stub, [][]byte{
+	//	[]byte("updateDonating"),
+	//	[]byte(realEstateList[0].RealEstateID),
+	//	[]byte(realEstateList[0].Proprietor),
+	//	[]byte(realEstateList[2].Proprietor),
+	//	[]byte("done"),
+	//}).Payload)))
+	fmt.Println(fmt.Sprintf("4、取消受赠%s\n%s", realEstateList[0].Proprietor, string(checkInvoke(t, stub, [][]byte{
+		[]byte("updateDonating"),
+		[]byte(realEstateList[0].RealEstateID),
+		[]byte(realEstateList[0].Proprietor),
+		[]byte(realEstateList[2].Proprietor),
+		[]byte("cancelled"),
+	}).Payload)))
+
+	fmt.Println(fmt.Sprintf("获取房地产信息\n%s",
+		string(checkInvoke(t, stub, [][]byte{
+			[]byte("queryRealEstateList"),
+		}).Payload)))
+}

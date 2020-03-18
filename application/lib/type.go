@@ -50,32 +50,3 @@ var DonatingStatusConstant = func() map[string]string {
 		"done":          "完成",  //受赠人确认接收，交易完成
 	}
 }
-
-//质押要约
-//业主将房地产质押给质押人
-//需要确定ObjectOfPledge是否属于Owner
-//需要指定质押人Pledge，并等待质押人转移质押金
-//质押人转移质押金,业主确认收到资金,质押期开始
-//如果期限到期,且业主尚未返还资金,质押对象将成为质押人的财产
-//业主可以随时取消报价,直到他们确认收到资金
-//质押人可在业主确认收到上述资金之前,随时提取资金
-type Pledge struct {
-	ObjectOfPledge string  `json:"objectOfPledge"` //质押对象(正在质押的房地产RealEstateID)
-	Owner          string  `json:"owner"`          //业主(业主AccountId)
-	Pledge         string  `json:"pledge"`         //质押人(质押人AccountId)
-	Money          float64 `json:"money"`          //质押金额
-	CreateTime     string  `json:"createTime"`     //创建时间
-	PledgePeriod   int     `json:"pledgePeriod"`   //质押期(单位为天)
-	PledgeStatus   string  `json:"pledgeStatus"`   //质押状态
-}
-
-//质押状态
-var PledgeStatusConstant = func() map[string]string {
-	return map[string]string{
-		"pendingPayment":      "待转账", //业主发起质押合约，等待质押人转移质押金
-		"pendingConfirmation": "待确认", //质押人转移资金，等待业主确认收到资金
-		"pledgedStart":        "质押中", //业主确认收到资金，正在质押状态
-		"cancelled":           "已取消", //业主和质押人可以在业主确认收到资金前取消质押，处于质押状态过程不可再取消
-		"done":                "已完成", //质押期限到期，完成质押，如若业主尚未返还资金,质押对象将成为质押人的财产
-	}
-}
