@@ -30,7 +30,7 @@
 2、进入deploy目录，执行`start.sh`脚本
 
 ```shell
-# 赋与权限
+# 赋予权限
 sudo chmod +x *.sh
 # 启动区块链网络
 ./start.sh
@@ -44,7 +44,7 @@ sudo chmod +x *.sh
 ```shell
 # 编译
 go build
-# 赋与权限
+# 赋予权限
 sudo chmod +x application
 # 启动
 ./application
