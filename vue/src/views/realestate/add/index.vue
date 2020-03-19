@@ -73,12 +73,10 @@ export default {
   created() {
     queryAccountList().then(response => {
       if (response !== null) {
-        this.accountList = response
-        for (var i in this.accountList) {
-          if (this.accountList[i].userName === '管理员') {
-            this.accountList.splice(i, 1)
-          }
-        }
+        // 过滤掉管理员
+        this.accountList = response.filter(item =>
+          item.userName !== '管理员'
+        )
       }
     })
   },

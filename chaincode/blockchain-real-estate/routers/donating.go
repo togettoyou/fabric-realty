@@ -45,6 +45,13 @@ func CreateDonating(stub shim.ChaincodeStubInterface, args []string) pb.Response
 	if err != nil || len(resultsAccount) != 1 {
 		return shim.Error(fmt.Sprintf("grantee受赠人信息验证失败%s", err))
 	}
+	var accountGrantee lib.Account
+	if err = json.Unmarshal(resultsAccount[0], &accountGrantee); err != nil {
+		return shim.Error(fmt.Sprintf("查询操作人信息-反序列化出错: %s", err))
+	}
+	if accountGrantee.UserName == "管理员" {
+		return shim.Error(fmt.Sprintf("不能捐赠给管理员%s", err))
+	}
 	//判断记录是否已存在，不能重复发起捐赠
 	//若Encumbrance为true即说明此房产已经正在担保状态
 	if realEstate.Encumbrance {

@@ -31,12 +31,13 @@ func (t *BlockChainRealEstate) Init(stub shim.ChaincodeStubInterface) pb.Respons
 		"ef2d127de37b",
 	}
 	var userNames = [6]string{"管理员", "①号业主", "②号业主", "③号业主", "④号业主", "⑤号业主"}
+	var balances = [6]float64{0, 5000000, 5000000, 5000000, 5000000, 5000000}
 	//初始化账号数据
 	for i, val := range accountIds {
 		account := &lib.Account{
 			AccountId: val,
 			UserName:  userNames[i],
-			Balance:   5000000,
+			Balance:   balances[i],
 		}
 		// 写入账本
 		if err := utils.WriteLedger(account, stub, lib.AccountKey, []string{val}); err != nil {

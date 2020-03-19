@@ -173,12 +173,10 @@ export default {
       this.valItem = item
       queryAccountList().then(response => {
         if (response !== null) {
-          this.accountList = response
-          for (var i in this.accountList) {
-            if (this.accountList[i].userName === '管理员' || this.accountList[i].accountId === this.accountId) {
-              this.accountList.splice(i, 1)
-            }
-          }
+          // 过滤掉管理员和当前用户
+          this.accountList = response.filter(item =>
+            item.userName !== '管理员' && item.accountId !== this.accountId
+          )
         }
       })
     },
@@ -281,7 +279,7 @@ export default {
       this.$refs[formName].resetFields()
     },
     selectGet(accountId) {
-      this.ruleForm.proprietor = accountId
+      this.DonatingForm.proprietor = accountId
     }
   }
 }
