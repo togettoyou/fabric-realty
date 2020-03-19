@@ -77,7 +77,7 @@ yarn build:prod
 
 ## 演示效果图
 
-![Mar-19-2020 15-28-20](https://github.com/togettoyou/blockchain-real-estate/blob/master/screenshots/Mar-19-2020 15-28-20.gif)
+![Mar-19-2020_15-28-20](https://github.com/togettoyou/blockchain-real-estate/blob/master/screenshots/Mar-19-2020_15-28-20.gif)
 
 ## 感谢
 
