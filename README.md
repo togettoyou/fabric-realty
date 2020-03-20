@@ -91,4 +91,5 @@ yarn build:prod
 ## 感谢
 
 - [go-gin-example](https://github.com/eddycjy/go-gin-example)
-- [vue-admin-template](
+- [vue-admin-template](https://github.com/PanJiaChen/vue-admin-template)
+
