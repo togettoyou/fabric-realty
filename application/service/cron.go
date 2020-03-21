@@ -21,13 +21,13 @@ const spec = "0 0 0 * * ?" // 每天0点执行
 //const spec = "*/10 * * * * ?" //10秒执行一次，用于测试
 
 func Init() {
-	c := cron.New()
-	//c := cron.New(cron.WithSeconds())//秒级别
+	c := cron.New(cron.WithSeconds())//支持到秒级别
 	_, err := c.AddFunc(spec, GoRun)
 	if err != nil {
-		log.Printf("start cron failed %s", err)
+		log.Printf("定时任务开启失败 %s", err)
 	}
 	c.Start()
+	log.Printf("定时任务已开启")
 	select {}
 }
 
