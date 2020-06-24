@@ -1,5 +1,27 @@
 # blockchain-real-estate
 
+2020.6.24 更新详细运行步骤
+
+1. 确保你的项目目录为`$GOPATH/src/github.com/togettoyou/blockchain-real-estate`
+2. 项目由于未使用mod管理，请先将go mod环境设置为auto： `go env -w GO111MODULE=auto`
+3. 首先测试chaincode是否正常调用，运行`chaincode/blockchain-real-estate/chaincode_test.go`测试用例
+![image](https://user-images.githubusercontent.com/55381228/85498013-8200a100-b611-11ea-938f-9ac1d3ad5b89.png)
+
+4. 在deploy目录下运行`./start.sh`,观察有无报错提示。运行成功后在终端执行`docker exec cli peer chaincode invoke -C assetschannel -n blockchain-real-estate -c '{"Args":["queryAccountList"]}'` 等cli命令，Args可以替换为Invoke中的funcName，先验证链码是否正确安装及区块链网络能否正常工作。建议`./start.sh`之前可以先运行`./stop.sh`清理一下环境。
+![image](https://user-images.githubusercontent.com/55381228/85497727-0141a500-b611-11ea-8d10-deacb8bd627e.png)
+
+5. 如果以上都成功，说明区块链网络是没有问题的。接下来同样先执行`application/sdk_test.go`单元测试，看是否可以成功使用sdk调用链码(此步骤前提你区块链网络即以上步骤已成功启动)
+![image](https://user-images.githubusercontent.com/55381228/85497628-d7887e00-b610-11ea-9749-0006ad0df814.png)
+
+6. 运行application，`go run main.go` 
+
+我的本机测试环境：
+![image](https://user-images.githubusercontent.com/55381228/85497883-4960c780-b611-11ea-93b0-4a2ec69b8142.png)
+
+***
+分割线
+***
+
 > 🚀基于区块链的房地产交易系统小模型。提供销售和捐赠功能。本项目使用Hyperledger Fabric构建区块链网络, go编写智能合约，应用层使用gin+fabric-sdk-go调用合约。前端展示使用vue+element。前后端分离。
 
 注：本项目需放在 `$GOPATH/src/github.com/togettoyou/blockchain-real-estate` 下运行
