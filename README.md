@@ -16,7 +16,7 @@
 
 ## 运行
 
-> 默认已经安装Hyperledger Fabric环境，如果未安装，参考：https://juejin.im/post/5e5db4ebf265da57301bfba5
+> 默认已经安装Hyperledger Fabric环境，如果未安装，参考：https://www.yuque.com/togettoyou/blog/his57f
 >
 > 我的本机环境参考：
 >
