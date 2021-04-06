@@ -10,7 +10,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/robfig/cron"
+	"github.com/robfig/cron/v3"
 	bc "github.com/togettoyou/blockchain-real-estate/application/blockchain"
 	"github.com/togettoyou/blockchain-real-estate/application/lib"
 	"log"
