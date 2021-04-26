@@ -49,6 +49,7 @@ docker exec cli peer chaincode install -n blockchain-real-estate -v 1.0.0 -l gol
 echo "七、实例化链码"
 docker exec cli peer chaincode instantiate -o orderer.blockchainrealestate.com:7050 -C assetschannel -n blockchain-real-estate -l golang -v 1.0.0 -c '{"Args":["init"]}'
 
+echo "正在等待链码实例化完成，等待5秒"
 sleep 5
 
 # 进行链码交互，验证链码是否正确安装及区块链网络能否正常工作
