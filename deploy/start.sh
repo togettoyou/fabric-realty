@@ -1,7 +1,14 @@
 #!/bin/bash
 
 # 根据需求保留，这里相当于使用fabric-samples_v1.4.7中的bin
-export PATH=${PWD}/fabric/bin:${PWD}:$PATH
+if [[ `uname` == 'Darwin' ]]; then
+    echo "Mac OS"
+    export PATH=${PWD}/fabric/mac/bin:${PWD}:$PATH
+fi
+if [[ `uname` == 'Linux' ]]; then
+    echo "Linux"
+    export PATH=${PWD}/fabric/linux/bin:${PWD}:$PATH
+fi
 
 echo "一、清理环境"
 mkdir -p config
