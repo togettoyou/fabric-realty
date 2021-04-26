@@ -1,9 +1,3 @@
-/**
- * @Author: 夜央 Oh oh oh oh oh oh (https://github.com/togettoyou)
- * @Email: zoujh99@qq.com
- * @Date: 2020/3/4 4:21 下午
- * @Description: fabric-sdk-go的封装
- */
 package blockchain
 
 import (
@@ -19,10 +13,10 @@ var (
 	ChainCodeName = "blockchain-real-estate" // 链码名称
 	Org           = "org1"                   // 组织名称
 	User          = "Admin"                  // 用户
-	ConfigPath    = "blockchain/config.yaml" // 配置文件路径
+	ConfigPath    = "conf/config.yaml"       // 配置文件路径
 )
 
-// 初始化
+// Init 初始化
 func Init() {
 	var err error
 	// 通过配置文件初始化SDK
@@ -32,7 +26,7 @@ func Init() {
 	}
 }
 
-// 区块链交互
+// ChannelExecute 区块链交互
 func ChannelExecute(fcn string, args [][]byte) (channel.Response, error) {
 	// 创建客户端，表明在通道的身份
 	ctx := SDK.ChannelContext(ChannelName, fabsdk.WithOrg(Org), fabsdk.WithUser(User))
@@ -53,7 +47,7 @@ func ChannelExecute(fcn string, args [][]byte) (channel.Response, error) {
 	return resp, nil
 }
 
-// 区块链查询
+// ChannelQuery 区块链查询
 func ChannelQuery(fcn string, args [][]byte) (channel.Response, error) {
 	// 创建客户端，表明在通道的身份
 	ctx := SDK.ChannelContext(ChannelName, fabsdk.WithOrg(Org), fabsdk.WithUser(User))

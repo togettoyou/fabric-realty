@@ -1,9 +1,3 @@
-/**
- * @Author: 夜央 Oh oh oh oh oh oh (https://github.com/togettoyou)
- * @Email: zoujh99@qq.com
- * @Date: 2020/3/3 11:15 下午
- * @Description: application启动入口
- */
 package main
 
 import (

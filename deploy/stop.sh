@@ -30,7 +30,3 @@ clearContainers
 
 # 调用函数清除不需要的链码镜像
 removeUnwantedImages
-
-
-
-

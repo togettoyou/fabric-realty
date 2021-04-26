@@ -1,9 +1,3 @@
-/**
- * @Author: 夜央 Oh oh oh oh oh oh (https://github.com/togettoyou)
- * @Email: zoujh99@qq.com
- * @Date: 2020/3/4 12:51 上午
- * @Description: 定义请求返回JSON格式
- */
 package app
 
 import (

@@ -1,16 +1,11 @@
 version: '2'
 services:
 
-  # 关注点
-  # 1. 如何注入系统配置到容器中 环境变量注入
-  # 2. 端口的映射关系
-  # 3. 文件的映射
-
   orderer.blockchainrealestate.com:
     container_name: orderer.blockchainrealestate.com
     image: hyperledger/fabric-orderer:1.4.2
     environment:
-      - ORDERER_GENERAL_LOGLEVEL=info # general.loglevel: debug
+      - ORDERER_GENERAL_LOGLEVEL=debug
       - ORDERER_GENERAL_LISTENADDRESS=0.0.0.0 # 服务暴露地址
       - ORDERER_GENERAL_GENESISMETHOD=file
       - ORDERER_GENERAL_GENESISFILE=/etc/hyperledger/config/genesis.block # 注入创世区块
@@ -21,13 +16,10 @@ services:
     ports:
       - 7050:7050 # 17050:7050
     volumes:
-      #- ./config/:/etc/hyperledger/config
       - ./config/genesis.block:/etc/hyperledger/config/genesis.block
       - ./crypto-config/ordererOrganizations/blockchainrealestate.com/orderers/orderer.blockchainrealestate.com/:/etc/hyperledger/orderer
 
   peer0.org0.blockchainrealestate.com:
-    #    extends:
-    #      service: peer.base
     extends:
       file: docker-compose-base.yaml
       service: peer-base
@@ -47,8 +39,6 @@ services:
       - orderer.blockchainrealestate.com
 
   peer1.org0.blockchainrealestate.com:
-    #    extends:
-    #      service: peer.base
     extends:
       file: docker-compose-base.yaml
       service: peer-base
@@ -68,8 +58,6 @@ services:
       - orderer.blockchainrealestate.com
 
   peer0.org1.blockchainrealestate.com:
-    #    extends:
-    #      service: peer.base
     extends:
       file: docker-compose-base.yaml
       service: peer-base
@@ -89,8 +77,6 @@ services:
       - orderer.blockchainrealestate.com
 
   peer1.org1.blockchainrealestate.com:
-    #    extends:
-    #      service: peer.base
     extends:
       file: docker-compose-base.yaml
       service: peer-base
@@ -110,8 +96,6 @@ services:
       - orderer.blockchainrealestate.com
 
   peer0.org2.blockchainrealestate.com:
-    #    extends:
-    #      service: peer.base
     extends:
       file: docker-compose-base.yaml
       service: peer-base
@@ -131,8 +115,6 @@ services:
       - orderer.blockchainrealestate.com
 
   peer1.org2.blockchainrealestate.com:
-    #    extends:
-    #      service: peer.base
     extends:
       file: docker-compose-base.yaml
       service: peer-base
@@ -151,13 +133,13 @@ services:
     depends_on:
       - orderer.blockchainrealestate.com
 
-  cli: # peer节点客户端 交易都是从客户端发起 需要用到User证书
+  cli:
     container_name: cli
     image: hyperledger/fabric-tools:1.4.2
     tty: true
     environment:
       - GOPATH=/opt/gopath
-      - CORE_LOGGING_LEVEL=INFO
+      - CORE_LOGGING_LEVEL=DEBUG
       - CORE_PEER_ID=cli
       - CORE_PEER_ADDRESS=peer0.org1.blockchainrealestate.com:7051
       - CORE_PEER_LOCALMSPID=Org1MSP

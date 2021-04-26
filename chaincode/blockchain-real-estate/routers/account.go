@@ -1,9 +1,3 @@
-/**
- * @Author: 夜央 Oh oh oh oh oh oh (https://github.com/togettoyou)
- * @Email: zoujh99@qq.com
- * @Date: 2020/3/5 4:18 下午
- * @Description: 账户相关合约路由
- */
 package routers
 
 import (
@@ -15,7 +9,7 @@ import (
 	"github.com/togettoyou/blockchain-real-estate/chaincode/blockchain-real-estate/utils"
 )
 
-//查询账户列表
+// QueryAccountList 查询账户列表
 func QueryAccountList(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 	var accountList []lib.Account
 	results, err := utils.GetStateByPartialCompositeKeys(stub, lib.AccountKey, args)

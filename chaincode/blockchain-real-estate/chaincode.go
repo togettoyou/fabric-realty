@@ -13,7 +13,7 @@ import (
 type BlockChainRealEstate struct {
 }
 
-//链码初始化
+// Init 链码初始化
 func (t *BlockChainRealEstate) Init(stub shim.ChaincodeStubInterface) pb.Response {
 	fmt.Println("链码初始化")
 	timeLocal, err := time.LoadLocation("Asia/Chongqing")
@@ -47,7 +47,7 @@ func (t *BlockChainRealEstate) Init(stub shim.ChaincodeStubInterface) pb.Respons
 	return shim.Success(nil)
 }
 
-//实现Invoke接口调用智能合约
+// Invoke 实现Invoke接口调用智能合约
 func (t *BlockChainRealEstate) Invoke(stub shim.ChaincodeStubInterface) pb.Response {
 	funcName, args := stub.GetFunctionAndParameters()
 	switch funcName {
