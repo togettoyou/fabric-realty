@@ -14,7 +14,7 @@
 ## 前提
 Linux 或者 Mac，连接网络，要求安装了 Docker 和 Docker Compose
 
-附Linux安装 Docker 和 Docker Compose 教程：点此跳转
+附 Linux 安装 Docker 和 Docker Compose 教程：[点此跳转](/Install.md)
 
 ## 运行
 
