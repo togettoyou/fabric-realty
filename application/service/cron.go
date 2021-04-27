@@ -1,9 +1,3 @@
-/**
- * @Author: 夜央 Oh oh oh oh oh oh (https://github.com/togettoyou)
- * @Email: zoujh99@qq.com
- * @Date: 2020/3/13 1:01 上午
- * @Description: 定时任务-每天晚上0点扫描一下处理过期交易
- */
 package service
 
 import (
@@ -21,7 +15,7 @@ const spec = "0 0 0 * * ?" // 每天0点执行
 //const spec = "*/10 * * * * ?" //10秒执行一次，用于测试
 
 func Init() {
-	c := cron.New(cron.WithSeconds())//支持到秒级别
+	c := cron.New(cron.WithSeconds()) //支持到秒级别
 	_, err := c.AddFunc(spec, GoRun)
 	if err != nil {
 		log.Printf("定时任务开启失败 %s", err)

@@ -1,9 +1,3 @@
-/**
- * @Author: 夜央 Oh oh oh oh oh oh (https://github.com/togettoyou)
- * @Email: zoujh99@qq.com
- * @Date: 2020/3/10 12:33 上午
- * @Description: 房地产相关合约路由
- */
 package routers
 
 import (
@@ -17,7 +11,7 @@ import (
 	"time"
 )
 
-//新建房地产(管理员)
+// CreateRealEstate 新建房地产(管理员)
 func CreateRealEstate(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 	// 验证参数
 	if len(args) != 4 {
@@ -83,7 +77,7 @@ func CreateRealEstate(stub shim.ChaincodeStubInterface, args []string) pb.Respon
 	return shim.Success(realEstateByte)
 }
 
-//查询房地产(可查询所有，也可根据所有人查询名下房产)
+// QueryRealEstateList 查询房地产(可查询所有，也可根据所有人查询名下房产)
 func QueryRealEstateList(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 	var realEstateList []lib.RealEstate
 	results, err := utils.GetStateByPartialCompositeKeys2(stub, lib.RealEstateKey, args)

@@ -1,9 +1,3 @@
-/**
- * @Author: 夜央 Oh oh oh oh oh oh (https://github.com/togettoyou)
- * @Email: zoujh99@qq.com
- * @Date: 2020/3/10 6:40 下午
- * @Description: 销售相关合约路由
- */
 package routers
 
 import (
@@ -17,7 +11,7 @@ import (
 	"time"
 )
 
-//发起销售
+// CreateSelling 发起销售
 func CreateSelling(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 	// 验证参数
 	if len(args) != 4 {
@@ -84,7 +78,7 @@ func CreateSelling(stub shim.ChaincodeStubInterface, args []string) pb.Response 
 	return shim.Success(sellingByte)
 }
 
-//参与销售(买家购买)
+// CreateSellingByBuy 参与销售(买家购买)
 func CreateSellingByBuy(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 	// 验证参数
 	if len(args) != 3 {
@@ -163,7 +157,7 @@ func CreateSellingByBuy(stub shim.ChaincodeStubInterface, args []string) pb.Resp
 	return shim.Success(sellingBuyByte)
 }
 
-//查询销售(可查询所有，也可根据发起销售人查询)(发起的)(供卖家查询)
+// QuerySellingList 查询销售(可查询所有，也可根据发起销售人查询)(发起的)(供卖家查询)
 func QuerySellingList(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 	var sellingList []lib.Selling
 	results, err := utils.GetStateByPartialCompositeKeys2(stub, lib.SellingKey, args)
@@ -187,7 +181,7 @@ func QuerySellingList(stub shim.ChaincodeStubInterface, args []string) pb.Respon
 	return shim.Success(sellingListByte)
 }
 
-//根据参与销售人、买家(买家AccountId)查询销售(参与的)(供买家查询)
+// QuerySellingListByBuyer 根据参与销售人、买家(买家AccountId)查询销售(参与的)(供买家查询)
 func QuerySellingListByBuyer(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 	if len(args) != 1 {
 		return shim.Error(fmt.Sprintf("必须指定买家AccountId查询"))
@@ -214,7 +208,7 @@ func QuerySellingListByBuyer(stub shim.ChaincodeStubInterface, args []string) pb
 	return shim.Success(sellingBuyListByte)
 }
 
-// 更新销售状态（买家确认、买卖家取消）
+// UpdateSelling 更新销售状态（买家确认、买卖家取消）
 func UpdateSelling(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 	// 验证参数
 	if len(args) != 4 {
@@ -341,9 +335,9 @@ func UpdateSelling(stub shim.ChaincodeStubInterface, args []string) pb.Response 
 	return shim.Success(data)
 }
 
-//不管是取消还是过期，都分两种情况
-//1、当前处于saleStart销售状态
-//2、当前处于delivery交付中状态
+// closeSelling 不管是取消还是过期，都分两种情况
+// 1、当前处于saleStart销售状态
+// 2、当前处于delivery交付中状态
 func closeSelling(closeStart string, selling lib.Selling, realEstate lib.RealEstate, sellingBuy lib.SellingBuy, buyer string, stub shim.ChaincodeStubInterface) ([]byte, error) {
 	switch selling.SellingStatus {
 	case lib.SellingStatusConstant()["saleStart"]:

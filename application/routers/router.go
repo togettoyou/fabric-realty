@@ -1,9 +1,3 @@
-/**
- * @Author: 夜央 Oh oh oh oh oh oh (https://github.com/togettoyou)
- * @Email: zoujh99@qq.com
- * @Date: 2020/3/3 11:17 下午
- * @Description: 路由配置
- */
 package routers
 
 import (
@@ -16,7 +10,7 @@ import (
 	"strings"
 )
 
-//初始化路由信息
+// InitRouter 初始化路由信息
 func InitRouter() *gin.Engine {
 	r := gin.New()
 	r.Use(gin.Logger())
@@ -45,7 +39,7 @@ func InitRouter() *gin.Engine {
 	return r
 }
 
-//允许跨域请求
+// Cors 允许跨域请求
 func Cors() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		method := c.Request.Method               //请求方法

@@ -1,9 +1,3 @@
-/**
- * @Author: 夜央 Oh oh oh oh oh oh (https://github.com/togettoyou)
- * @Email: zoujh99@qq.com
- * @Date: 2020/3/4 1:51 下午
- * @Description: 读写账本工具
- */
 package utils
 
 import (
@@ -13,7 +7,7 @@ import (
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 )
 
-//写入账本
+// WriteLedger 写入账本
 func WriteLedger(obj interface{}, stub shim.ChaincodeStubInterface, objectType string, keys []string) error {
 	//创建复合主键
 	var key string
@@ -34,7 +28,7 @@ func WriteLedger(obj interface{}, stub shim.ChaincodeStubInterface, objectType s
 	return nil
 }
 
-//删除账本
+// DelLedger 删除账本
 func DelLedger(stub shim.ChaincodeStubInterface, objectType string, keys []string) error {
 	//创建复合主键
 	var key string
@@ -50,8 +44,8 @@ func DelLedger(stub shim.ChaincodeStubInterface, objectType string, keys []strin
 	return nil
 }
 
-//根据复合主键查询数据(适合获取全部，多个，单个数据)
-//将keys拆分查询
+// GetStateByPartialCompositeKeys 根据复合主键查询数据(适合获取全部，多个，单个数据)
+// 将keys拆分查询
 func GetStateByPartialCompositeKeys(stub shim.ChaincodeStubInterface, objectType string, keys []string) (results [][]byte, err error) {
 	if len(keys) == 0 {
 		// 传入的keys长度为0，则查找并返回所有数据
@@ -94,7 +88,7 @@ func GetStateByPartialCompositeKeys(stub shim.ChaincodeStubInterface, objectType
 	return results, nil
 }
 
-//根据复合主键查询数据(适合获取全部或指定的数据)
+// GetStateByPartialCompositeKeys2 根据复合主键查询数据(适合获取全部或指定的数据)
 func GetStateByPartialCompositeKeys2(stub shim.ChaincodeStubInterface, objectType string, keys []string) (results [][]byte, err error) {
 	// 通过主键从区块链查找相关的数据，相当于对主键的模糊查询
 	resultIterator, err := stub.GetStateByPartialCompositeKey(objectType, keys)

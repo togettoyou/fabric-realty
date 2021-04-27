@@ -1,9 +1,3 @@
-/**
- * @Author: 夜央 Oh oh oh oh oh oh (https://github.com/togettoyou)
- * @Email: zoujh99@qq.com
- * @Date: 2020/3/10 4:43 下午
- * @Description: 房地产信息相关接口
- */
 package v1
 
 import (

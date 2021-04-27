@@ -1,9 +1,3 @@
-/**
- * @Author: 夜央 Oh oh oh oh oh oh (https://github.com/togettoyou)
- * @Email: zoujh99@qq.com
- * @Date: 2020/3/19 12:28 上午
- * @Description: 捐赠相关合约路由
- */
 package routers
 
 import (
@@ -16,7 +10,7 @@ import (
 	"time"
 )
 
-//发起捐赠
+// CreateDonating 发起捐赠
 func CreateDonating(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 	// 验证参数
 	if len(args) != 3 {
@@ -92,7 +86,7 @@ func CreateDonating(stub shim.ChaincodeStubInterface, args []string) pb.Response
 	return shim.Success(donatingGranteeByte)
 }
 
-//查询捐赠列表(可查询所有，也可根据发起捐赠人查询)(发起的)(供捐赠人查询)
+// QueryDonatingList 查询捐赠列表(可查询所有，也可根据发起捐赠人查询)(发起的)(供捐赠人查询)
 func QueryDonatingList(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 	var donatingList []lib.Donating
 	results, err := utils.GetStateByPartialCompositeKeys2(stub, lib.DonatingKey, args)
@@ -116,7 +110,7 @@ func QueryDonatingList(stub shim.ChaincodeStubInterface, args []string) pb.Respo
 	return shim.Success(donatingListByte)
 }
 
-//根据受赠人(受赠人AccountId)查询捐赠(受赠的)(供受赠人查询)
+// QueryDonatingListByGrantee 根据受赠人(受赠人AccountId)查询捐赠(受赠的)(供受赠人查询)
 func QueryDonatingListByGrantee(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 	if len(args) != 1 {
 		return shim.Error(fmt.Sprintf("必须指定受赠人AccountId查询"))
@@ -143,7 +137,7 @@ func QueryDonatingListByGrantee(stub shim.ChaincodeStubInterface, args []string)
 	return shim.Success(donatingGranteeListByte)
 }
 
-// 更新捐赠状态（确认受赠、取消）
+// UpdateDonating 更新捐赠状态（确认受赠、取消）
 func UpdateDonating(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 	// 验证参数
 	if len(args) != 4 {

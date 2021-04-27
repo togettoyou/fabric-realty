@@ -1,10 +1,3 @@
-/**
- * @Author: 夜央 Oh oh oh oh oh oh (https://github.com/togettoyou)
- * @Email: zoujh99@qq.com
- * @Date: 2020/3/4 12:50 上午
- * @Description: 将所有的配置项统管到 setting 中
- */
-
 package setting
 
 import (
@@ -24,7 +17,7 @@ var ServerSetting = &Server{}
 
 var cfg *ini.File
 
-// 程序初始化配置
+// Setup 程序初始化配置
 func Setup() {
 	var err error
 	cfg, err = ini.Load("conf/app.ini")

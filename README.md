@@ -1,120 +1,106 @@
-# blockchain-real-estate
+# 全新极速运行部署方式
 
-![扫码_搜索联合传播样式-标准色版.png](https://cdn.nlark.com/yuque/0/2021/png/1077776/1612960247290-a878d022-cdd1-4f8b-ad39-98bafbe48894.png#align=left&display=inline&height=624&margin=%5Bobject%20Object%5D&name=%E6%89%AB%E7%A0%81_%E6%90%9C%E7%B4%A2%E8%81%94%E5%90%88%E4%BC%A0%E6%92%AD%E6%A0%B7%E5%BC%8F-%E6%A0%87%E5%87%86%E8%89%B2%E7%89%88.png&originHeight=624&originWidth=2092&size=5221770&status=done&style=none&width=2092)
+---
+
+> 🚀基于区块链的房地产交易系统模型。提供销售和捐赠功能。本项目使用Hyperledger Fabric构建区块链网络, go编写智能合约，应用层使用gin+fabric-sdk-go调用合约。前端展示使用vue+element。前后端分离。
 
 
-2020.6.24 更新详细运行步骤
-
-1. 确保你的项目目录为`$GOPATH/src/github.com/togettoyou/blockchain-real-estate`
-2. 项目由于未使用mod管理，请先将go mod环境设置为auto： `go env -w GO111MODULE=auto`
-3. 首先测试chaincode是否正常调用，运行`chaincode/blockchain-real-estate/chaincode_test.go`测试用例
-![image](https://user-images.githubusercontent.com/55381228/85498013-8200a100-b611-11ea-938f-9ac1d3ad5b89.png)
-
-4. 在deploy目录下运行`./start.sh`,观察有无报错提示。运行成功后在终端执行`docker exec cli peer chaincode invoke -C assetschannel -n blockchain-real-estate -c '{"Args":["queryAccountList"]}'` 等cli命令，Args可以替换为Invoke中的funcName，先验证链码是否正确安装及区块链网络能否正常工作。建议`./start.sh`之前可以先运行`./stop.sh`清理一下环境。
-![image](https://user-images.githubusercontent.com/55381228/85497727-0141a500-b611-11ea-8d10-deacb8bd627e.png)
-
-5. 如果以上都成功，说明区块链网络是没有问题的。接下来同样先执行`application/sdk_test.go`单元测试，看是否可以成功使用sdk调用链码(此步骤前提你区块链网络即以上步骤已成功启动)
-![image](https://user-images.githubusercontent.com/55381228/85497628-d7887e00-b610-11ea-9749-0006ad0df814.png)
-
-6. 运行application，`go run main.go` 
-
-我的本机测试环境：
-![image](https://user-images.githubusercontent.com/55381228/85497883-4960c780-b611-11ea-93b0-4a2ec69b8142.png)
-
-***
-分割线
-***
-
-> 🚀基于区块链的房地产交易系统小模型。提供销售和捐赠功能。本项目使用Hyperledger Fabric构建区块链网络, go编写智能合约，应用层使用gin+fabric-sdk-go调用合约。前端展示使用vue+element。前后端分离。
-
-注：本项目需放在 `$GOPATH/src/github.com/togettoyou/blockchain-real-estate` 下运行
-
-## [在线体验地址](http://blockchain.togettoyou.com/web) 
 
 ## 技术栈
 
+
 - Hyperledger Fabric
-- Docker
-- Go Gin
+- Go
 - Vue
-- ElementUI
+- Docker
+
+
+
+## 前提
+
+
+Linux 或者 Mac，连接网络，要求安装了 Docker 和 Docker Compose
+
+
+附 Linux 安装 Docker 和 Docker Compose 教程：[点此跳转](/Install.md)
+
+
+我的测试环境：
+
+![image.png](https://cdn.nlark.com/yuque/0/2021/png/1077776/1619497705974-f2cf0c33-5718-4b45-8bd8-aed870b86aa8.png#align=left&display=inline&height=160&margin=%5Bobject%20Object%5D&name=image.png&originHeight=319&originWidth=1116&size=40973&status=done&style=none&width=558)
+
 
 ## 运行
 
-> 默认已经安装Hyperledger Fabric环境，如果未安装，参考：https://www.yuque.com/togettoyou/blog/his57f
->
-> 我的本机环境参考：
->
-> ![Snipaste_2020-03-19_14-52-13](https://github.com/togettoyou/blockchain-real-estate/blob/master/screenshots/Snipaste_2020-03-19_14-52-13.png)
+
+### 1、克隆本项目放在任意目录下，例：`/root/blockchain-real-estate`
+
+![image.png](https://cdn.nlark.com/yuque/0/2021/png/1077776/1619497926959-136131db-40b9-4d9d-8949-9a24015e6b29.png#align=left&display=inline&height=139&margin=%5Bobject%20Object%5D&name=image.png&originHeight=278&originWidth=1345&size=29585&status=done&style=none&width=672.5)
 
 
+### 2、给予项目权限，执行 `sudo chmod -R +x /root/blockchain-real-estate/`
 
-1、克隆本项目放在 `$GOPATH/src/github.com/togettoyou/blockchain-real-estate` 下
+![image.png](https://cdn.nlark.com/yuque/0/2021/png/1077776/1619497967789-8728ba28-6026-4aca-bf6e-5847c9e6dee8.png#align=left&display=inline&height=128&margin=%5Bobject%20Object%5D&name=image.png&originHeight=255&originWidth=1422&size=32430&status=done&style=none&width=711)
 
-2、进入deploy目录，执行`start.sh`脚本
 
-```shell
-# 赋予权限
-sudo chmod +x *.sh
-# 启动区块链网络
-./start.sh
-# 停止区块链网络
-./stop.sh
-# 如果启动失败，可能是环境清理不干净，可以尝试先./stop.sh清理环境再./start.sh启动
-```
+### 3、进入 `deploy` 目录，执行 `./start.sh` 启动区块链网络
 
-3、进入application目录，启动应用程序
+![image.png](https://cdn.nlark.com/yuque/0/2021/png/1077776/1619498040768-995d25af-fcd5-41e4-92b9-b0b1f5263c0e.png#align=left&display=inline&height=145&margin=%5Bobject%20Object%5D&name=image.png&originHeight=289&originWidth=1128&size=24879&status=done&style=none&width=564)
+![image.png](https://cdn.nlark.com/yuque/0/2021/png/1077776/1619503231479-0628da82-bb59-4cc2-8d6e-ec1b07b8d030.png#align=left&display=inline&height=698&margin=%5Bobject%20Object%5D&name=image.png&originHeight=1396&originWidth=2361&size=417175&status=done&style=none&width=1180.5)
 
-```shell
-# 编译
-go build
-# 赋予权限
-sudo chmod +x application
-# 启动
-./application
-```
 
-4、浏览器访问 http://localhost:8000/web
+### 4、进入 `vue` 目录，执行 `./build.sh` 编译前端
 
+![image.png](https://cdn.nlark.com/yuque/0/2021/png/1077776/1619498139589-19c53edf-202c-429f-8cdd-381ef8083e66.png#align=left&display=inline&height=159&margin=%5Bobject%20Object%5D&name=image.png&originHeight=318&originWidth=1201&size=25754&status=done&style=none&width=600.5)
+![image.png](https://cdn.nlark.com/yuque/0/2021/png/1077776/1619501158280-3028b279-eb14-47fc-9880-f5584df005c9.png#align=left&display=inline&height=500&margin=%5Bobject%20Object%5D&name=image.png&originHeight=1000&originWidth=2361&size=167745&status=done&style=none&width=1180.5)
+
+
+### 5、进入 `application` 目录，执行 `./build.sh` 编译后端
+
+![image.png](https://cdn.nlark.com/yuque/0/2021/png/1077776/1619498187100-a82374b4-e985-439f-91d7-a3e9d3924dc4.png#align=left&display=inline&height=173&margin=%5Bobject%20Object%5D&name=image.png&originHeight=345&originWidth=1265&size=28209&status=done&style=none&width=632.5)
+![image.png](https://cdn.nlark.com/yuque/0/2021/png/1077776/1619503373258-82447169-cc83-4efe-ac32-98513b67bb29.png#align=left&display=inline&height=611&margin=%5Bobject%20Object%5D&name=image.png&originHeight=1222&originWidth=1300&size=166511&status=done&style=none&width=650)
+
+
+### 6、在 `application` 目录下，执行 `./start.sh` 启动应用
+
+![image.png](https://cdn.nlark.com/yuque/0/2021/png/1077776/1619501464096-a543fd23-153e-4ddc-bd56-472698966940.png#align=left&display=inline&height=159&margin=%5Bobject%20Object%5D&name=image.png&originHeight=317&originWidth=1952&size=54818&status=done&style=none&width=976)
+![image.png](https://cdn.nlark.com/yuque/0/2021/png/1077776/1619501482450-7dc34559-6c39-4f8e-a7fe-177659517304.png#align=left&display=inline&height=698&margin=%5Bobject%20Object%5D&name=image.png&originHeight=1396&originWidth=2361&size=367532&status=done&style=none&width=1180.5)
+
+
+### 7、浏览器访问 [http://localhost:8000/web](http://localhost:8000/web)
+
+![image.png](https://cdn.nlark.com/yuque/0/2021/png/1077776/1619503481607-d6dd7048-77aa-4461-817c-2fcf7507cf9d.png#align=left&display=inline&height=784&margin=%5Bobject%20Object%5D&name=image.png&originHeight=1568&originWidth=2874&size=161730&status=done&style=none&width=1437)
 ## 目录结构
 
-`application` : go gin + fabric-sdk-go 调用链码，提供外部访问接口，前端静态资源放在`dist`目录下
+
+`application` : go gin + fabric-sdk-go 调用链码，提供外部访问接口，前端编译后静态资源放在`dist`目录下
+
 
 `chaincode` : go 编写的智能合约
 
-`deploy` : 区块链网络的配置以及启动停止脚本
 
-`vendor` : 项目所需依赖包，防止网络原因下载失败
+`deploy` : 区块链网络配置
+
 
 `vue` : vue + element的前端展示页面
 
-```shell
-# 如果需要修改前端页面，在vue目录下执行
-yarn install
-# 启动
-yarn dev
-# 重新打包生成dist资源，将dist放到application目录下覆盖
-yarn build:prod
-```
-
-`screenshots` : 截图
 
 ## 功能流程
 
+
 管理员为用户业主创建房地产。
+
 
 业主查看名下房产信息。
 
+
 业主发起销售，所有人都可查看销售列表，购买者购买后进行扣款操作，并等待业主确认收款，交易完成，更新房产持有人。在有效期期间可以随时取消交易，有效期到期后自动关闭交易。
+
 
 业主发起捐赠，指定受赠人，受赠人确认接收受赠前，双方可取消捐赠/受赠。
 
+
 ## 演示效果图
-
-![Mar-19-2020_15-28-20](https://github.com/togettoyou/blockchain-real-estate/blob/master/screenshots/Mar-19-2020_15-28-20.gif)
-
-## 感谢
-
-- [go-gin-example](https://github.com/eddycjy/go-gin-example)
-- [vue-admin-template](https://github.com/PanJiaChen/vue-admin-template)
-
+![image.png](https://cdn.nlark.com/yuque/0/2021/png/1077776/1619503587830-48d3d53d-92eb-4848-8a38-da2d07b5b119.png#align=left&display=inline&height=777&margin=%5Bobject%20Object%5D&name=image.png&originHeight=1554&originWidth=2875&size=232911&status=done&style=none&width=1437.5)
+![image.png](https://cdn.nlark.com/yuque/0/2021/png/1077776/1619503608573-35bcf8ad-5738-4df8-bd7b-4824650c0e13.png#align=left&display=inline&height=778&margin=%5Bobject%20Object%5D&name=image.png&originHeight=1555&originWidth=2880&size=255025&status=done&style=none&width=1440)
+![image.png](https://cdn.nlark.com/yuque/0/2021/png/1077776/1619503660695-3596146f-a09c-4914-8667-f2f468e768a5.png#align=left&display=inline&height=779&margin=%5Bobject%20Object%5D&name=image.png&originHeight=1558&originWidth=2880&size=232348&status=done&style=none&width=1440)

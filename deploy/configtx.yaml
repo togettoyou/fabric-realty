@@ -1,6 +1,6 @@
 ---
 
-Organizations:  # Organizations配置段用来定义组织机构实体，以便在后续配置中引用。 下面的配置文件中，定义了三个机构，可以分别使用OrdererOrg、 Org0、Org1和Org2引用其配置：
+Organizations: # Organizations配置段用来定义组织机构实体，以便在后续配置中引用。 下面的配置文件中，定义了三个机构，可以分别使用OrdererOrg、 Org0、Org1和Org2引用其配置：
   - &OrdererOrg
     Name: OrdererOrg # 组织的名字
     ID: OrdererMSP # 组织的MSPID

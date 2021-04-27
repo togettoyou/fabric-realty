@@ -1,9 +1,3 @@
-/**
- * @Author: 夜央 Oh oh oh oh oh oh (https://github.com/togettoyou)
- * @Email: zoujh99@qq.com
- * @Date: 2020/3/5 12:55 上午
- * @Description: 账户信息相关接口
- */
 package v1
 
 import (
