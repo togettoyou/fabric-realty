@@ -20,22 +20,18 @@ sudo usermod -aG docker togettoyou # 需要重启生效
 使用 /etc/docker/daemon.json来配置 Daemon ：
 
 ```shell
-sudo vi /etc/docker/daemon.json
-```
-
-在该配置文件中加入
-
-```json
+sudo mkdir -p /etc/docker
+sudo tee /etc/docker/daemon.json <<-'EOF'
 {
-  "registry-mirrors": [
-    "你申请的加速器地址"
-  ]
+  "registry-mirrors": ["你申请的加速器地址"]
 }
+EOF
 ```
 
-重启docker
+重载daemon、重启docker
 
 ```shell
+sudo systemctl daemon-reload
 sudo service docker restart
 ```
 
