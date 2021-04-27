@@ -20,8 +20,7 @@ sudo usermod -aG docker togettoyou # 需要重启生效
 使用 /etc/docker/daemon.json来配置 Daemon ：
 
 ```shell
-cd  /etc/docker
-sudo vi daemon.json
+sudo vi /etc/docker/daemon.json
 ```
 
 在该配置文件中加入
