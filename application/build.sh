@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo "运行单元测试，检查区块链网络是否连接成功"
+echo "运行单元测试，检查区块链网络是否连接成功，需要有go环境，若无可忽略"
 go test sdk_test.go
 echo "开始准备启动应用"
 sleep 2

@@ -47,6 +47,12 @@ docker exec cli peer chaincode install -n blockchain-real-estate -v 1.0.0 -l gol
 #-C 是通道，在fabric的世界，一个通道就是一条不同的链，composer并没有很多提现这点，composer提现channel也就在于多组织时候的数据隔离和沟通使用
 #-c 为传参，传入init参数
 echo "七、实例化链码"
+if [[ "$(docker images -q hyperledger/fabric-ccenv:1.4 2> /dev/null)" == "" ]]; then
+  docker pull hyperledger/fabric-ccenv:1.4
+fi
+if [[ "$(docker images -q hyperledger/fabric-ccenv:latest 2> /dev/null)" == "" ]]; then
+  docker tag hyperledger/fabric-ccenv:1.4 hyperledger/fabric-ccenv:latest
+fi
 docker exec cli peer chaincode instantiate -o orderer.blockchainrealestate.com:7050 -C assetschannel -n blockchain-real-estate -l golang -v 1.0.0 -c '{"Args":["init"]}'
 
 echo "正在等待链码实例化完成，等待5秒"
