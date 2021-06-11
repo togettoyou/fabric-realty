@@ -13,7 +13,7 @@ networks:
 services:
 
   explorerdb.blockchainrealestate.com:
-    image: hyperledger/explorer-db:latest
+    image: hyperledger/explorer-db:1.1.6
     container_name: explorerdb.blockchainrealestate.com
     hostname: explorerdb.blockchainrealestate.com
     environment:
@@ -31,7 +31,7 @@ services:
       - blockchainrealestate.com
 
   explorer.blockchainrealestate.com:
-    image: hyperledger/explorer:latest
+    image: hyperledger/explorer:1.1.6
     container_name: explorer.blockchainrealestate.com
     hostname: explorer.blockchainrealestate.com
     environment:
