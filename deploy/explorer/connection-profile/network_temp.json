@@ -1,0 +1,50 @@
+{
+  "name": "blockchain-real-estate-network",
+  "version": "1.0.0",
+  "client": {
+    "tlsEnable": true,
+    "adminCredential": {
+      "id": "admin",
+      "password": "123456"
+    },
+    "enableAuthentication": true,
+    "organization": "Org1MSP",
+    "connection": {
+      "timeout": {
+        "peer": {
+          "endorser": "300"
+        },
+        "orderer": "300"
+      }
+    }
+  },
+  "channels": {
+    "assetschannel": {
+      "peers": {
+        "peer0.org1.blockchainrealestate.com": {}
+      }
+    }
+  },
+  "organizations": {
+    "Org1MSP": {
+      "mspid": "Org1MSP",
+      "adminPrivateKey": {
+        "path": "/tmp/crypto/peerOrganizations/org1.blockchainrealestate.com/users/Admin@org1.blockchainrealestate.com/msp/keystore/priv_sk"
+      },
+      "peers": [
+        "peer0.org1.blockchainrealestate.com"
+      ],
+      "signedCert": {
+        "path": "/tmp/crypto/peerOrganizations/org1.blockchainrealestate.com/users/Admin@org1.blockchainrealestate.com/msp/signcerts/Admin@org1.blockchainrealestate.com-cert.pem"
+      }
+    }
+  },
+  "peers": {
+    "peer0.org1.blockchainrealestate.com": {
+      "tlsCACerts": {
+        "path": "/tmp/crypto/peerOrganizations/org1.blockchainrealestate.com/peers/peer0.org1.blockchainrealestate.com/tls/ca.crt"
+      },
+      "url": "grpc://peer0.org1.blockchainrealestate.com:7051"
+    }
+  }
+}
