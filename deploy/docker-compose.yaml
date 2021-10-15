@@ -67,6 +67,9 @@ services:
       - CORE_PEER_ID=peer0.org1.blockchainrealestate.com
       - CORE_PEER_LOCALMSPID=Org1MSP
       - CORE_PEER_ADDRESS=peer0.org1.blockchainrealestate.com:7051
+      # 浏览器要想能探测到节点必须配置这两个环境变量
+      - CORE_PEER_GOSSIP_BOOTSTRAP=peer1.org1.blockchainrealestate.com:8051
+      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.org1.blockchainrealestate.com:7051
     ports:
       - 27051:7051
       - 27053:7053
