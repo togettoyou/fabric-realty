@@ -12,10 +12,7 @@ curl -sSL https://get.daocloud.io/docker | sh
 sudo usermod -aG docker togettoyou # 需要重启生效
 ```
 
-# 2. Docker 更换阿里镜像源
-
-进入 [https://cr.console.aliyun.com/cn-hangzhou/instances/mirrors](https://cr.console.aliyun.com/cn-hangzhou/instances/mirrors)
-申请专属镜像加速器
+# 2. Docker 更换镜像源
 
 使用 /etc/docker/daemon.json来配置 Daemon ：
 
@@ -23,7 +20,7 @@ sudo usermod -aG docker togettoyou # 需要重启生效
 sudo mkdir -p /etc/docker
 sudo tee /etc/docker/daemon.json <<-'EOF'
 {
-  "registry-mirrors": ["你申请的加速器地址"]
+  "registry-mirrors": ["https://reg-mirror.qiniu.com/"]
 }
 EOF
 ```
