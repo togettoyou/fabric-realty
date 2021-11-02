@@ -5,6 +5,7 @@ services:
     container_name: orderer.blockchainrealestate.com
     image: hyperledger/fabric-orderer:1.4.2
     environment:
+      - GODEBUG=netdns=go
       - ORDERER_GENERAL_LOGLEVEL=debug
       - ORDERER_GENERAL_LISTENADDRESS=0.0.0.0 # 服务暴露地址
       - ORDERER_GENERAL_GENESISMETHOD=file
@@ -25,6 +26,7 @@ services:
       service: peer-base
     container_name: peer0.org0.blockchainrealestate.com
     environment:
+      - GODEBUG=netdns=go
       - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
       - CORE_PEER_ID=peer0.org0.blockchainrealestate.com
       - CORE_PEER_LOCALMSPID=Org0MSP
@@ -44,6 +46,7 @@ services:
       service: peer-base
     container_name: peer1.org0.blockchainrealestate.com
     environment:
+      - GODEBUG=netdns=go
       - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
       - CORE_PEER_ID=peer1.org0.blockchainrealestate.com
       - CORE_PEER_LOCALMSPID=Org0MSP
@@ -63,6 +66,7 @@ services:
       service: peer-base
     container_name: peer0.org1.blockchainrealestate.com
     environment:
+      - GODEBUG=netdns=go
       - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
       - CORE_PEER_ID=peer0.org1.blockchainrealestate.com
       - CORE_PEER_LOCALMSPID=Org1MSP
@@ -85,6 +89,7 @@ services:
       service: peer-base
     container_name: peer1.org1.blockchainrealestate.com
     environment:
+      - GODEBUG=netdns=go
       - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
       - CORE_PEER_ID=peer1.org1.blockchainrealestate.com
       - CORE_PEER_LOCALMSPID=Org1MSP
@@ -104,6 +109,7 @@ services:
       service: peer-base
     container_name: peer0.org2.blockchainrealestate.com
     environment:
+      - GODEBUG=netdns=go
       - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
       - CORE_PEER_ID=peer0.org2.blockchainrealestate.com
       - CORE_PEER_LOCALMSPID=Org2MSP
@@ -123,6 +129,7 @@ services:
       service: peer-base
     container_name: peer1.org2.blockchainrealestate.com
     environment:
+      - GODEBUG=netdns=go
       - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
       - CORE_PEER_ID=peer1.org2.blockchainrealestate.com
       - CORE_PEER_LOCALMSPID=Org2MSP

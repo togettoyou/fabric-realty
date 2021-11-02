@@ -4,6 +4,7 @@ services:
   peer-base: # peer的公共服务
     image: hyperledger/fabric-peer:1.4.2
     environment:
+      - GODEBUG=netdns=go
       - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock # docker的服务端注入
       - CORE_LOGGING_PEER=info
       - CORE_CHAINCODE_LOGGING_LEVEL=INFO
