@@ -2,6 +2,7 @@
 
 echo "一、清理环境、删除旧容器"
 rm -rf dist
+rm -rf ./../application/dist
 docker rm -f blockchain-real-estate-vue
 
 echo "二、开始打包编译"
