@@ -1,6 +1,6 @@
 > 🚀基于区块链的房地产交易系统模型。提供销售和捐赠功能。本项目使用Hyperledger Fabric构建区块链网络, go编写智能合约，应用层使用gin+fabric-sdk-go调用合约。前端展示使用vue+element。前后端分离。
 
-如果想要联系我，或者该项目确实帮助到了您，可以关注一下我的公众号【寻寻觅觅的Gopher】
+如果想要联系我，或者该项目确实帮助到了您，可以关注一下我的公众号【SuperGopher】
 
 ![微信公众号.png](https://gitee.com/togettoyou/picture/raw/master/2022-2-9/1644374999459-weixin.jpg)
 
