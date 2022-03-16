@@ -1,0 +1,131 @@
+version: '2'
+
+volumes:
+  orderer.qq.com:
+  peer0.taobao.com:
+  peer1.taobao.com:
+  peer0.jd.com:
+  peer1.jd.com:
+
+networks:
+  fabric_network:
+    name: fabric_network
+
+services:
+  # 排序服务节点
+  orderer.qq.com:
+    container_name: orderer.qq.com
+    image: hyperledger/fabric-orderer:1.4.12
+    environment:
+      - GODEBUG=netdns=go
+      - ORDERER_GENERAL_LISTENADDRESS=0.0.0.0
+      - ORDERER_GENERAL_GENESISMETHOD=file
+      - ORDERER_GENERAL_GENESISFILE=/etc/hyperledger/config/genesis.block # 注入创世区块
+      - ORDERER_GENERAL_LOCALMSPID=QQMSP
+      - ORDERER_GENERAL_LOCALMSPDIR=/etc/hyperledger/orderer/msp # 证书相关
+    working_dir: /opt/gopath/src/github.com/hyperledger/fabric/orderer
+    command: orderer
+    ports:
+      - "7050:7050"
+    volumes: # 挂载由cryptogen和configtxgen生成的证书文件以及创世区块
+      - ./config/genesis.block:/etc/hyperledger/config/genesis.block
+      - ./crypto-config/ordererOrganizations/qq.com/orderers/orderer.qq.com/:/etc/hyperledger/orderer
+      - orderer.qq.com:/var/hyperledger/production/orderer
+    networks:
+      - fabric_network
+
+  #  Taobao 组织 peer0 节点
+  peer0.taobao.com:
+    extends:
+      file: docker-compose-base.yaml
+      service: peer-base
+    container_name: peer0.taobao.com
+    environment:
+      - CORE_PEER_ID=peer0.taobao.com
+      - CORE_PEER_LOCALMSPID=TaobaoMSP
+      - CORE_PEER_ADDRESS=peer0.taobao.com:7051
+    ports:
+      - "7051:7051" # grpc服务端口
+      - "7053:7053" # eventhub端口
+    volumes:
+      - ./crypto-config/peerOrganizations/taobao.com/peers/peer0.taobao.com:/etc/hyperledger/peer
+      - peer0.taobao.com:/var/hyperledger/production
+    depends_on:
+      - orderer.qq.com
+
+  #  Taobao 组织 peer1 节点
+  peer1.taobao.com:
+    extends:
+      file: docker-compose-base.yaml
+      service: peer-base
+    container_name: peer1.taobao.com
+    environment:
+      - CORE_PEER_ID=peer1.taobao.com
+      - CORE_PEER_LOCALMSPID=TaobaoMSP
+      - CORE_PEER_ADDRESS=peer1.taobao.com:7051
+    ports:
+      - "17051:7051"
+      - "17053:7053"
+    volumes:
+      - ./crypto-config/peerOrganizations/taobao.com/peers/peer1.taobao.com:/etc/hyperledger/peer
+      - peer1.taobao.com:/var/hyperledger/production
+    depends_on:
+      - orderer.qq.com
+
+  #  JD 组织 peer0 节点
+  peer0.jd.com:
+    extends:
+      file: docker-compose-base.yaml
+      service: peer-base
+    container_name: peer0.jd.com
+    environment:
+      - CORE_PEER_ID=peer0.jd.com
+      - CORE_PEER_LOCALMSPID=JDMSP
+      - CORE_PEER_ADDRESS=peer0.jd.com:7051
+    ports:
+      - "27051:7051"
+      - "27053:7053"
+    volumes:
+      - ./crypto-config/peerOrganizations/jd.com/peers/peer0.jd.com:/etc/hyperledger/peer
+      - peer0.jd.com:/var/hyperledger/production
+    depends_on:
+      - orderer.qq.com
+
+  #  JD 组织 peer1 节点
+  peer1.jd.com:
+    extends:
+      file: docker-compose-base.yaml
+      service: peer-base
+    container_name: peer1.jd.com
+    environment:
+      - CORE_PEER_ID=peer1.jd.com
+      - CORE_PEER_LOCALMSPID=JDMSP
+      - CORE_PEER_ADDRESS=peer1.jd.com:7051
+    ports:
+      - "37051:7051"
+      - "37053:7053"
+    volumes:
+      - ./crypto-config/peerOrganizations/jd.com/peers/peer1.jd.com:/etc/hyperledger/peer
+      - peer1.jd.com:/var/hyperledger/production
+    depends_on:
+      - orderer.qq.com
+
+  # 客户端节点
+  cli:
+    container_name: cli
+    image: hyperledger/fabric-tools:1.4.12
+    tty: true
+    environment:
+      - CORE_PEER_ID=cli
+      # 要设置的节点地址
+      - CORE_PEER_ADDRESS=peer0.taobao.com:7051
+      # 要设置的节点对应的组织的标识ID
+      - CORE_PEER_LOCALMSPID=TaobaoMSP
+      # Peer节点对应的组织的配置文件的路径
+      - CORE_PEER_MSPCONFIGPATH=/etc/hyperledger/peer/users/Admin@taobao.com/msp
+    command: /bin/bash
+    volumes:
+      - ./config:/etc/hyperledger/config
+      - ./crypto-config/peerOrganizations/taobao.com/:/etc/hyperledger/peer
+    networks:
+      - fabric_network

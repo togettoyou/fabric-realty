@@ -1,0 +1,60 @@
+# 定义组织机构实体
+Organizations:
+  - &QQ
+    Name: QQ # 组织的名称
+    ID: QQMSP # 组织的 MSPID
+    MSPDir: crypto-config/ordererOrganizations/qq.com/msp #组织的证书相对位置（生成的crypto-config目录)
+
+  - &Taobao
+    Name: Taobao
+    ID: TaobaoMSP
+    MSPDir: crypto-config/peerOrganizations/taobao.com/msp
+    AnchorPeers: # 组织锚节点的配置
+      - Host: peer0.taobao.com
+        Port: 7051
+
+  - &JD
+    Name: JD
+    ID: JDMSP
+    MSPDir: crypto-config/peerOrganizations/jd.com/msp
+    AnchorPeers: # 组织锚节点的配置
+      - Host: peer0.jd.com
+        Port: 7051
+
+# 定义了排序服务的相关参数，这些参数将用于创建创世区块
+Orderer: &QQOrdererDefaults
+  # 排序节点类型用来指定要启用的排序节点实现，不同的实现对应不同的共识算法
+  OrdererType: solo # 共识机制
+  Addresses: # Orderer 的域名（用于连接）
+    - orderer.qq.com:7050
+  BatchTimeout: 2s # 出块时间间隔
+  BatchSize: # 用于控制每个block的信息量
+    MaxMessageCount: 10 #每个区块的消息个数
+    AbsoluteMaxBytes: 99 MB #每个区块最大的信息大小
+    PreferredMaxBytes: 512 KB #每个区块包含的一条信息最大长度
+  Organizations:
+
+# 定义要写入创世区块或交易配置相关的值
+Application: &ApplicationDefaults
+  Organizations:
+
+# 用来定义用于 configtxgen 工具的配置入口
+# 将 Profile 参数（ TwoOrgsOrdererGenesis 或 TwoOrgChannel ）指定为 configtxgen 工具的参数
+Profiles:
+  TwoOrgsOrdererGenesis:
+    Orderer:
+      <<: *QQOrdererDefaults
+      Organizations:
+        - *QQ
+    Consortiums:
+      SampleConsortium:
+        Organizations:
+          - *Taobao
+          - *JD
+  TwoOrgChannel:
+    Consortium: SampleConsortium
+    Application:
+      <<: *ApplicationDefaults
+      Organizations:
+        - *Taobao
+        - *JD

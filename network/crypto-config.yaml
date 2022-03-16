@@ -1,0 +1,24 @@
+# 排序节点的组织定义
+OrdererOrgs:
+  - Name: QQ # 名称
+    Domain: qq.com # 域名
+    Specs: # 节点域名：orderer.qq.com
+      - Hostname: orderer # 主机名
+
+# peer节点的组织定义
+PeerOrgs:
+  # Taobao-组织
+  - Name: Taobao # 名称
+    Domain: taobao.com # 域名
+    Template: # 使用模板定义。Count 指的是该组织下组织节点的个数
+      Count: 2 # 节点域名：peer0.taobao.com 和 peer1.taobao.com
+    Users: # 组织的用户信息。Count 指该组织中除了 Admin 之外的用户的个数
+      Count: 1 # 用户：Admin 和 User1
+
+  # JD-组织
+  - Name: JD
+    Domain: jd.com
+    Template:
+      Count: 2 # 节点域名：peer0.jd.com 和 peer1.jd.com
+    Users:
+      Count: 1 # 用户：Admin 和 User1
