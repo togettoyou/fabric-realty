@@ -1,9 +1,0 @@
-{
-  "network-configs": {
-    "test-network": {
-      "name": "Blockchain Real Estate Network",
-      "profile": "./connection-profile/network.json"
-    }
-  },
-  "license": "Apache-2.0"
-}

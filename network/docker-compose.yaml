@@ -1,4 +1,4 @@
-version: '2'
+version: '2.1'
 
 volumes:
   orderer.qq.com:
@@ -23,7 +23,6 @@ services:
       - ORDERER_GENERAL_GENESISFILE=/etc/hyperledger/config/genesis.block # 注入创世区块
       - ORDERER_GENERAL_LOCALMSPID=QQMSP
       - ORDERER_GENERAL_LOCALMSPDIR=/etc/hyperledger/orderer/msp # 证书相关
-    working_dir: /opt/gopath/src/github.com/hyperledger/fabric/orderer
     command: orderer
     ports:
       - "7050:7050"
@@ -116,6 +115,9 @@ services:
     image: hyperledger/fabric-tools:1.4.12
     tty: true
     environment:
+      # go 环境设置
+      - GO111MODULE=auto
+      - GOPROXY=https://goproxy.cn
       - CORE_PEER_ID=cli
       # 要设置的节点地址
       - CORE_PEER_ADDRESS=peer0.taobao.com:7051
@@ -127,5 +129,6 @@ services:
     volumes:
       - ./config:/etc/hyperledger/config
       - ./crypto-config/peerOrganizations/taobao.com/:/etc/hyperledger/peer
+      - ./../chaincode:/opt/gopath/src/chaincode # 链码路径注入
     networks:
       - fabric_network

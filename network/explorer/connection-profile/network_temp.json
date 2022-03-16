@@ -1,0 +1,50 @@
+{
+  "name": "fabric-network",
+  "version": "1.0.0",
+  "client": {
+    "tlsEnable": true,
+    "adminCredential": {
+      "id": "admin",
+      "password": "123456"
+    },
+    "enableAuthentication": true,
+    "organization": "TaobaoMSP",
+    "connection": {
+      "timeout": {
+        "peer": {
+          "endorser": "300"
+        },
+        "orderer": "300"
+      }
+    }
+  },
+  "channels": {
+    "appchannel": {
+      "peers": {
+        "peer0.taobao.com": {}
+      }
+    }
+  },
+  "organizations": {
+    "TaobaoMSP": {
+      "mspid": "TaobaoMSP",
+      "adminPrivateKey": {
+        "path": "/tmp/crypto/peerOrganizations/taobao.com/users/Admin@taobao.com/msp/keystore/priv_sk"
+      },
+      "peers": [
+        "peer0.taobao.com"
+      ],
+      "signedCert": {
+        "path": "/tmp/crypto/peerOrganizations/taobao.com/users/Admin@taobao.com/msp/signcerts/Admin@taobao.com-cert.pem"
+      }
+    }
+  },
+  "peers": {
+    "peer0.taobao.com": {
+      "tlsCACerts": {
+        "path": "/tmp/crypto/peerOrganizations/taobao.com/peers/peer0.taobao.com/tls/ca.crt"
+      },
+      "url": "grpc://peer0.taobao.com:7051"
+    }
+  }
+}

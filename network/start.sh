@@ -36,3 +36,23 @@ docker exec cli peer channel create -o orderer.qq.com:7050 -c appchannel -f /etc
 
 echo "六、节点加入通道"
 docker exec cli peer channel join -b appchannel.block
+
+# -n 链码名，可以自己随便设置
+# -v 版本号
+# -p 链码目录，在 /opt/gopath/src/ 目录下
+echo "七、链码安装"
+docker exec cli peer chaincode install -n fabric-realty -v 1.0.0 -l golang -p chaincode
+
+# -n 对应上一步安装链码的名字
+# -v 版本号
+# -C 是通道，在fabric的世界，一个通道就是一条不同的链
+# -c 为传参，传入init参数
+echo "八、实例化链码"
+docker exec cli peer chaincode instantiate -o orderer.qq.com:7050 -C appchannel -n fabric-realty -l golang -v 1.0.0 -c '{"Args":["init"]}'
+
+echo "正在等待链码实例化完成，等待5秒"
+sleep 5
+
+# 进行链码交互，验证链码是否正确安装及区块链网络能否正常工作
+echo "九、验证链码"
+docker exec cli peer chaincode invoke -C appchannel -n fabric-realty -c '{"Args":["hello"]}'
