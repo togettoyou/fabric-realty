@@ -119,16 +119,17 @@ services:
       - GO111MODULE=auto
       - GOPROXY=https://goproxy.cn
       - CORE_PEER_ID=cli
-      # 要设置的节点地址
-      - CORE_PEER_ADDRESS=peer0.taobao.com:7051
-      # 要设置的节点对应的组织的标识ID
-      - CORE_PEER_LOCALMSPID=TaobaoMSP
-      # Peer节点对应的组织的配置文件的路径
-      - CORE_PEER_MSPCONFIGPATH=/etc/hyperledger/peer/users/Admin@taobao.com/msp
     command: /bin/bash
     volumes:
       - ./config:/etc/hyperledger/config
-      - ./crypto-config/peerOrganizations/taobao.com/:/etc/hyperledger/peer
+      - ./crypto-config/peerOrganizations/taobao.com/:/etc/hyperledger/peer/taobao.com
+      - ./crypto-config/peerOrganizations/jd.com/:/etc/hyperledger/peer/jd.com
       - ./../chaincode:/opt/gopath/src/chaincode # 链码路径注入
     networks:
       - fabric_network
+    depends_on:
+      - orderer.qq.com
+      - peer0.taobao.com
+      - peer1.taobao.com
+      - peer0.jd.com
+      - peer1.jd.com

@@ -8,12 +8,12 @@ import (
 
 // 配置信息
 var (
-	SDK           *fabsdk.FabricSDK          // Fabric提供的SDK
-	ChannelName   = "assetschannel"          // 通道名称
-	ChainCodeName = "blockchain-real-estate" // 链码名称
-	Org           = "org1"                   // 组织名称
-	User          = "Admin"                  // 用户
-	ConfigPath    = "conf/config.yaml"       // 配置文件路径
+	SDK           *fabsdk.FabricSDK    // Fabric提供的SDK
+	ChannelName   = "appchannel"       // 通道名称
+	ChainCodeName = "fabric-realty"    // 链码名称
+	Org           = "JD"               // 组织名称
+	User          = "Admin"            // 用户
+	ConfigPath    = "conf/config.yaml" // 配置文件路径
 )
 
 // Init 初始化
@@ -39,7 +39,7 @@ func ChannelExecute(fcn string, args [][]byte) (channel.Response, error) {
 		ChaincodeID: ChainCodeName,
 		Fcn:         fcn,
 		Args:        args,
-	}, channel.WithTargetEndpoints("peer0.org1.blockchainrealestate.com"))
+	}, channel.WithTargetEndpoints("peer0.jd.com"))
 	if err != nil {
 		return channel.Response{}, err
 	}
@@ -60,7 +60,7 @@ func ChannelQuery(fcn string, args [][]byte) (channel.Response, error) {
 		ChaincodeID: ChainCodeName,
 		Fcn:         fcn,
 		Args:        args,
-	}, channel.WithTargetEndpoints("peer0.org1.blockchainrealestate.com"))
+	}, channel.WithTargetEndpoints("peer0.jd.com"))
 	if err != nil {
 		return channel.Response{}, err
 	}

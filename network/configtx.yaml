@@ -22,7 +22,7 @@ Organizations:
         Port: 7051
 
 # 定义了排序服务的相关参数，这些参数将用于创建创世区块
-Orderer: &QQOrdererDefaults
+Orderer: &OrdererDefaults
   # 排序节点类型用来指定要启用的排序节点实现，不同的实现对应不同的共识算法
   OrdererType: solo # 共识机制
   Addresses: # Orderer 的域名（用于连接）
@@ -39,11 +39,11 @@ Application: &ApplicationDefaults
   Organizations:
 
 # 用来定义用于 configtxgen 工具的配置入口
-# 将 Profile 参数（ TwoOrgsOrdererGenesis 或 TwoOrgChannel ）指定为 configtxgen 工具的参数
+# 将 Profile 参数（ TwoOrgsOrdererGenesis 或 TwoOrgsChannel ）指定为 configtxgen 工具的参数
 Profiles:
   TwoOrgsOrdererGenesis:
     Orderer:
-      <<: *QQOrdererDefaults
+      <<: *OrdererDefaults
       Organizations:
         - *QQ
     Consortiums:
@@ -51,7 +51,7 @@ Profiles:
         Organizations:
           - *Taobao
           - *JD
-  TwoOrgChannel:
+  TwoOrgsChannel:
     Consortium: SampleConsortium
     Application:
       <<: *ApplicationDefaults
