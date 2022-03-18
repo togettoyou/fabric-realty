@@ -23,11 +23,8 @@ channels:
         ledgerQuery: true
         eventSource: true
 
-# 组织配置，列举了参与该网络的所有组织
+# 组织配置
 organizations:
-  QQ:
-    mspID: "QQMSP"
-    cryptoPath: ordererOrganizations/qq.com/users/{username}@qq.com/msp
   JD:
     mspid: "JDMSP"
     cryptoPath: peerOrganizations/jd.com/users/{username}@jd.com/msp
@@ -57,6 +54,17 @@ peers:
     # 传递给gRPC客户端构造函数
     grpcOptions:
       ssl-target-name-override: peer0.jd.com
+      keep-alive-time: 0s
+      keep-alive-timeout: 20s
+      keep-alive-permit: false
+      fail-fast: false
+      allow-insecure: true
+  peer0.taobao.com:
+    # URL用于发送背书和查询请求
+    url: 127.0.0.1:7051
+    # 传递给gRPC客户端构造函数
+    grpcOptions:
+      ssl-target-name-override: peer0.taobao.com
       keep-alive-time: 0s
       keep-alive-timeout: 20s
       keep-alive-permit: false

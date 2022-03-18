@@ -11,7 +11,6 @@ var (
 	SDK           *fabsdk.FabricSDK    // Fabric提供的SDK
 	ChannelName   = "appchannel"       // 通道名称
 	ChainCodeName = "fabric-realty"    // 链码名称
-	Org           = "JD"               // 组织名称
 	User          = "Admin"            // 用户
 	ConfigPath    = "conf/config.yaml" // 配置文件路径
 )
@@ -29,7 +28,7 @@ func Init() {
 // ChannelExecute 区块链交互
 func ChannelExecute(fcn string, args [][]byte) (channel.Response, error) {
 	// 创建客户端，表明在通道的身份
-	ctx := SDK.ChannelContext(ChannelName, fabsdk.WithOrg(Org), fabsdk.WithUser(User))
+	ctx := SDK.ChannelContext(ChannelName, fabsdk.WithUser(User))
 	cli, err := channel.New(ctx)
 	if err != nil {
 		return channel.Response{}, err
@@ -39,7 +38,7 @@ func ChannelExecute(fcn string, args [][]byte) (channel.Response, error) {
 		ChaincodeID: ChainCodeName,
 		Fcn:         fcn,
 		Args:        args,
-	}, channel.WithTargetEndpoints("peer0.jd.com"))
+	}, channel.WithTargetEndpoints("peer0.jd.com", "peer0.taobao.com"))
 	if err != nil {
 		return channel.Response{}, err
 	}
@@ -50,7 +49,7 @@ func ChannelExecute(fcn string, args [][]byte) (channel.Response, error) {
 // ChannelQuery 区块链查询
 func ChannelQuery(fcn string, args [][]byte) (channel.Response, error) {
 	// 创建客户端，表明在通道的身份
-	ctx := SDK.ChannelContext(ChannelName, fabsdk.WithOrg(Org), fabsdk.WithUser(User))
+	ctx := SDK.ChannelContext(ChannelName, fabsdk.WithUser(User))
 	cli, err := channel.New(ctx)
 	if err != nil {
 		return channel.Response{}, err
@@ -60,7 +59,7 @@ func ChannelQuery(fcn string, args [][]byte) (channel.Response, error) {
 		ChaincodeID: ChainCodeName,
 		Fcn:         fcn,
 		Args:        args,
-	}, channel.WithTargetEndpoints("peer0.jd.com"))
+	}, channel.WithTargetEndpoints("peer0.jd.com", "peer0.taobao.com"))
 	if err != nil {
 		return channel.Response{}, err
 	}
