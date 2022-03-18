@@ -22,6 +22,11 @@ channels:
         chaincodeQuery: true
         ledgerQuery: true
         eventSource: true
+      peer1.jd.com:
+        endorsingPeer: true
+        chaincodeQuery: true
+        ledgerQuery: true
+        eventSource: true
 
 # 组织配置
 organizations:
@@ -59,12 +64,28 @@ peers:
       keep-alive-permit: false
       fail-fast: false
       allow-insecure: true
+  peer1.jd.com:
+    url: 127.0.0.1:37051
+    grpcOptions:
+      ssl-target-name-override: peer1.jd.com
+      keep-alive-time: 0s
+      keep-alive-timeout: 20s
+      keep-alive-permit: false
+      fail-fast: false
+      allow-insecure: true
   peer0.taobao.com:
-    # URL用于发送背书和查询请求
     url: 127.0.0.1:7051
-    # 传递给gRPC客户端构造函数
     grpcOptions:
       ssl-target-name-override: peer0.taobao.com
+      keep-alive-time: 0s
+      keep-alive-timeout: 20s
+      keep-alive-permit: false
+      fail-fast: false
+      allow-insecure: true
+  peer1.taobao.com:
+    url: 127.0.0.1:17051
+    grpcOptions:
+      ssl-target-name-override: peer1.taobao.com
       keep-alive-time: 0s
       keep-alive-timeout: 20s
       keep-alive-permit: false

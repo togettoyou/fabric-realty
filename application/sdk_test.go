@@ -8,7 +8,12 @@ import (
 
 func TestInvoke_QueryAccountList(t *testing.T) {
 	blockchain.Init()
-	response, e := blockchain.ChannelQuery("hello", [][]byte{})
+	response, e := blockchain.ChannelExecute("createRealEstate", [][]byte{
+		[]byte("5feceb66ffc8"),
+		[]byte("6b86b273ff34"),
+		[]byte("122.22"),
+		[]byte("122.22"),
+	})
 	if e != nil {
 		fmt.Println(e.Error())
 		t.FailNow()
