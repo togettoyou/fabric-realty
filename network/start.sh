@@ -63,7 +63,7 @@ docker exec cli bash -c "$JDPeer0Cli peer chaincode install -n fabric-realty -v 
 # -C 是通道，在fabric的世界，一个通道就是一条不同的链
 # -c 为传参，传入init参数
 echo "十一、实例化链码"
-docker exec cli bash -c "$TaobaoPeer0Cli peer chaincode instantiate -o orderer.qq.com:7050 -C appchannel -n fabric-realty -l golang -v 1.0.0 -c '{\"Args\":[\"init\"]}' -P \"OR ('TaobaoMSP.member','JDMSP.member')\""
+docker exec cli bash -c "$TaobaoPeer0Cli peer chaincode instantiate -o orderer.qq.com:7050 -C appchannel -n fabric-realty -l golang -v 1.0.0 -c '{\"Args\":[\"init\"]}' -P \"AND ('TaobaoMSP.member','JDMSP.member')\""
 
 echo "正在等待链码实例化完成，等待5秒"
 sleep 5

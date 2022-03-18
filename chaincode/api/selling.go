@@ -5,11 +5,9 @@ import (
 	"chaincode/pkg/utils"
 	"encoding/json"
 	"fmt"
-	"strconv"
-	"time"
-
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 	pb "github.com/hyperledger/fabric/protos/peer"
+	"strconv"
 )
 
 // CreateSelling 发起销售
@@ -52,12 +50,13 @@ func CreateSelling(stub shim.ChaincodeStubInterface, args []string) pb.Response 
 	if realEstate.Encumbrance {
 		return shim.Error("此房地产已经作为担保状态，不能重复发起销售")
 	}
+	createTime, _ := stub.GetTxTimestamp()
 	selling := &model.Selling{
 		ObjectOfSale:  objectOfSale,
 		Seller:        seller,
 		Buyer:         "",
 		Price:         formattedPrice,
-		CreateTime:    time.Now().Local().Format("2006-01-02 15:04:05"),
+		CreateTime:    createTime.String(),
 		SalePeriod:    formattedSalePeriod,
 		SellingStatus: model.SellingStatusConstant()["saleStart"],
 	}
@@ -134,15 +133,14 @@ func CreateSellingByBuy(stub shim.ChaincodeStubInterface, args []string) pb.Resp
 	if err := utils.WriteLedger(selling, stub, model.SellingKey, []string{selling.Seller, selling.ObjectOfSale}); err != nil {
 		return shim.Error(fmt.Sprintf("将buyer写入交易selling,修改交易状态 失败%s", err))
 	}
+	createTime, _ := stub.GetTxTimestamp()
 	//将本次购买交易写入账本,可供买家查询
 	sellingBuy := &model.SellingBuy{
 		Buyer:      buyer,
-		CreateTime: time.Now().Local().Format("2006-01-02 15:04:05"),
+		CreateTime: createTime.String(),
 		Selling:    selling,
 	}
-	local, _ := time.LoadLocation("Local")
-	createTimeUnixNano, _ := time.ParseInLocation("2006-01-02 15:04:05", sellingBuy.CreateTime, local)
-	if err := utils.WriteLedger(sellingBuy, stub, model.SellingBuyKey, []string{sellingBuy.Buyer, fmt.Sprintf("%d", createTimeUnixNano.UnixNano())}); err != nil {
+	if err := utils.WriteLedger(sellingBuy, stub, model.SellingBuyKey, []string{sellingBuy.Buyer, stub.GetTxID()}); err != nil {
 		return shim.Error(fmt.Sprintf("将本次购买交易写入账本失败%s", err))
 	}
 	sellingBuyByte, err := json.Marshal(sellingBuy)
@@ -293,7 +291,7 @@ func UpdateSelling(stub shim.ChaincodeStubInterface, args []string) pb.Response 
 		//将房产信息转入买家，并重置担保状态
 		realEstate.Proprietor = buyer
 		realEstate.Encumbrance = false
-		realEstate.RealEstateID = fmt.Sprintf("%d", time.Now().Local().UnixNano()) //重新更新房产ID
+		realEstate.RealEstateID = stub.GetTxID() //重新更新房产ID
 		if err := utils.WriteLedger(realEstate, stub, model.RealEstateKey, []string{realEstate.Proprietor, realEstate.RealEstateID}); err != nil {
 			return shim.Error(fmt.Sprintf("%s", err))
 		}
@@ -308,9 +306,7 @@ func UpdateSelling(stub shim.ChaincodeStubInterface, args []string) pb.Response 
 			return shim.Error(fmt.Sprintf("%s", err))
 		}
 		sellingBuy.Selling = selling
-		local, _ := time.LoadLocation("Local")
-		sellingBuyCreateTimeUnixNano, _ := time.ParseInLocation("2006-01-02 15:04:05", sellingBuy.CreateTime, local)
-		if err := utils.WriteLedger(sellingBuy, stub, model.SellingBuyKey, []string{sellingBuy.Buyer, fmt.Sprintf("%d", sellingBuyCreateTimeUnixNano.UnixNano())}); err != nil {
+		if err := utils.WriteLedger(sellingBuy, stub, model.SellingBuyKey, []string{sellingBuy.Buyer, stub.GetTxID()}); err != nil {
 			return shim.Error(fmt.Sprintf("将本次购买交易写入账本失败%s", err))
 		}
 		data, err = json.Marshal(sellingBuy)
@@ -382,9 +378,7 @@ func closeSelling(closeStart string, selling model.Selling, realEstate model.Rea
 			return nil, err
 		}
 		sellingBuy.Selling = selling
-		local, _ := time.LoadLocation("Local")
-		sellingBuyCreateTimeUnixNano, _ := time.ParseInLocation("2006-01-02 15:04:05", sellingBuy.CreateTime, local)
-		if err := utils.WriteLedger(sellingBuy, stub, model.SellingBuyKey, []string{sellingBuy.Buyer, fmt.Sprintf("%d", sellingBuyCreateTimeUnixNano.UnixNano())}); err != nil {
+		if err := utils.WriteLedger(sellingBuy, stub, model.SellingBuyKey, []string{sellingBuy.Buyer, stub.GetTxID()}); err != nil {
 			return nil, err
 		}
 		data, err := json.Marshal(sellingBuy)

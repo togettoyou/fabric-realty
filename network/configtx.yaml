@@ -34,13 +34,17 @@ Orderer: &OrdererDefaults
     PreferredMaxBytes: 512 KB #每个区块包含的一条信息最大长度
   Organizations:
 
-# 定义要写入创世区块或交易配置相关的值
+# 定义Peer组织如何与应用程序通道交互的策略
+# 默认策略：所有Peer组织都将能够读取数据并将数据写入账本
 Application: &ApplicationDefaults
   Organizations:
 
 # 用来定义用于 configtxgen 工具的配置入口
 # 将 Profile 参数（ TwoOrgsOrdererGenesis 或 TwoOrgsChannel ）指定为 configtxgen 工具的参数
 Profiles:
+  #  TwoOrgsOrdererGenesis配置文件用于创建系统通道创世块
+  #  该配置文件创建一个名为SampleConsortium的联盟
+  #  该联盟在configtx.yaml文件中包含两个Peer组织Taobao和JD
   TwoOrgsOrdererGenesis:
     Orderer:
       <<: *OrdererDefaults
@@ -51,6 +55,7 @@ Profiles:
         Organizations:
           - *Taobao
           - *JD
+  # 使用TwoOrgsChannel配置文件创建应用程序通道
   TwoOrgsChannel:
     Consortium: SampleConsortium
     Application:
