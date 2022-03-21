@@ -79,7 +79,7 @@ func (t *BlockChainRealEstate) Invoke(stub shim.ChaincodeStubInterface) pb.Respo
 }
 
 func main() {
-	timeLocal, err := time.LoadLocation("Asia/Chongqing")
+	timeLocal, err := time.LoadLocation("Asia/Shanghai")
 	if err != nil {
 		panic(err)
 	}

@@ -1,5 +1,3 @@
 #!/bin/bash
 
-./app
-
-#nohup ./app &
+docker-compose up

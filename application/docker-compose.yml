@@ -1,0 +1,19 @@
+version: '2.1'
+
+networks:
+  fabric_network:
+    external:
+      name: fabric_network
+
+services:
+  fabric-realty.app:
+    build: .
+    image: fabric-realty/application:latest
+    container_name: fabric-realty.app
+    ports:
+      - "8000:8000"
+    volumes:
+      - /usr/share/zoneinfo/Asia/Shanghai:/usr/share/zoneinfo/Asia/Shanghai
+      - ./../network/crypto-config:/network/crypto-config
+    networks:
+      - fabric_network
