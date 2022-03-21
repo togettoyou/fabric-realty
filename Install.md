@@ -12,24 +12,11 @@ curl -sSL https://get.daocloud.io/docker | sh
 sudo usermod -aG docker togettoyou # 需要重启生效
 ```
 
-# 2. Docker 更换镜像源
-
-使用 /etc/docker/daemon.json来配置 Daemon ：
+# 2. 配置 Docker 开机自启
 
 ```shell
-sudo mkdir -p /etc/docker
-sudo tee /etc/docker/daemon.json <<-'EOF'
-{
-  "registry-mirrors": ["https://reg-mirror.qiniu.com/"]
-}
-EOF
-```
-
-重载daemon、重启docker
-
-```shell
-sudo systemctl daemon-reload
-sudo service docker restart
+sudo systemctl enable docker
+sudo systemctl start docker
 ```
 
 查看docker信息
