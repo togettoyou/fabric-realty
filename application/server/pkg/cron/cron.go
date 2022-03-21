@@ -1,14 +1,16 @@
-package service
+package cron
 
 import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/robfig/cron/v3"
-	bc "github.com/togettoyou/blockchain-real-estate/application/blockchain"
-	"github.com/togettoyou/blockchain-real-estate/application/lib"
 	"log"
 	"time"
+
+	bc "application/blockchain"
+	"application/model"
+
+	"github.com/robfig/cron/v3"
 )
 
 const spec = "0 0 0 * * ?" // 每天0点执行
@@ -34,15 +36,15 @@ func GoRun() {
 		return
 	}
 	// 反序列化json
-	var data []lib.Selling
+	var data []model.Selling
 	if err = json.Unmarshal(bytes.NewBuffer(resp.Payload).Bytes(), &data); err != nil {
 		log.Printf("定时任务-反序列化json失败%s", err.Error())
 		return
 	}
 	for _, v := range data {
 		//把状态为销售中和交付中的筛选出来
-		if v.SellingStatus == lib.SellingStatusConstant()["saleStart"] ||
-			v.SellingStatus == lib.SellingStatusConstant()["delivery"] {
+		if v.SellingStatus == model.SellingStatusConstant()["saleStart"] ||
+			v.SellingStatus == model.SellingStatusConstant()["delivery"] {
 			//有效期天数
 			day, _ := time.ParseDuration(fmt.Sprintf("%dh", v.SalePeriod*24))
 			local, _ := time.LoadLocation("Local")

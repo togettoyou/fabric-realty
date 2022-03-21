@@ -1,14 +1,15 @@
 package v1
 
 import (
+	bc "application/blockchain"
+	"application/pkg/app"
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/gin-gonic/gin"
-	bc "github.com/togettoyou/blockchain-real-estate/application/blockchain"
-	"github.com/togettoyou/blockchain-real-estate/application/pkg/app"
 	"net/http"
 	"strconv"
+
+	"github.com/gin-gonic/gin"
 )
 
 type RealEstateRequestBody struct {
@@ -22,12 +23,6 @@ type RealEstateQueryRequestBody struct {
 	Proprietor string `json:"proprietor"` //所有者(业主)(业主AccountId)
 }
 
-// @Summary 新建房地产(管理员)
-// @Param realEstate body RealEstateRequestBody true "realEstate"
-// @Produce  json
-// @Success 200 {object} app.Response
-// @Failure 500 {object} app.Response
-// @Router /api/v1/createRealEstate [post]
 func CreateRealEstate(c *gin.Context) {
 	appG := app.Gin{C: c}
 	body := new(RealEstateRequestBody)
@@ -59,12 +54,6 @@ func CreateRealEstate(c *gin.Context) {
 	appG.Response(http.StatusOK, "成功", data)
 }
 
-// @Summary 获取房地产信息(空json{}可以查询所有，指定proprietor可以查询指定业主名下房产)
-// @Param realEstateQuery body RealEstateQueryRequestBody true "realEstateQuery"
-// @Produce  json
-// @Success 200 {object} app.Response
-// @Failure 500 {object} app.Response
-// @Router /api/v1/queryRealEstateList [post]
 func QueryRealEstateList(c *gin.Context) {
 	appG := app.Gin{C: c}
 	body := new(RealEstateQueryRequestBody)

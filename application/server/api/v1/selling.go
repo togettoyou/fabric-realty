@@ -1,14 +1,15 @@
 package v1
 
 import (
+	bc "application/blockchain"
+	"application/pkg/app"
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/gin-gonic/gin"
-	bc "github.com/togettoyou/blockchain-real-estate/application/blockchain"
-	"github.com/togettoyou/blockchain-real-estate/application/pkg/app"
 	"net/http"
 	"strconv"
+
+	"github.com/gin-gonic/gin"
 )
 
 type SellingRequestBody struct {
@@ -23,12 +24,15 @@ type SellingByBuyRequestBody struct {
 	Seller       string `json:"seller"`       //发起销售人、卖家(卖家AccountId)
 	Buyer        string `json:"buyer"`        //买家(买家AccountId)
 }
+
 type SellingListQueryRequestBody struct {
 	Seller string `json:"seller"` //发起销售人、卖家(卖家AccountId)
 }
+
 type SellingListQueryByBuyRequestBody struct {
 	Buyer string `json:"buyer"` //买家(买家AccountId)
 }
+
 type UpdateSellingRequestBody struct {
 	ObjectOfSale string `json:"objectOfSale"` //销售对象(正在出售的房地产RealEstateID)
 	Seller       string `json:"seller"`       //发起销售人、卖家(卖家AccountId)
@@ -36,12 +40,6 @@ type UpdateSellingRequestBody struct {
 	Status       string `json:"status"`       //需要更改的状态
 }
 
-// @Summary 发起销售
-// @Param selling body SellingRequestBody true "selling"
-// @Produce  json
-// @Success 200 {object} app.Response
-// @Failure 500 {object} app.Response
-// @Router /api/v1/createSelling [post]
 func CreateSelling(c *gin.Context) {
 	appG := app.Gin{C: c}
 	body := new(SellingRequestBody)
@@ -77,12 +75,6 @@ func CreateSelling(c *gin.Context) {
 	appG.Response(http.StatusOK, "成功", data)
 }
 
-// @Summary 买家购买
-// @Param sellingByBuy body SellingByBuyRequestBody true "sellingByBuy"
-// @Produce  json
-// @Success 200 {object} app.Response
-// @Failure 500 {object} app.Response
-// @Router /api/v1/createSellingByBuy [post]
 func CreateSellingByBuy(c *gin.Context) {
 	appG := app.Gin{C: c}
 	body := new(SellingByBuyRequestBody)
@@ -113,12 +105,6 @@ func CreateSellingByBuy(c *gin.Context) {
 	appG.Response(http.StatusOK, "成功", data)
 }
 
-// @Summary 查询销售(可查询所有，也可根据发起销售人查询)(发起的)
-// @Param sellingListQuery body SellingListQueryRequestBody true "sellingListQuery"
-// @Produce  json
-// @Success 200 {object} app.Response
-// @Failure 500 {object} app.Response
-// @Router /api/v1/querySellingList [post]
 func QuerySellingList(c *gin.Context) {
 	appG := app.Gin{C: c}
 	body := new(SellingListQueryRequestBody)
@@ -146,12 +132,6 @@ func QuerySellingList(c *gin.Context) {
 	appG.Response(http.StatusOK, "成功", data)
 }
 
-// @Summary 根据参与销售人、买家(买家AccountId)查询销售(参与的)
-// @Param sellingListQueryByBuy body SellingListQueryByBuyRequestBody true "sellingListQueryByBuy"
-// @Produce  json
-// @Success 200 {object} app.Response
-// @Failure 500 {object} app.Response
-// @Router /api/v1/querySellingListByBuyer [post]
 func QuerySellingListByBuyer(c *gin.Context) {
 	appG := app.Gin{C: c}
 	body := new(SellingListQueryByBuyRequestBody)
@@ -181,12 +161,6 @@ func QuerySellingListByBuyer(c *gin.Context) {
 	appG.Response(http.StatusOK, "成功", data)
 }
 
-// @Summary 更新销售状态（买家确认、买卖家取消）Status取值为 完成"done"、取消"cancelled" 当处于销售中状态，卖家要取消时，buyer为""空
-// @Param updateSelling body UpdateSellingRequestBody true "updateSelling"
-// @Produce  json
-// @Success 200 {object} app.Response
-// @Failure 500 {object} app.Response
-// @Router /api/v1/updateSelling [post]
 func UpdateSelling(c *gin.Context) {
 	appG := app.Gin{C: c}
 	body := new(UpdateSellingRequestBody)

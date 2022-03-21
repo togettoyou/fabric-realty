@@ -1,13 +1,14 @@
 package v1
 
 import (
+	bc "application/blockchain"
+	"application/pkg/app"
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/gin-gonic/gin"
-	bc "github.com/togettoyou/blockchain-real-estate/application/blockchain"
-	"github.com/togettoyou/blockchain-real-estate/application/pkg/app"
 	"net/http"
+
+	"github.com/gin-gonic/gin"
 )
 
 type DonatingRequestBody struct {
@@ -31,12 +32,6 @@ type UpdateDonatingRequestBody struct {
 	Status           string `json:"status"`           //需要更改的状态
 }
 
-// @Summary 发起捐赠
-// @Param donating body DonatingRequestBody true "donating"
-// @Produce  json
-// @Success 200 {object} app.Response
-// @Failure 500 {object} app.Response
-// @Router /api/v1/createDonating [post]
 func CreateDonating(c *gin.Context) {
 	appG := app.Gin{C: c}
 	body := new(DonatingRequestBody)
@@ -67,12 +62,6 @@ func CreateDonating(c *gin.Context) {
 	appG.Response(http.StatusOK, "成功", data)
 }
 
-// @Summary 查询捐赠列表(可查询所有，也可根据发起捐赠人查询)
-// @Param donatingListQuery body DonatingListQueryRequestBody true "donatingListQuery"
-// @Produce  json
-// @Success 200 {object} app.Response
-// @Failure 500 {object} app.Response
-// @Router /api/v1/queryDonatingList [post]
 func QueryDonatingList(c *gin.Context) {
 	appG := app.Gin{C: c}
 	body := new(DonatingListQueryRequestBody)
@@ -100,12 +89,6 @@ func QueryDonatingList(c *gin.Context) {
 	appG.Response(http.StatusOK, "成功", data)
 }
 
-// @Summary 根据受赠人(受赠人AccountId)查询捐赠(受赠的)(供受赠人查询)
-// @Param donatingListQueryByGrantee body DonatingListQueryByGranteeRequestBody true "donatingListQueryByGrantee"
-// @Produce  json
-// @Success 200 {object} app.Response
-// @Failure 500 {object} app.Response
-// @Router /api/v1/queryDonatingListByGrantee [post]
 func QueryDonatingListByGrantee(c *gin.Context) {
 	appG := app.Gin{C: c}
 	body := new(DonatingListQueryByGranteeRequestBody)
@@ -135,12 +118,6 @@ func QueryDonatingListByGrantee(c *gin.Context) {
 	appG.Response(http.StatusOK, "成功", data)
 }
 
-// @Summary 更新捐赠状态（确认受赠、取消）
-// @Param updateDonating body UpdateDonatingRequestBody true "updateDonating"
-// @Produce  json
-// @Success 200 {object} app.Response
-// @Failure 500 {object} app.Response
-// @Router /api/v1/updateDonating [post]
 func UpdateDonating(c *gin.Context) {
 	appG := app.Gin{C: c}
 	body := new(UpdateDonatingRequestBody)

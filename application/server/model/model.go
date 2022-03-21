@@ -1,4 +1,4 @@
-package lib
+package model
 
 // Selling 销售要约
 // 需要确定ObjectOfSale是否属于Seller

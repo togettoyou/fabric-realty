@@ -1,13 +1,14 @@
 package v1
 
 import (
+	bc "application/blockchain"
+	"application/pkg/app"
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/gin-gonic/gin"
-	bc "github.com/togettoyou/blockchain-real-estate/application/blockchain"
-	"github.com/togettoyou/blockchain-real-estate/application/pkg/app"
 	"net/http"
+
+	"github.com/gin-gonic/gin"
 )
 
 type AccountIdBody struct {
@@ -18,12 +19,6 @@ type AccountRequestBody struct {
 	Args []AccountIdBody `json:"args"`
 }
 
-// @Summary 获取账户信息
-// @Param account body AccountRequestBody true "account"
-// @Produce  json
-// @Success 200 {object} app.Response
-// @Failure 500 {object} app.Response
-// @Router /api/v1/queryAccountList [post]
 func QueryAccountList(c *gin.Context) {
 	appG := app.Gin{C: c}
 	body := new(AccountRequestBody)
