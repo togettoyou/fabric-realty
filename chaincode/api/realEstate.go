@@ -58,7 +58,7 @@ func CreateRealEstate(stub shim.ChaincodeStubInterface, args []string) pb.Respon
 		return shim.Error(fmt.Sprintf("业主proprietor信息验证失败%s", err))
 	}
 	realEstate := &model.RealEstate{
-		RealEstateID: stub.GetTxID(),
+		RealEstateID: stub.GetTxID()[:16],
 		Proprietor:   proprietor,
 		Encumbrance:  false,
 		TotalArea:    formattedTotalArea,

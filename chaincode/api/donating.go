@@ -5,6 +5,8 @@ import (
 	"chaincode/pkg/utils"
 	"encoding/json"
 	"fmt"
+	"time"
+
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 	pb "github.com/hyperledger/fabric/protos/peer"
 )
@@ -55,7 +57,7 @@ func CreateDonating(stub shim.ChaincodeStubInterface, args []string) pb.Response
 		ObjectOfDonating: objectOfDonating,
 		Donor:            donor,
 		Grantee:          grantee,
-		CreateTime:       createTime.String(),
+		CreateTime:       time.Unix(int64(createTime.GetSeconds()), int64(createTime.GetNanos())).Local().Format("2006-01-02 15:04:05"),
 		DonatingStatus:   model.DonatingStatusConstant()["donatingStart"],
 	}
 	// 写入账本
@@ -70,10 +72,10 @@ func CreateDonating(stub shim.ChaincodeStubInterface, args []string) pb.Response
 	//将本次购买交易写入账本,可供受赠人查询
 	donatingGrantee := &model.DonatingGrantee{
 		Grantee:    grantee,
-		CreateTime: createTime.String(),
+		CreateTime: time.Unix(int64(createTime.GetSeconds()), int64(createTime.GetNanos())).Local().Format("2006-01-02 15:04:05"),
 		Donating:   *donating,
 	}
-	if err := utils.WriteLedger(donatingGrantee, stub, model.DonatingGranteeKey, []string{donatingGrantee.Grantee, stub.GetTxID()}); err != nil {
+	if err := utils.WriteLedger(donatingGrantee, stub, model.DonatingGranteeKey, []string{donatingGrantee.Grantee, donatingGrantee.CreateTime}); err != nil {
 		return shim.Error(fmt.Sprintf("将本次捐赠交易写入账本失败%s", err))
 	}
 	donatingGranteeByte, err := json.Marshal(donatingGrantee)
@@ -211,7 +213,7 @@ func UpdateDonating(stub shim.ChaincodeStubInterface, args []string) pb.Response
 		//将房产信息转入受赠人，并重置担保状态
 		realEstate.Proprietor = grantee
 		realEstate.Encumbrance = false
-		realEstate.RealEstateID = stub.GetTxID() //重新更新房产ID
+		//realEstate.RealEstateID = stub.GetTxID() //重新更新房产ID
 		if err := utils.WriteLedger(realEstate, stub, model.RealEstateKey, []string{realEstate.Proprietor, realEstate.RealEstateID}); err != nil {
 			return shim.Error(fmt.Sprintf("%s", err))
 		}
@@ -226,7 +228,7 @@ func UpdateDonating(stub shim.ChaincodeStubInterface, args []string) pb.Response
 			return shim.Error(fmt.Sprintf("%s", err))
 		}
 		donatingGrantee.Donating = donating
-		if err := utils.WriteLedger(donatingGrantee, stub, model.DonatingGranteeKey, []string{donatingGrantee.Grantee, stub.GetTxID()}); err != nil {
+		if err := utils.WriteLedger(donatingGrantee, stub, model.DonatingGranteeKey, []string{donatingGrantee.Grantee, donatingGrantee.CreateTime}); err != nil {
 			return shim.Error(fmt.Sprintf("将本次捐赠交易写入账本失败%s", err))
 		}
 		data, err = json.Marshal(donatingGrantee)
@@ -246,7 +248,7 @@ func UpdateDonating(stub shim.ChaincodeStubInterface, args []string) pb.Response
 			return shim.Error(fmt.Sprintf("%s", err))
 		}
 		donatingGrantee.Donating = donating
-		if err := utils.WriteLedger(donatingGrantee, stub, model.DonatingGranteeKey, []string{donatingGrantee.Grantee, stub.GetTxID()}); err != nil {
+		if err := utils.WriteLedger(donatingGrantee, stub, model.DonatingGranteeKey, []string{donatingGrantee.Grantee, donatingGrantee.CreateTime}); err != nil {
 			return shim.Error(fmt.Sprintf("%s", err))
 		}
 		data, err = json.Marshal(donatingGrantee)

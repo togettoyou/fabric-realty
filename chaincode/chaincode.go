@@ -17,11 +17,6 @@ type BlockChainRealEstate struct {
 // Init 链码初始化
 func (t *BlockChainRealEstate) Init(stub shim.ChaincodeStubInterface) pb.Response {
 	fmt.Println("链码初始化")
-	timeLocal, err := time.LoadLocation("Asia/Chongqing")
-	if err != nil {
-		return shim.Error(fmt.Sprintf("时区设置失败%s", err))
-	}
-	time.Local = timeLocal
 	//初始化默认数据
 	var accountIds = [6]string{
 		"5feceb66ffc8",
@@ -84,7 +79,12 @@ func (t *BlockChainRealEstate) Invoke(stub shim.ChaincodeStubInterface) pb.Respo
 }
 
 func main() {
-	err := shim.Start(new(BlockChainRealEstate))
+	timeLocal, err := time.LoadLocation("Asia/Chongqing")
+	if err != nil {
+		panic(err)
+	}
+	time.Local = timeLocal
+	err = shim.Start(new(BlockChainRealEstate))
 	if err != nil {
 		fmt.Printf("Error starting Simple chaincode: %s", err)
 	}

@@ -1,9 +1,6 @@
 #!/bin/bash
 
 # 根据需求保留，这里相当于使用fabric-samples_v1.4.12中的bin
-if [[ `uname` == 'Darwin' ]]; then
-    echo "Mac OS"
-fi
 if [[ `uname` == 'Linux' ]]; then
     echo "Linux"
     export PATH=${PWD}/hyperledger-fabric-linux-amd64-1.4.12/bin:$PATH

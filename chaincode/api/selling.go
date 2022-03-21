@@ -5,9 +5,11 @@ import (
 	"chaincode/pkg/utils"
 	"encoding/json"
 	"fmt"
+	"strconv"
+	"time"
+
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 	pb "github.com/hyperledger/fabric/protos/peer"
-	"strconv"
 )
 
 // CreateSelling 发起销售
@@ -56,7 +58,7 @@ func CreateSelling(stub shim.ChaincodeStubInterface, args []string) pb.Response 
 		Seller:        seller,
 		Buyer:         "",
 		Price:         formattedPrice,
-		CreateTime:    createTime.String(),
+		CreateTime:    time.Unix(int64(createTime.GetSeconds()), int64(createTime.GetNanos())).Local().Format("2006-01-02 15:04:05"),
 		SalePeriod:    formattedSalePeriod,
 		SellingStatus: model.SellingStatusConstant()["saleStart"],
 	}
@@ -137,10 +139,10 @@ func CreateSellingByBuy(stub shim.ChaincodeStubInterface, args []string) pb.Resp
 	//将本次购买交易写入账本,可供买家查询
 	sellingBuy := &model.SellingBuy{
 		Buyer:      buyer,
-		CreateTime: createTime.String(),
+		CreateTime: time.Unix(int64(createTime.GetSeconds()), int64(createTime.GetNanos())).Local().Format("2006-01-02 15:04:05"),
 		Selling:    selling,
 	}
-	if err := utils.WriteLedger(sellingBuy, stub, model.SellingBuyKey, []string{sellingBuy.Buyer, stub.GetTxID()}); err != nil {
+	if err := utils.WriteLedger(sellingBuy, stub, model.SellingBuyKey, []string{sellingBuy.Buyer, sellingBuy.CreateTime}); err != nil {
 		return shim.Error(fmt.Sprintf("将本次购买交易写入账本失败%s", err))
 	}
 	sellingBuyByte, err := json.Marshal(sellingBuy)
@@ -291,7 +293,7 @@ func UpdateSelling(stub shim.ChaincodeStubInterface, args []string) pb.Response 
 		//将房产信息转入买家，并重置担保状态
 		realEstate.Proprietor = buyer
 		realEstate.Encumbrance = false
-		realEstate.RealEstateID = stub.GetTxID() //重新更新房产ID
+		//realEstate.RealEstateID = stub.GetTxID() //重新更新房产ID
 		if err := utils.WriteLedger(realEstate, stub, model.RealEstateKey, []string{realEstate.Proprietor, realEstate.RealEstateID}); err != nil {
 			return shim.Error(fmt.Sprintf("%s", err))
 		}
@@ -306,7 +308,7 @@ func UpdateSelling(stub shim.ChaincodeStubInterface, args []string) pb.Response 
 			return shim.Error(fmt.Sprintf("%s", err))
 		}
 		sellingBuy.Selling = selling
-		if err := utils.WriteLedger(sellingBuy, stub, model.SellingBuyKey, []string{sellingBuy.Buyer, stub.GetTxID()}); err != nil {
+		if err := utils.WriteLedger(sellingBuy, stub, model.SellingBuyKey, []string{sellingBuy.Buyer, sellingBuy.CreateTime}); err != nil {
 			return shim.Error(fmt.Sprintf("将本次购买交易写入账本失败%s", err))
 		}
 		data, err = json.Marshal(sellingBuy)
@@ -378,7 +380,7 @@ func closeSelling(closeStart string, selling model.Selling, realEstate model.Rea
 			return nil, err
 		}
 		sellingBuy.Selling = selling
-		if err := utils.WriteLedger(sellingBuy, stub, model.SellingBuyKey, []string{sellingBuy.Buyer, stub.GetTxID()}); err != nil {
+		if err := utils.WriteLedger(sellingBuy, stub, model.SellingBuyKey, []string{sellingBuy.Buyer, sellingBuy.CreateTime}); err != nil {
 			return nil, err
 		}
 		data, err := json.Marshal(sellingBuy)
