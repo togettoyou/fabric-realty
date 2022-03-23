@@ -4,6 +4,10 @@
 
 ![微信公众号.png](https://gitee.com/togettoyou/picture/raw/master/2022-2-9/1644374999459-weixin.jpg)
 
+## 教程
+
+[万字长文，教你用go开发区块链应用](https://mp.weixin.qq.com/s/yDmGwfRjXxDJfgv1d0p3Ig)
+
 ## 环境要求
 
 安装了 Docker 和 Docker Compose 的 Linux 环境
