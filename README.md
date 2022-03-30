@@ -32,6 +32,28 @@
 5. （可选）进入 `network/explorer` 目录，执行 `./start.sh` 启动区块链浏览器后，访问 [http://localhost:8080](http://localhost:8080)，用户名 admin，密码
    123456
 
+## 停止或重启
+
+注意，默认执行 `./start.sh` 脚本时都会调用 `./stop.sh` ，所以如果想持久化数据的情况下停止或重启本项目，请不要重新执行 `./start.sh` ，正确姿势参考：
+
+1. （如果启动了区块链浏览器）进入 `network/explorer` 目录，执行 `docker-compose stop` 停止区块链浏览器，执行 `docker-compose start`
+   启动区块链浏览器，执行 `docker-compose restart` 重启区块链浏览器
+
+2. 进入 `network` 目录，执行 `docker-compose stop` 停止区块链网络，执行 `docker-compose start`
+   启动区块链网络，执行 `docker-compose restart` 重启区块链网络
+
+3. 进入 `application` 目录，区块链应用是无状态的，可以直接执行 `./stop.sh` 关闭区块链应用，执行 `./start.sh` 关闭区块链应用
+
+## 完全清理环境
+
+注意，该操作会将所有数据清空。按照该顺序：
+
+1. （如果启动了区块链浏览器）进入 `network/explorer` 目录，执行 `./stop.sh` 关闭区块链浏览器
+
+2. 进入 `network` 目录，执行 `./stop.sh` 关闭区块链网络并清理链码容器
+
+3. 进入 `application` 目录，执行 `./stop.sh` 关闭区块链应用
+
 ## 目录结构
 
 - `application/server` : `fabric-sdk-go` 调用链码（即智能合约），`gin` 提供外部访问接口（RESTful API）
