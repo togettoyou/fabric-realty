@@ -8,7 +8,7 @@ RUN CGO_ENABLED=0 go build -v -o "app" .
 FROM node:lts-alpine AS web
 WORKDIR /root/togettoyou
 COPY web/package*.json ./
-RUN yarn install
+RUN yarn config set registry https://registry.npmmirror.com/ && yarn install
 COPY web/. .
 RUN yarn run build:prod
 
