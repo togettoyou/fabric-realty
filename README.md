@@ -6,13 +6,17 @@
 
 ## 教程
 
-[万字长文，教你用go开发区块链应用](https://mp.weixin.qq.com/s/yDmGwfRjXxDJfgv1d0p3Ig)
+[万字长文，教你用go开发区块链应用](https://mp.weixin.qq.com/s/yDmGwfRjXxDJfgv1d0p3Ig) 
+
+> 🤔 有任何疑问，请先看完本篇文章。本项目涉及的知识点都有在文章中进行说明
 
 ## 环境要求
 
 安装了 Docker 和 Docker Compose 的 Linux 环境
 
 附 Docker 安装教程：[点此跳转](Install.md)
+
+> 🤔 Docker 和 Docker Compose 需要先自行学习。本项目的区块链网络搭建、链码部署、前后端编译/部署都是使用 Docker 和 Docker Compose 完成的。
 
 ## 部署
 
