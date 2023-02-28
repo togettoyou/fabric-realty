@@ -1,8 +1,8 @@
 > 🚀 本项目使用 Hyperledger Fabric 构建底层区块链网络, go 编写智能合约，应用层使用 gin+fabric-sdk-go ，前端使用 vue+element-ui
 
-如果想要联系我，可以关注我的公众号【SuperGopher】
+如果想要联系我，可以关注我的公众号【gopher云原生】
 
-![微信公众号.png](https://user-images.githubusercontent.com/55381228/155444889-eacc0104-cd85-45c9-b7b7-9036e0c2334c.jpg)
+![gopher云原生](https://user-images.githubusercontent.com/55381228/221747734-13783ce6-1969-4c10-acd6-833f5046aa85.png)
 
 ## 教程
 
