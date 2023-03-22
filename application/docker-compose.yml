@@ -29,8 +29,5 @@ services:
     container_name: fabric-realty.web
     ports:
       - "8000:80"
-    volumes:
-      - /usr/share/zoneinfo/Asia/Shanghai:/usr/share/zoneinfo/Asia/Shanghai
-      - ./../network/crypto-config:/network/crypto-config
     networks:
       - fabric_network

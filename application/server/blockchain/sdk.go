@@ -14,6 +14,8 @@ var (
 	user          = "Admin"                                      // 用户
 	chainCodeName = "fabric-realty"                              // 链码名称
 	endpoints     = []string{"peer0.jd.com", "peer0.taobao.com"} // 要发送交易的节点
+
+	//configPath    = "config-local-dev.yaml"                      // 配置文件路径(本地开发时使用)
 )
 
 // Init 初始化
