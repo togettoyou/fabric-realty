@@ -169,7 +169,7 @@ export const asyncRoutes = [
 ]
 
 const createRouter = () => new Router({
-  base: '/web',
+  base: '/',
   // mode: 'history', // require service support
   scrollBehavior: () => ({
     y: 0
