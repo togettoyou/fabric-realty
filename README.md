@@ -11,59 +11,38 @@
 
 > 🤔 有任何疑问，请先看完本篇文章。本项目涉及的知识点都有在文章中进行说明
 
-## 环境要求
+## 手动部署
 
-安装了 Docker 和 Docker Compose 的 Linux 或 Mac OS 环境
+环境要求： 安装了 Docker 和 Docker Compose 的 Linux 或 Mac OS 环境
 
 附 Linux Docker 安装教程：[点此跳转](Install.md)
 
 > 🤔 Docker 和 Docker Compose 需要先自行学习。本项目的区块链网络搭建、链码部署、前后端编译/部署都是使用 Docker 和 Docker
 > Compose 完成的。
 
-## 部署
-
-1. 克隆本项目放在任意目录下，例：`/root/fabric-realty`
-
+1. 下载本项目放在任意目录下，例：`/root/fabric-realty`
 
 2. 给予项目权限，执行 `sudo chmod -R +x /root/fabric-realty/`
 
-
-3. 进入 `network` 目录，执行 `./start.sh` 启动区块链网络以及部署智能合约
-
+3. 进入 `network` 目录，执行 `./start.sh` 部署区块链网络和智能合约
 
 4. 进入 `application` 目录，执行 `./start.sh`
-   启动前后端应用，最后可使用浏览器访问 [http://localhost:8000](http://localhost:8000)
+   启动前后端应用，然后就可使用浏览器访问前端页面 [http://localhost:8000](http://localhost:8000)
    ，其中后端接口地址为 [http://localhost:8888](http://localhost:8888)
-
 
 5. （可选）进入 `network/explorer` 目录，执行 `./start.sh`
    启动区块链浏览器后，访问 [http://localhost:8080](http://localhost:8080)，用户名 admin，密码
    123456
 
-## 停止或重启
-
-注意，`network` 下默认执行 `./start.sh` 脚本时都会调用 `./stop.sh`
-，所以部署成功后，如果想持久化数据的情况下停止或重启本项目，请不要在 `network` 下再次执行 `./start.sh` ，正确姿势参考：
-
-1. （如果启动了区块链浏览器）进入 `network/explorer` 目录，执行 `docker-compose stop`
-   停止区块链浏览器，执行 `docker-compose start`
-   启动区块链浏览器，执行 `docker-compose restart` 重启区块链浏览器
-
-2. 进入 `network` 目录，执行 `docker-compose stop` 停止区块链网络，执行 `docker-compose start`
-   启动区块链网络，执行 `docker-compose restart` 重启区块链网络
-
-3. 进入 `application` 目录，区块链应用是无状态的，可以直接执行 `./stop.sh` 停止区块链前后端应用，执行 `./start.sh`
-   启动区块链前后端应用
-
 ## 完全清理环境
 
-注意，该操作会将所有数据清空。按照该顺序：
+注意，该操作会将所有数据清空。按照该先后顺序：
 
 1. （如果启动了区块链浏览器）进入 `network/explorer` 目录，执行 `./stop.sh` 关闭区块链浏览器
 
-2. 进入 `network` 目录，执行 `./stop.sh` 关闭区块链网络并清理链码容器
+2. 进入 `application` 目录，执行 `./stop.sh` 关闭区块链应用
 
-3. 进入 `application` 目录，执行 `./stop.sh` 关闭区块链应用
+3. 最后进入 `network` 目录，执行 `./stop.sh` 关闭区块链网络并清理链码容器
 
 ## 目录结构
 

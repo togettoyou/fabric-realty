@@ -10,7 +10,7 @@ services:
   fabric-realty.server:
     # 默认使用我编译好放在 Docker Hub 上的镜像： togettoyou/fabric-realty.server:latest
     image: togettoyou/fabric-realty.server:latest
-    # 如改动代码需要自行编译并使用本地镜像：fabric-realty.server:latest
+    # 如改动代码需要自行编译（进入 server 执行 ./build.sh ）并使用本地镜像：fabric-realty.server:latest
     # image: fabric-realty.server:latest
     container_name: fabric-realty.server
     ports:
@@ -24,7 +24,7 @@ services:
   fabric-realty.web:
     # 默认使用我编译好放在 Docker Hub 上的镜像： togettoyou/fabric-realty.web:latest
     image: togettoyou/fabric-realty.web:latest
-    # 如改动代码需要自行编译并使用本地镜像：fabric-realty.web:latest
+    # 如改动代码需要自行编译（进入 web 执行 ./build.sh ）并使用本地镜像：fabric-realty.web:latest
     # image: fabric-realty.web:latest
     container_name: fabric-realty.web
     ports:

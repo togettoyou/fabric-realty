@@ -1,12 +1,23 @@
 #!/bin/bash
 
+# 检查操作系统类型
 if [[ `uname` == 'Darwin' ]]; then
-    echo "Mac OS"
-    export PATH=${PWD}/hyperledger-fabric-darwin-amd64-1.4.12/bin:$PATH
+  echo "当前操作系统是 Mac"
+  export PATH=${PWD}/hyperledger-fabric-darwin-amd64-1.4.12/bin:$PATH
+elif [[ `uname` == 'Linux' ]]; then
+  echo "当前操作系统是 Linux"
+  export PATH=${PWD}/hyperledger-fabric-linux-amd64-1.4.12/bin:$PATH
+else
+  echo "当前操作系统不是 Mac 或 Linux，脚本无法继续执行！"
+  exit 1
 fi
-if [[ `uname` == 'Linux' ]]; then
-    echo "Linux"
-    export PATH=${PWD}/hyperledger-fabric-linux-amd64-1.4.12/bin:$PATH
+
+echo -e "注意：倘若您之前已经部署过了 network ，执行该脚本会丢失之前的数据！\n若只是想重启 network ，可以直接执行 docker-compose restart 命令。"
+read -p "你确定要继续执行吗？请输入 Y 或 y 继续执行：" confirm
+
+if [[ "$confirm" != "Y" && "$confirm" != "y" ]]; then
+  echo "你取消了脚本的执行。"
+  exit 1
 fi
 
 echo "一、清理环境"
@@ -71,4 +82,10 @@ sleep 5
 # 进行链码交互，验证链码是否正确安装及区块链网络能否正常工作
 echo "十二、验证链码"
 docker exec cli bash -c "$TaobaoPeer0Cli peer chaincode invoke -C appchannel -n fabric-realty -c '{\"Args\":[\"hello\"]}'"
-docker exec cli bash -c "$JDPeer0Cli peer chaincode invoke -C appchannel -n fabric-realty -c '{\"Args\":[\"hello\"]}'"
+
+if docker exec cli bash -c "$JDPeer0Cli peer chaincode invoke -C appchannel -n fabric-realty -c '{\"Args\":[\"hello\"]}'" 2>&1 | grep "Chaincode invoke successful"; then
+  echo "【恭喜您！】 network 部署成功，后续如需暂时停止运行，可以执行 docker-compose stop 命令（不会丢失数据）。"
+  exit 0
+fi
+
+echo "【警告】network 未部署成功，请检查每一个步骤，定位具体问题。"
