@@ -1,4 +1,4 @@
-FROM golang:1.14 AS server
+FROM golang:1.18 AS server
 ENV GO111MODULE=on
 ENV GOPROXY https://goproxy.cn,direct
 WORKDIR /root/togettoyou
