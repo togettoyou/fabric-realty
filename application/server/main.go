@@ -21,7 +21,7 @@ func main() {
 	blockchain.Init()
 	go cron.Init()
 
-	endPoint := fmt.Sprintf("0.0.0.0:%d", 8000)
+	endPoint := fmt.Sprintf("0.0.0.0:%d", 8888)
 	server := &http.Server{
 		Addr:    endPoint,
 		Handler: routers.InitRouter(),

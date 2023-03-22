@@ -1,4 +1,5 @@
-> 🚀 本项目使用 Hyperledger Fabric 构建底层区块链网络, go 编写智能合约，应用层使用 gin+fabric-sdk-go ，前端使用 vue+element-ui
+> 🚀 本项目使用 Hyperledger Fabric 构建底层区块链网络, go 编写智能合约，应用层使用 gin+fabric-sdk-go ，前端使用
+> vue+element-ui
 
 如果想要联系我，可以关注我的公众号【gopher云原生】
 
@@ -6,17 +7,18 @@
 
 ## 教程
 
-[万字长文，教你用go开发区块链应用](https://mp.weixin.qq.com/s/yDmGwfRjXxDJfgv1d0p3Ig) 
+[万字长文，教你用go开发区块链应用](https://mp.weixin.qq.com/s/yDmGwfRjXxDJfgv1d0p3Ig)
 
 > 🤔 有任何疑问，请先看完本篇文章。本项目涉及的知识点都有在文章中进行说明
 
 ## 环境要求
 
-安装了 Docker 和 Docker Compose 的 Linux 环境
+安装了 Docker 和 Docker Compose 的 Linux 或 Mac OS 环境
 
-附 Docker 安装教程：[点此跳转](Install.md)
+附 Linux Docker 安装教程：[点此跳转](Install.md)
 
-> 🤔 Docker 和 Docker Compose 需要先自行学习。本项目的区块链网络搭建、链码部署、前后端编译/部署都是使用 Docker 和 Docker Compose 完成的。
+> 🤔 Docker 和 Docker Compose 需要先自行学习。本项目的区块链网络搭建、链码部署、前后端编译/部署都是使用 Docker 和 Docker
+> Compose 完成的。
 
 ## 部署
 
@@ -29,24 +31,29 @@
 3. 进入 `network` 目录，执行 `./start.sh` 启动区块链网络以及部署智能合约
 
 
-4. 进入 `application` 目录，执行 `./build.sh` 编译镜像，完成后继续执行 `./start.sh`
-   启动应用，最后可使用浏览器访问 [http://localhost:8000/web](http://localhost:8000/web)
+4. 进入 `application` 目录，执行 `./start.sh`
+   启动前后端应用，最后可使用浏览器访问 [http://localhost:8000](http://localhost:8000)
+   ，其中后端接口地址为 [http://localhost:8888](http://localhost:8888)
 
 
-5. （可选）进入 `network/explorer` 目录，执行 `./start.sh` 启动区块链浏览器后，访问 [http://localhost:8080](http://localhost:8080)，用户名 admin，密码
+5. （可选）进入 `network/explorer` 目录，执行 `./start.sh`
+   启动区块链浏览器后，访问 [http://localhost:8080](http://localhost:8080)，用户名 admin，密码
    123456
 
 ## 停止或重启
 
-注意，默认执行 `./start.sh` 脚本时都会调用 `./stop.sh` ，所以如果想持久化数据的情况下停止或重启本项目，请不要重新执行 `./start.sh` ，正确姿势参考：
+注意，`network` 下默认执行 `./start.sh` 脚本时都会调用 `./stop.sh`
+，所以部署成功后，如果想持久化数据的情况下停止或重启本项目，请不要在 `network` 下再次执行 `./start.sh` ，正确姿势参考：
 
-1. （如果启动了区块链浏览器）进入 `network/explorer` 目录，执行 `docker-compose stop` 停止区块链浏览器，执行 `docker-compose start`
+1. （如果启动了区块链浏览器）进入 `network/explorer` 目录，执行 `docker-compose stop`
+   停止区块链浏览器，执行 `docker-compose start`
    启动区块链浏览器，执行 `docker-compose restart` 重启区块链浏览器
 
 2. 进入 `network` 目录，执行 `docker-compose stop` 停止区块链网络，执行 `docker-compose start`
    启动区块链网络，执行 `docker-compose restart` 重启区块链网络
 
-3. 进入 `application` 目录，区块链应用是无状态的，可以直接执行 `./stop.sh` 关闭区块链应用，执行 `./start.sh` 关闭区块链应用
+3. 进入 `application` 目录，区块链应用是无状态的，可以直接执行 `./stop.sh` 停止区块链前后端应用，执行 `./start.sh`
+   启动区块链前后端应用
 
 ## 完全清理环境
 

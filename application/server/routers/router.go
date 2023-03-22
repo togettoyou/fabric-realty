@@ -2,8 +2,6 @@ package routers
 
 import (
 	v1 "application/api/v1"
-	"net/http"
-
 	"github.com/gin-gonic/gin"
 )
 
@@ -27,7 +25,5 @@ func InitRouter() *gin.Engine {
 		apiV1.POST("/queryDonatingListByGrantee", v1.QueryDonatingListByGrantee)
 		apiV1.POST("/updateDonating", v1.UpdateDonating)
 	}
-	// 静态文件路由
-	r.StaticFS("/web", http.Dir("./dist/"))
 	return r
 }
