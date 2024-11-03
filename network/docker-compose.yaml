@@ -43,6 +43,8 @@ services:
       - CORE_PEER_ID=peer0.taobao.com
       - CORE_PEER_LOCALMSPID=TaobaoMSP
       - CORE_PEER_ADDRESS=peer0.taobao.com:7051
+      - CORE_PEER_GOSSIP_BOOTSTRAP=peer1.taobao.com:7051 # Gossip引导节点，联络列表中的其他 peer 节点进行消息的 gossip 传播
+      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.taobao.com:7051 # 节点向组织外节点公开的服务地址（通过锚节点广播出去给其它组织节点）
     ports:
       - "7051:7051" # grpc服务端口
       - "7053:7053" # eventhub端口
@@ -62,6 +64,8 @@ services:
       - CORE_PEER_ID=peer1.taobao.com
       - CORE_PEER_LOCALMSPID=TaobaoMSP
       - CORE_PEER_ADDRESS=peer1.taobao.com:7051
+      - CORE_PEER_GOSSIP_BOOTSTRAP=peer0.taobao.com:7051
+      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer1.taobao.com:7051
     ports:
       - "17051:7051"
       - "17053:7053"
@@ -81,6 +85,8 @@ services:
       - CORE_PEER_ID=peer0.jd.com
       - CORE_PEER_LOCALMSPID=JDMSP
       - CORE_PEER_ADDRESS=peer0.jd.com:7051
+      - CORE_PEER_GOSSIP_BOOTSTRAP=peer1.jd.com:7051
+      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.jd.com:7051
     ports:
       - "27051:7051"
       - "27053:7053"
@@ -100,6 +106,8 @@ services:
       - CORE_PEER_ID=peer1.jd.com
       - CORE_PEER_LOCALMSPID=JDMSP
       - CORE_PEER_ADDRESS=peer1.jd.com:7051
+      - CORE_PEER_GOSSIP_BOOTSTRAP=peer0.jd.com:7051
+      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer1.jd.com:7051
     ports:
       - "37051:7051"
       - "37053:7053"
