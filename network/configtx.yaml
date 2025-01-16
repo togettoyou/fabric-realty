@@ -1,65 +1,173 @@
-# 定义组织机构实体
 Organizations:
-  - &QQ
-    Name: QQ # 组织的名称
-    ID: QQMSP # 组织的 MSPID
-    MSPDir: crypto-config/ordererOrganizations/qq.com/msp #组织的证书相对位置（生成的crypto-config目录)
+  - &Orderer # 排序节点
+    Name: Orderer
+    ID: OrdererMSP
+    MSPDir: crypto-config/ordererOrganizations/togettoyou.com/msp # msp 证书路径
+    Policies: # 2.x 版本必须定义策略
+      Readers:
+        Type: Signature
+        Rule: "OR('OrdererMSP.member')"
+      Writers:
+        Type: Signature
+        Rule: "OR('OrdererMSP.member')"
+      Admins:
+        Type: Signature
+        Rule: "OR('OrdererMSP.admin')"
+    OrdererEndpoints:
+      - orderer1.togettoyou.com:7050
+      - orderer2.togettoyou.com:7050
+      - orderer3.togettoyou.com:7050
 
-  - &Taobao
-    Name: Taobao
-    ID: TaobaoMSP
-    MSPDir: crypto-config/peerOrganizations/taobao.com/msp
-    AnchorPeers: # 组织锚节点的配置
-      - Host: peer0.taobao.com
+  - &Org1 # 组织1
+    Name: Org1
+    ID: Org1MSP
+    MSPDir: crypto-config/peerOrganizations/org1.togettoyou.com/msp
+    AnchorPeers: # 锚节点
+      - Host: peer0.org1.togettoyou.com
         Port: 7051
+    Policies:
+      Readers:
+        Type: Signature
+        Rule: "OR('Org1MSP.admin', 'Org1MSP.peer', 'Org1MSP.client')"
+      Writers:
+        Type: Signature
+        Rule: "OR('Org1MSP.admin', 'Org1MSP.client')"
+      Admins:
+        Type: Signature
+        Rule: "OR('Org1MSP.admin')"
+      Endorsement:
+        Type: Signature
+        Rule: "OR('Org1MSP.peer')"
 
-  - &JD
-    Name: JD
-    ID: JDMSP
-    MSPDir: crypto-config/peerOrganizations/jd.com/msp
-    AnchorPeers: # 组织锚节点的配置
-      - Host: peer0.jd.com
+  - &Org2 # 组织2
+    Name: Org2
+    ID: Org2MSP
+    MSPDir: crypto-config/peerOrganizations/org2.togettoyou.com/msp
+    AnchorPeers:
+      - Host: peer0.org2.togettoyou.com
         Port: 7051
+    Policies:
+      Readers:
+        Type: Signature
+        Rule: "OR('Org2MSP.admin', 'Org2MSP.peer', 'Org2MSP.client')"
+      Writers:
+        Type: Signature
+        Rule: "OR('Org2MSP.admin', 'Org2MSP.client')"
+      Admins:
+        Type: Signature
+        Rule: "OR('Org2MSP.admin')"
+      Endorsement:
+        Type: Signature
+        Rule: "OR('Org2MSP.peer')"
 
-# 定义了排序服务的相关参数，这些参数将用于创建创世区块
-Orderer: &OrdererDefaults
-  # 排序节点类型用来指定要启用的排序节点实现，不同的实现对应不同的共识算法
-  OrdererType: solo # 共识机制
-  Addresses: # Orderer 的域名（用于连接）
-    - orderer.qq.com:7050
-  BatchTimeout: 2s # 出块时间间隔
-  BatchSize: # 用于控制每个block的信息量
-    MaxMessageCount: 10 #每个区块的消息个数
-    AbsoluteMaxBytes: 99 MB #每个区块最大的信息大小
-    PreferredMaxBytes: 512 KB #每个区块包含的一条信息最大长度
-  Organizations:
+Capabilities:
+  Channel: &ChannelCapabilities
+    V2_0: true
+  Orderer: &OrdererCapabilities
+    V2_0: true
+  Application: &ApplicationCapabilities
+    V2_5: true
 
-# 定义Peer组织如何与应用程序通道交互的策略
-# 默认策略：所有Peer组织都将能够读取数据并将数据写入账本
 Application: &ApplicationDefaults
   Organizations:
+  Policies:
+    Readers:
+      Type: ImplicitMeta
+      Rule: "ANY Readers"
+    Writers:
+      Type: ImplicitMeta
+      Rule: "ANY Writers"
+    Admins:
+      Type: ImplicitMeta
+      Rule: "MAJORITY Admins"
+    LifecycleEndorsement:
+      Type: ImplicitMeta
+      Rule: "MAJORITY Endorsement"
+    Endorsement:
+      Type: ImplicitMeta
+      Rule: "MAJORITY Endorsement"
+  Capabilities:
+    <<: *ApplicationCapabilities
 
-# 用来定义用于 configtxgen 工具的配置入口
-# 将 Profile 参数（ TwoOrgsOrdererGenesis 或 TwoOrgsChannel ）指定为 configtxgen 工具的参数
+Orderer: &OrdererDefaults
+  OrdererType: etcdraft
+  Addresses:
+    - orderer1.togettoyou.com:7050
+    - orderer2.togettoyou.com:7050
+    - orderer3.togettoyou.com:7050
+  BatchTimeout: 2s
+  BatchSize:
+    MaxMessageCount: 10
+    AbsoluteMaxBytes: 99 MB
+    PreferredMaxBytes: 512 KB
+  EtcdRaft:
+    Consenters:
+      - Host: orderer1.togettoyou.com
+        Port: 7050
+        ClientTLSCert: crypto-config/ordererOrganizations/togettoyou.com/orderers/orderer1.togettoyou.com/tls/server.crt
+        ServerTLSCert: crypto-config/ordererOrganizations/togettoyou.com/orderers/orderer1.togettoyou.com/tls/server.crt
+      - Host: orderer2.togettoyou.com
+        Port: 7050
+        ClientTLSCert: crypto-config/ordererOrganizations/togettoyou.com/orderers/orderer2.togettoyou.com/tls/server.crt
+        ServerTLSCert: crypto-config/ordererOrganizations/togettoyou.com/orderers/orderer2.togettoyou.com/tls/server.crt
+      - Host: orderer3.togettoyou.com
+        Port: 7050
+        ClientTLSCert: crypto-config/ordererOrganizations/togettoyou.com/orderers/orderer3.togettoyou.com/tls/server.crt
+        ServerTLSCert: crypto-config/ordererOrganizations/togettoyou.com/orderers/orderer3.togettoyou.com/tls/server.crt
+  Organizations:
+  Policies:
+    Readers:
+      Type: ImplicitMeta
+      Rule: "ANY Readers"
+    Writers:
+      Type: ImplicitMeta
+      Rule: "ANY Writers"
+    Admins:
+      Type: ImplicitMeta
+      Rule: "MAJORITY Admins"
+    BlockValidation:
+      Type: ImplicitMeta
+      Rule: "ANY Writers"
+  Capabilities:
+    <<: *OrdererCapabilities
+
+Channel: &ChannelDefaults
+  Policies:
+    Readers:
+      Type: ImplicitMeta
+      Rule: "ANY Readers"
+    Writers:
+      Type: ImplicitMeta
+      Rule: "ANY Writers"
+    Admins:
+      Type: ImplicitMeta
+      Rule: "MAJORITY Admins"
+  Capabilities:
+    <<: *ChannelCapabilities
+
+# 真正配置
 Profiles:
-  #  TwoOrgsOrdererGenesis配置文件用于创建系统通道创世块
-  #  该配置文件创建一个名为SampleConsortium的联盟
-  #  该联盟在configtx.yaml文件中包含两个Peer组织Taobao和JD
-  TwoOrgsOrdererGenesis:
+  SampleGenesis:
+    <<: *ChannelDefaults
+    # Orderer节点配置
     Orderer:
       <<: *OrdererDefaults
       Organizations:
-        - *QQ
+        - *Orderer
     Consortiums:
+      # 联盟配置，名称自定义，这里叫做 SampleConsortium
       SampleConsortium:
+        # 联盟旗下组织
         Organizations:
-          - *Taobao
-          - *JD
-  # 使用TwoOrgsChannel配置文件创建应用程序通道
-  TwoOrgsChannel:
+          - *Org1
+          - *Org2
+  SampleChannel:
+    <<: *ChannelDefaults
+    # 所属联盟
     Consortium: SampleConsortium
+    # 通道组织
     Application:
       <<: *ApplicationDefaults
       Organizations:
-        - *Taobao
-        - *JD
+        - *Org1
+        - *Org2

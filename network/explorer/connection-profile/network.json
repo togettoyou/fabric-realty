@@ -1,0 +1,50 @@
+{
+  "name": "network",
+  "version": "1.0.0",
+  "client": {
+    "tlsEnable": true,
+    "adminCredential": {
+      "id": "admin",
+      "password": "123456"
+    },
+    "enableAuthentication": true,
+    "organization": "Org1MSP",
+    "connection": {
+      "timeout": {
+        "peer": {
+          "endorser": "300"
+        },
+        "orderer": "300"
+      }
+    }
+  },
+  "channels": {
+    "channeltogettoyou": {
+      "peers": {
+        "peer0.org1.togettoyou.com": {}
+      }
+    }
+  },
+  "organizations": {
+    "Org1MSP": {
+      "mspid": "Org1MSP",
+      "adminPrivateKey": {
+        "path": "/tmp/crypto/peerOrganizations/org1.togettoyou.com/users/User1@org1.togettoyou.com/msp/keystore/priv_sk"
+      },
+      "peers": [
+        "peer0.org1.togettoyou.com"
+      ],
+      "signedCert": {
+        "path": "/tmp/crypto/peerOrganizations/org1.togettoyou.com/users/User1@org1.togettoyou.com/msp/signcerts/User1@org1.togettoyou.com-cert.pem"
+      }
+    }
+  },
+  "peers": {
+    "peer0.org1.togettoyou.com": {
+      "tlsCACerts": {
+        "path": "/tmp/crypto/peerOrganizations/org1.togettoyou.com/peers/peer0.org1.togettoyou.com/tls/ca.crt"
+      },
+      "url": "grpcs://peer0.org1.togettoyou.com:7051"
+    }
+  }
+}

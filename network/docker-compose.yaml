@@ -1,143 +1,155 @@
 version: '2.1'
 
-volumes:
-  orderer.qq.com:
-  peer0.taobao.com:
-  peer1.taobao.com:
-  peer0.jd.com:
-  peer1.jd.com:
-
 networks:
-  fabric_network:
-    name: fabric_network
+  fabric_togettoyou_network:
+    name: fabric_togettoyou_network
 
 services:
-  # 排序服务节点
-  orderer.qq.com:
-    container_name: orderer.qq.com
-    image: hyperledger/fabric-orderer:1.4.12
-    environment:
-      - GODEBUG=netdns=go
-      - ORDERER_GENERAL_LISTENADDRESS=0.0.0.0
-      - ORDERER_GENERAL_GENESISMETHOD=file
-      - ORDERER_GENERAL_GENESISFILE=/etc/hyperledger/config/genesis.block # 注入创世区块
-      - ORDERER_GENERAL_LOCALMSPID=QQMSP
-      - ORDERER_GENERAL_LOCALMSPDIR=/etc/hyperledger/orderer/msp # 证书相关
-    command: orderer
+  orderer1.togettoyou.com:
+    extends:
+      file: docker-compose-base.yaml
+      service: order-base
+    container_name: orderer1.togettoyou.com
     ports:
       - "7050:7050"
-    volumes: # 挂载由cryptogen和configtxgen生成的证书文件以及创世区块
-      - ./config/genesis.block:/etc/hyperledger/config/genesis.block
-      - ./crypto-config/ordererOrganizations/qq.com/orderers/orderer.qq.com/:/etc/hyperledger/orderer
-      - orderer.qq.com:/var/hyperledger/production/orderer
-    networks:
-      - fabric_network
-
-  #  Taobao 组织 peer0 节点
-  peer0.taobao.com:
-    extends:
-      file: docker-compose-base.yaml
-      service: peer-base
-    container_name: peer0.taobao.com
-    environment:
-      - CORE_PEER_ID=peer0.taobao.com
-      - CORE_PEER_LOCALMSPID=TaobaoMSP
-      - CORE_PEER_ADDRESS=peer0.taobao.com:7051
-      - CORE_PEER_GOSSIP_BOOTSTRAP=peer1.taobao.com:7051 # Gossip引导节点，联络列表中的其他 peer 节点进行消息的 gossip 传播
-      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.taobao.com:7051 # 节点向组织外节点公开的服务地址（通过锚节点广播出去给其它组织节点）
-    ports:
-      - "7051:7051" # grpc服务端口
-      - "7053:7053" # eventhub端口
     volumes:
-      - ./crypto-config/peerOrganizations/taobao.com/peers/peer0.taobao.com:/etc/hyperledger/peer
-      - peer0.taobao.com:/var/hyperledger/production
-    depends_on:
-      - orderer.qq.com
+      - ./config/genesis.block:/etc/hyperledger/config/genesis.block
+      - ./crypto-config/ordererOrganizations/togettoyou.com/orderers/orderer1.togettoyou.com/:/etc/hyperledger/orderer
+      - ./data/orderer1.togettoyou.com:/var/hyperledger/production/orderer
+  orderer2.togettoyou.com:
+    extends:
+      file: docker-compose-base.yaml
+      service: order-base
+    container_name: orderer2.togettoyou.com
+    ports:
+      - "8050:7050"
+    volumes:
+      - ./config/genesis.block:/etc/hyperledger/config/genesis.block
+      - ./crypto-config/ordererOrganizations/togettoyou.com/orderers/orderer2.togettoyou.com/:/etc/hyperledger/orderer
+      - ./data/orderer2.togettoyou.com:/var/hyperledger/production/orderer
+  orderer3.togettoyou.com:
+    extends:
+      file: docker-compose-base.yaml
+      service: order-base
+    container_name: orderer3.togettoyou.com
+    ports:
+      - "9050:7050"
+    volumes:
+      - ./config/genesis.block:/etc/hyperledger/config/genesis.block
+      - ./crypto-config/ordererOrganizations/togettoyou.com/orderers/orderer3.togettoyou.com/:/etc/hyperledger/orderer
+      - ./data/orderer3.togettoyou.com:/var/hyperledger/production/orderer
 
-  #  Taobao 组织 peer1 节点
-  peer1.taobao.com:
+  peer0.org1.togettoyou.com:
     extends:
       file: docker-compose-base.yaml
       service: peer-base
-    container_name: peer1.taobao.com
+    container_name: peer0.org1.togettoyou.com
     environment:
-      - CORE_PEER_ID=peer1.taobao.com
-      - CORE_PEER_LOCALMSPID=TaobaoMSP
-      - CORE_PEER_ADDRESS=peer1.taobao.com:7051
-      - CORE_PEER_GOSSIP_BOOTSTRAP=peer0.taobao.com:7051
-      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer1.taobao.com:7051
+      - CORE_PEER_ID=peer0.org1.togettoyou.com
+      - CORE_PEER_LOCALMSPID=Org1MSP
+      - CORE_PEER_ADDRESS=peer0.org1.togettoyou.com:7051  # peer节点的访问地址
+      - CORE_PEER_CHAINCODEADDRESS=peer0.org1.togettoyou.com:7052 # peer节点的链码访问地址
+      # 参考 https://hyperledger-fabric.readthedocs.io/zh-cn/release-2.5/gossip.html
+      - CORE_PEER_GOSSIP_BOOTSTRAP=peer1.org1.togettoyou.com:7051 # Gossip引导节点，联络列表中的其他 peer 节点进行消息的 gossip 传播
+      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.org1.togettoyou.com:7051 # 节点向组织外节点公开的服务地址（通过锚节点广播出去给其它组织节点）
+    ports:
+      - "7051:7051"
+      - "7053:7053"
+    volumes:
+      - ./crypto-config/peerOrganizations/org1.togettoyou.com/peers/peer0.org1.togettoyou.com:/etc/hyperledger/peer
+      - ./data/peer0.org1.togettoyou.com:/var/hyperledger/production
+    depends_on:
+      - orderer1.togettoyou.com
+      - orderer2.togettoyou.com
+      - orderer3.togettoyou.com
+  peer1.org1.togettoyou.com:
+    extends:
+      file: docker-compose-base.yaml
+      service: peer-base
+    container_name: peer1.org1.togettoyou.com
+    environment:
+      - CORE_PEER_ID=peer1.org1.togettoyou.com
+      - CORE_PEER_LOCALMSPID=Org1MSP
+      - CORE_PEER_ADDRESS=peer1.org1.togettoyou.com:7051  # peer节点的访问地址
+      - CORE_PEER_CHAINCODEADDRESS=peer1.org1.togettoyou.com:7052 # peer节点的链码访问地址
+      - CORE_PEER_GOSSIP_BOOTSTRAP=peer0.org1.togettoyou.com:7051 # Gossip引导节点，联络列表中的其他 peer 节点进行消息的 gossip 传播
+      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer1.org1.togettoyou.com:7051 # 节点向组织外节点公开的服务地址（通过锚节点广播出去给其它组织节点）
     ports:
       - "17051:7051"
       - "17053:7053"
     volumes:
-      - ./crypto-config/peerOrganizations/taobao.com/peers/peer1.taobao.com:/etc/hyperledger/peer
-      - peer1.taobao.com:/var/hyperledger/production
+      - ./crypto-config/peerOrganizations/org1.togettoyou.com/peers/peer1.org1.togettoyou.com:/etc/hyperledger/peer
+      - ./data/peer1.org1.togettoyou.com:/var/hyperledger/production
     depends_on:
-      - orderer.qq.com
+      - orderer1.togettoyou.com
+      - orderer2.togettoyou.com
+      - orderer3.togettoyou.com
 
-  #  JD 组织 peer0 节点
-  peer0.jd.com:
+  peer0.org2.togettoyou.com:
     extends:
       file: docker-compose-base.yaml
       service: peer-base
-    container_name: peer0.jd.com
+    container_name: peer0.org2.togettoyou.com
     environment:
-      - CORE_PEER_ID=peer0.jd.com
-      - CORE_PEER_LOCALMSPID=JDMSP
-      - CORE_PEER_ADDRESS=peer0.jd.com:7051
-      - CORE_PEER_GOSSIP_BOOTSTRAP=peer1.jd.com:7051
-      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.jd.com:7051
+      - CORE_PEER_ID=peer0.org2.togettoyou.com
+      - CORE_PEER_LOCALMSPID=Org2MSP
+      - CORE_PEER_ADDRESS=peer0.org2.togettoyou.com:7051  # peer节点的访问地址
+      - CORE_PEER_CHAINCODEADDRESS=peer0.org2.togettoyou.com:7052 # peer节点的链码访问地址
+      - CORE_PEER_GOSSIP_BOOTSTRAP=peer1.org2.togettoyou.com:7051 # Gossip引导节点，联络列表中的其他 peer 节点进行消息的 gossip 传播
+      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.org2.togettoyou.com:7051 # 节点向组织外节点公开的服务地址（通过锚节点广播出去给其它组织节点）
     ports:
       - "27051:7051"
       - "27053:7053"
     volumes:
-      - ./crypto-config/peerOrganizations/jd.com/peers/peer0.jd.com:/etc/hyperledger/peer
-      - peer0.jd.com:/var/hyperledger/production
+      - ./crypto-config/peerOrganizations/org2.togettoyou.com/peers/peer0.org2.togettoyou.com:/etc/hyperledger/peer
+      - ./data/peer0.org2.togettoyou.com:/var/hyperledger/production
     depends_on:
-      - orderer.qq.com
-
-  #  JD 组织 peer1 节点
-  peer1.jd.com:
+      - orderer1.togettoyou.com
+      - orderer2.togettoyou.com
+      - orderer3.togettoyou.com
+  peer1.org2.togettoyou.com:
     extends:
       file: docker-compose-base.yaml
       service: peer-base
-    container_name: peer1.jd.com
+    container_name: peer1.org2.togettoyou.com
     environment:
-      - CORE_PEER_ID=peer1.jd.com
-      - CORE_PEER_LOCALMSPID=JDMSP
-      - CORE_PEER_ADDRESS=peer1.jd.com:7051
-      - CORE_PEER_GOSSIP_BOOTSTRAP=peer0.jd.com:7051
-      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer1.jd.com:7051
+      - CORE_PEER_ID=peer1.org2.togettoyou.com
+      - CORE_PEER_LOCALMSPID=Org2MSP
+      - CORE_PEER_ADDRESS=peer1.org2.togettoyou.com:7051  # peer节点的访问地址
+      - CORE_PEER_CHAINCODEADDRESS=peer1.org2.togettoyou.com:7052 # peer节点的链码访问地址
+      - CORE_PEER_GOSSIP_BOOTSTRAP=peer0.org2.togettoyou.com:7051 # Gossip引导节点，联络列表中的其他 peer 节点进行消息的 gossip 传播
+      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer1.org2.togettoyou.com:7051 # 节点向组织外节点公开的服务地址（通过锚节点广播出去给其它组织节点）
     ports:
       - "37051:7051"
       - "37053:7053"
     volumes:
-      - ./crypto-config/peerOrganizations/jd.com/peers/peer1.jd.com:/etc/hyperledger/peer
-      - peer1.jd.com:/var/hyperledger/production
+      - ./crypto-config/peerOrganizations/org2.togettoyou.com/peers/peer1.org2.togettoyou.com:/etc/hyperledger/peer
+      - ./data/peer1.org2.togettoyou.com:/var/hyperledger/production
     depends_on:
-      - orderer.qq.com
+      - orderer1.togettoyou.com
+      - orderer2.togettoyou.com
+      - orderer3.togettoyou.com
 
-  # 客户端节点
-  cli:
-    container_name: cli
-    image: hyperledger/fabric-tools:1.4.12
+  cli.togettoyou.com:
+    container_name: cli.togettoyou.com
+    image: hyperledger/fabric-tools:2.5.10
     tty: true
     environment:
-      # go 环境设置
-      - GO111MODULE=auto
-      - GOPROXY=https://goproxy.cn
-      - CORE_PEER_ID=cli
+      - GOPROXY=https://goproxy.cn,direct
+      - CORE_PEER_ID=cli.togettoyou.com
     command: /bin/bash
     volumes:
       - ./config:/etc/hyperledger/config
-      - ./crypto-config/peerOrganizations/taobao.com/:/etc/hyperledger/peer/taobao.com
-      - ./crypto-config/peerOrganizations/jd.com/:/etc/hyperledger/peer/jd.com
-      - ./../chaincode:/opt/gopath/src/chaincode # 链码路径注入
+      - ./crypto-config/peerOrganizations/:/etc/hyperledger/peer
+      - ./crypto-config/ordererOrganizations/:/etc/hyperledger/orderer
+      - ./../chaincode:/opt/gopath/src/chaincode
     networks:
-      - fabric_network
+      - fabric_togettoyou_network
     depends_on:
-      - orderer.qq.com
-      - peer0.taobao.com
-      - peer1.taobao.com
-      - peer0.jd.com
-      - peer1.jd.com
+      - orderer1.togettoyou.com
+      - orderer2.togettoyou.com
+      - orderer3.togettoyou.com
+      - peer0.org1.togettoyou.com
+      - peer1.org1.togettoyou.com
+      - peer0.org2.togettoyou.com
+      - peer1.org2.togettoyou.com

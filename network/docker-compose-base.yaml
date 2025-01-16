@@ -1,19 +1,50 @@
 version: '2.1'
 
 services:
-  peer-base: # peer的公共服务
-    image: hyperledger/fabric-peer:1.4.12
+  order-base:
+    image: hyperledger/fabric-orderer:2.5.10
     environment:
-      - GODEBUG=netdns=go
-      - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
-      - CORE_LOGGING_PEER=info
-      - CORE_CHAINCODE_LOGGING_LEVEL=INFO
-      - CORE_PEER_MSPCONFIGPATH=/etc/hyperledger/peer/msp # msp证书（节点证书）
-      - CORE_LEDGER_STATE_STATEDATABASE=goleveldb # 状态数据库的存储引擎（or CouchDB）
-      - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=fabric_network # docker 网络
+      - FABRIC_LOGGING_SPEC=INFO
+      - ORDERER_GENERAL_LISTENPORT=7050
+      - ORDERER_GENERAL_LISTENADDRESS=0.0.0.0
+      - ORDERER_GENERAL_BOOTSTRAPMETHOD=file # 创世区块的提供方式
+      - ORDERER_GENERAL_BOOTSTRAPFILE=/etc/hyperledger/config/genesis.block # 创世区块文件路径
+      - ORDERER_CHANNELPARTICIPATION_ENABLED=true # 是否提供参与通道的 API
+      - ORDERER_GENERAL_LOCALMSPID=OrdererMSP # MSPID
+      - ORDERER_GENERAL_LOCALMSPDIR=/etc/hyperledger/orderer/msp # 本地 MSP 文件路径
+      # enabled TLS
+      - ORDERER_GENERAL_TLS_ENABLED=true
+      - ORDERER_GENERAL_TLS_PRIVATEKEY=/etc/hyperledger/orderer/tls/server.key
+      - ORDERER_GENERAL_TLS_CERTIFICATE=/etc/hyperledger/orderer/tls/server.crt
+      - ORDERER_GENERAL_TLS_ROOTCAS=[/etc/hyperledger/orderer/tls/ca.crt]
+      - ORDERER_GENERAL_CLUSTER_CLIENTCERTIFICATE=/etc/hyperledger/orderer/tls/server.crt
+      - ORDERER_GENERAL_CLUSTER_CLIENTPRIVATEKEY=/etc/hyperledger/orderer/tls/server.key
+      - ORDERER_GENERAL_CLUSTER_ROOTCAS=[/etc/hyperledger/orderer/tls/ca.crt]
+    command: orderer
+    networks:
+      - fabric_togettoyou_network
+  peer-base:
+    image: hyperledger/fabric-peer:2.5.10
+    environment:
+      - FABRIC_LOGGING_SPEC=INFO
+      - CORE_PEER_PROFILE_ENABLED=false
+      - CORE_PEER_LISTENADDRESS=0.0.0.0:7051 # peer节点的监听地址
+      - CORE_PEER_CHAINCODELISTENADDRESS=0.0.0.0:7052 # peer节点的链码监听地址
+      - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock # docker daemon 的地址
+      - CORE_CHAINCODE_EXECUTETIMEOUT=300s # 链码执行超时时间
+      - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=fabric_togettoyou_network # 运行链码容器的容器网络
+      - CORE_PEER_GOSSIP_USELEADERELECTION=true # 是否采用选举产生leader节点
+      - CORE_PEER_GOSSIP_ORGLEADER=false # 本节点是否作为leader节点
+      - CORE_LEDGER_STATE_STATEDATABASE=goleveldb # 节点状态数据库，支持切换为外部部署的 CouchDB
+      - CORE_PEER_MSPCONFIGPATH=/etc/hyperledger/peer/msp # 本地 MSP 文件路径
+      # enabled TLS
+      - CORE_PEER_TLS_ENABLED=true
+      - CORE_PEER_TLS_CERT_FILE=/etc/hyperledger/peer/tls/server.crt
+      - CORE_PEER_TLS_KEY_FILE=/etc/hyperledger/peer/tls/server.key
+      - CORE_PEER_TLS_ROOTCERT_FILE=/etc/hyperledger/peer/tls/ca.crt
     volumes:
       - /var/run/docker.sock:/host/var/run/docker.sock
     working_dir: /opt/gopath/src/github.com/hyperledger/fabric
     command: peer node start
     networks:
-      - fabric_network
+      - fabric_togettoyou_network
