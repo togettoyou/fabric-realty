@@ -9,8 +9,8 @@ server:
   port: 8080
 
 jwt:
-  secret: "your-256-bit-secret"  # 在生产环境中使用更强的密钥
-  expire_time: 24  # token 过期时间（小时）
+  secret: "2c39affd-8238-470b-88e6-39a146c15fc6"
+  expire_time: 24
 
 fabric:
   channelName: mychannel
