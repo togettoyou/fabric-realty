@@ -1,0 +1,24 @@
+mysql:
+  host: localhost
+  port: 3306
+  user: root
+  password: 123456
+  dbname: realty
+
+server:
+  port: 8080
+
+jwt:
+  secret: "your-256-bit-secret"  # 在生产环境中使用更强的密钥
+  expire_time: 24  # token 过期时间（小时）
+
+fabric:
+  channelName: mychannel
+  chaincodeName: basic
+  org1MSPID: Org1MSP
+  cryptoPath: ../../test-network/organizations/peerOrganizations/org1.example.com
+  certPath: ../../test-network/organizations/peerOrganizations/org1.example.com/users/User1@org1.example.com/msp/signcerts
+  keyPath: ../../test-network/organizations/peerOrganizations/org1.example.com/users/User1@org1.example.com/msp/keystore
+  tlsCertPath: ../../test-network/organizations/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls/ca.crt
+  peerEndpoint: localhost:7051
+  gatewayPeer: peer0.org1.example.com
