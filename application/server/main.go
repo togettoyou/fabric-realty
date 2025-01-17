@@ -29,6 +29,8 @@ func main() {
 	}
 
 	// 创建 Gin 路由
+	gin.SetMode(gin.ReleaseMode)
+
 	r := gin.Default()
 
 	// 创建处理器实例

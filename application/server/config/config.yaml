@@ -14,11 +14,11 @@ jwt:
 
 fabric:
   channelName: mychannel
-  chaincodeName: basic
+  chaincodeName: mychaincode
   org1MSPID: Org1MSP
-  cryptoPath: ../../test-network/organizations/peerOrganizations/org1.example.com
-  certPath: ../../test-network/organizations/peerOrganizations/org1.example.com/users/User1@org1.example.com/msp/signcerts
-  keyPath: ../../test-network/organizations/peerOrganizations/org1.example.com/users/User1@org1.example.com/msp/keystore
-  tlsCertPath: ../../test-network/organizations/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls/ca.crt
+  cryptoPath: ../../network/crypto-config/peerOrganizations/org1.togettoyou.com
+  certPath: ../../network/crypto-config/peerOrganizations/org1.togettoyou.com/users/User1@org1.togettoyou.com/msp/signcerts
+  keyPath: ../../network/crypto-config/peerOrganizations/org1.togettoyou.com/users/User1@org1.togettoyou.com/msp/keystore
+  tlsCertPath: ../../network/crypto-config/peerOrganizations/org1.togettoyou.com/peers/peer0.org1.togettoyou.com/tls/ca.crt
   peerEndpoint: localhost:7051
-  gatewayPeer: peer0.org1.example.com
+  gatewayPeer: peer0.org1.togettoyou.com
