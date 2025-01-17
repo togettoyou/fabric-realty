@@ -18,8 +18,8 @@ const (
 func (s *RealtyService) CreateRealEstate(id, address string, area float64, owner string, price float64) error {
 	// 使用房管局组织身份
 	contract := utils.GetContract(REALTY_ORG)
-	now := time.Now()
-	_, err := contract.SubmitTransaction("CreateRealEstate", id, address, fmt.Sprintf("%f", area), owner, fmt.Sprintf("%f", price), fmt.Sprintf("%d", now.Unix()))
+	now := time.Now().UTC().Format(time.RFC3339)
+	_, err := contract.SubmitTransaction("CreateRealEstate", id, address, fmt.Sprintf("%f", area), owner, fmt.Sprintf("%f", price), now)
 	if err != nil {
 		return fmt.Errorf("创建房产信息失败：%v", err)
 	}
@@ -47,8 +47,8 @@ func (s *RealtyService) QueryRealEstate(id string) (map[string]interface{}, erro
 func (s *RealtyService) CreateTransaction(txID, realEstateID, seller, buyer string, price float64) error {
 	// 创建交易可以使用任意组织身份
 	contract := utils.GetContract(REALTY_ORG)
-	now := time.Now()
-	_, err := contract.SubmitTransaction("CreateTransaction", txID, realEstateID, seller, buyer, fmt.Sprintf("%f", price), fmt.Sprintf("%d", now.Unix()))
+	now := time.Now().UTC().Format(time.RFC3339)
+	_, err := contract.SubmitTransaction("CreateTransaction", txID, realEstateID, seller, buyer, fmt.Sprintf("%f", price), now)
 	if err != nil {
 		return fmt.Errorf("创建交易失败：%v", err)
 	}
@@ -59,8 +59,8 @@ func (s *RealtyService) CreateTransaction(txID, realEstateID, seller, buyer stri
 func (s *RealtyService) ConfirmEscrow(txID string) error {
 	// 使用银行组织身份
 	contract := utils.GetContract(BANK_ORG)
-	now := time.Now()
-	_, err := contract.SubmitTransaction("ConfirmEscrow", txID, fmt.Sprintf("%d", now.Unix()))
+	now := time.Now().UTC().Format(time.RFC3339)
+	_, err := contract.SubmitTransaction("ConfirmEscrow", txID, now)
 	if err != nil {
 		return fmt.Errorf("确认资金托管失败：%v", err)
 	}
@@ -71,8 +71,8 @@ func (s *RealtyService) ConfirmEscrow(txID string) error {
 func (s *RealtyService) CompleteTransaction(txID string) error {
 	// 使用银行组织身份
 	contract := utils.GetContract(BANK_ORG)
-	now := time.Now()
-	_, err := contract.SubmitTransaction("CompleteTransaction", txID, fmt.Sprintf("%d", now.Unix()))
+	now := time.Now().UTC().Format(time.RFC3339)
+	_, err := contract.SubmitTransaction("CompleteTransaction", txID, now)
 	if err != nil {
 		return fmt.Errorf("完成交易失败：%v", err)
 	}
