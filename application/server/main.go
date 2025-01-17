@@ -15,17 +15,17 @@ import (
 func main() {
 	// 初始化配置
 	if err := config.InitConfig(); err != nil {
-		log.Fatalf("Failed to initialize config: %v", err)
+		log.Fatalf("初始化配置失败：%v", err)
 	}
 
 	// 初始化数据库
 	if err := model.InitDB(); err != nil {
-		log.Fatalf("Failed to initialize database: %v", err)
+		log.Fatalf("初始化数据库失败：%v", err)
 	}
 
 	// 初始化 Fabric 客户端
 	if err := utils.InitFabric(); err != nil {
-		log.Fatalf("Failed to initialize Fabric client: %v", err)
+		log.Fatalf("初始化Fabric客户端失败：%v", err)
 	}
 
 	// 创建 Gin 路由
@@ -75,6 +75,6 @@ func main() {
 	// 启动服务器
 	addr := fmt.Sprintf(":%d", config.GlobalConfig.Server.Port)
 	if err := r.Run(addr); err != nil {
-		log.Fatalf("Failed to start server: %v", err)
+		log.Fatalf("启动服务器失败：%v", err)
 	}
 }

@@ -2,11 +2,11 @@ package model
 
 import (
 	"fmt"
-	"golang.org/x/crypto/bcrypt"
 	"log"
 
 	"application/config"
 
+	"golang.org/x/crypto/bcrypt"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
@@ -25,13 +25,13 @@ func InitDB() error {
 	var err error
 	DB, err = gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	if err != nil {
-		return fmt.Errorf("failed to connect to database: %v", err)
+		return fmt.Errorf("连接数据库失败：%v", err)
 	}
 
 	// 自动迁移数据库结构
 	err = DB.AutoMigrate(&User{})
 	if err != nil {
-		return fmt.Errorf("failed to migrate database: %v", err)
+		return fmt.Errorf("数据库迁移失败：%v", err)
 	}
 
 	// 创建默认管理员账户
@@ -61,10 +61,10 @@ func createDefaultAdmins() {
 
 	// 如果不存在则创建
 	if err := DB.FirstOrCreate(&realtyAdmin, User{Username: "realty_admin"}).Error; err != nil {
-		log.Printf("Failed to create default realty admin: %v", err)
+		log.Printf("创建默认房管局管理员失败：%v", err)
 	}
 
 	if err := DB.FirstOrCreate(&bankAdmin, User{Username: "bank_admin"}).Error; err != nil {
-		log.Printf("Failed to create default bank admin: %v", err)
+		log.Printf("创建默认银行管理员失败：%v", err)
 	}
 }

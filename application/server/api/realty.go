@@ -2,7 +2,7 @@ package api
 
 import (
 	"application/service"
-	"net/http"
+	"application/utils"
 
 	"github.com/gin-gonic/gin"
 )
@@ -28,17 +28,17 @@ func (h *RealtyHandler) CreateRealEstate(c *gin.Context) {
 	}
 
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		utils.BadRequest(c, "房产信息格式错误")
 		return
 	}
 
 	err := h.realtyService.CreateRealEstate(req.ID, req.Address, req.Area, req.Owner, req.Price)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		utils.ServerError(c, "创建房产信息失败："+err.Error())
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "Real estate created successfully"})
+	utils.SuccessWithMessage(c, "房产信息创建成功", nil)
 }
 
 // QueryRealEstate 查询房产信息
@@ -46,11 +46,11 @@ func (h *RealtyHandler) QueryRealEstate(c *gin.Context) {
 	id := c.Param("id")
 	realEstate, err := h.realtyService.QueryRealEstate(id)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		utils.ServerError(c, "查询房产信息失败："+err.Error())
 		return
 	}
 
-	c.JSON(http.StatusOK, realEstate)
+	utils.Success(c, realEstate)
 }
 
 // CreateTransaction 创建交易
@@ -64,17 +64,17 @@ func (h *RealtyHandler) CreateTransaction(c *gin.Context) {
 	}
 
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		utils.BadRequest(c, "交易信息格式错误")
 		return
 	}
 
 	err := h.realtyService.CreateTransaction(req.TxID, req.RealEstateID, req.Seller, req.Buyer, req.Price)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		utils.ServerError(c, "创建交易失败："+err.Error())
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "Transaction created successfully"})
+	utils.SuccessWithMessage(c, "交易创建成功", nil)
 }
 
 // ConfirmEscrow 确认资金托管
@@ -82,11 +82,11 @@ func (h *RealtyHandler) ConfirmEscrow(c *gin.Context) {
 	txID := c.Param("txId")
 	err := h.realtyService.ConfirmEscrow(txID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		utils.ServerError(c, "确认资金托管失败："+err.Error())
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "Escrow confirmed successfully"})
+	utils.SuccessWithMessage(c, "资金托管确认成功", nil)
 }
 
 // CompleteTransaction 完成交易
@@ -94,9 +94,9 @@ func (h *RealtyHandler) CompleteTransaction(c *gin.Context) {
 	txID := c.Param("txId")
 	err := h.realtyService.CompleteTransaction(txID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		utils.ServerError(c, "完成交易失败："+err.Error())
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "Transaction completed successfully"})
+	utils.SuccessWithMessage(c, "交易完成", nil)
 }

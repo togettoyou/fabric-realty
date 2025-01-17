@@ -37,7 +37,7 @@ func InitFabric() error {
 		client.WithCommitStatusTimeout(1*time.Minute),
 	)
 	if err != nil {
-		return fmt.Errorf("failed to connect to gateway: %v", err)
+		return fmt.Errorf("连接Fabric网关失败：%v", err)
 	}
 
 	network := gw.GetNetwork(config.GlobalConfig.Fabric.ChannelName)
@@ -50,7 +50,7 @@ func InitFabric() error {
 func newGrpcConnection() *grpc.ClientConn {
 	certificatePEM, err := os.ReadFile(config.GlobalConfig.Fabric.TLSCertPath)
 	if err != nil {
-		panic(fmt.Errorf("failed to read TLS certificate file: %w", err))
+		panic(fmt.Errorf("读取TLS证书文件失败：%w", err))
 	}
 
 	certificate, err := identity.CertificateFromPEM(certificatePEM)
@@ -64,7 +64,7 @@ func newGrpcConnection() *grpc.ClientConn {
 
 	connection, err := grpc.Dial(config.GlobalConfig.Fabric.PeerEndpoint, grpc.WithTransportCredentials(transportCredentials))
 	if err != nil {
-		panic(fmt.Errorf("failed to create gRPC connection: %w", err))
+		panic(fmt.Errorf("创建gRPC连接失败：%w", err))
 	}
 
 	return connection
@@ -74,7 +74,7 @@ func newGrpcConnection() *grpc.ClientConn {
 func newIdentity() *identity.X509Identity {
 	certificatePEM, err := readFirstFile(config.GlobalConfig.Fabric.CertPath)
 	if err != nil {
-		panic(fmt.Errorf("failed to read certificate file: %w", err))
+		panic(fmt.Errorf("读取证书文件失败：%w", err))
 	}
 
 	certificate, err := identity.CertificateFromPEM(certificatePEM)
@@ -94,7 +94,7 @@ func newIdentity() *identity.X509Identity {
 func newSign() identity.Sign {
 	privateKeyPEM, err := readFirstFile(config.GlobalConfig.Fabric.KeyPath)
 	if err != nil {
-		panic(fmt.Errorf("failed to read private key file: %w", err))
+		panic(fmt.Errorf("读取私钥文件失败：%w", err))
 	}
 
 	privateKey, err := identity.PrivateKeyFromPEM(privateKeyPEM)

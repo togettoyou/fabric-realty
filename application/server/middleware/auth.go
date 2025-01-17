@@ -14,7 +14,7 @@ func AuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		authHeader := c.GetHeader("Authorization")
 		if authHeader == "" {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "Authorization header is required"})
+			utils.Unauthorized(c, "请求头中缺少Authorization认证信息")
 			c.Abort()
 			return
 		}
@@ -22,7 +22,7 @@ func AuthMiddleware() gin.HandlerFunc {
 		// 检查 Authorization header 格式
 		parts := strings.SplitN(authHeader, " ", 2)
 		if !(len(parts) == 2 && parts[0] == "Bearer") {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "Authorization header format must be Bearer {token}"})
+			utils.Unauthorized(c, "认证信息格式错误，请使用Bearer {token}格式")
 			c.Abort()
 			return
 		}
@@ -30,7 +30,7 @@ func AuthMiddleware() gin.HandlerFunc {
 		// 解析 token
 		claims, err := utils.ParseToken(parts[1])
 		if err != nil {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid or expired token"})
+			utils.Unauthorized(c, "无效或已过期的访问令牌")
 			c.Abort()
 			return
 		}
@@ -49,7 +49,7 @@ func RequireRoles(allowedTypes ...model.UserType) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		userType, exists := c.Get("user_type")
 		if !exists {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "User type not found in context"})
+			utils.Unauthorized(c, "未找到用户角色信息")
 			c.Abort()
 			return
 		}
@@ -63,7 +63,7 @@ func RequireRoles(allowedTypes ...model.UserType) gin.HandlerFunc {
 		}
 
 		if !allowed {
-			c.JSON(http.StatusForbidden, gin.H{"error": "Permission denied"})
+			utils.Fail(c, http.StatusForbidden, "您没有权限执行此操作")
 			c.Abort()
 			return
 		}

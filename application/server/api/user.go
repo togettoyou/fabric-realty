@@ -3,7 +3,7 @@ package api
 import (
 	"application/model"
 	"application/service"
-	"net/http"
+	"application/utils"
 
 	"github.com/gin-gonic/gin"
 )
@@ -22,16 +22,16 @@ func NewUserHandler() *UserHandler {
 func (h *UserHandler) Register(c *gin.Context) {
 	var user model.User
 	if err := c.ShouldBindJSON(&user); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		utils.BadRequest(c, "用户注册信息格式错误")
 		return
 	}
 
 	if err := h.userService.Register(&user); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		utils.ServerError(c, "用户注册失败："+err.Error())
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "User registered successfully"})
+	utils.SuccessWithMessage(c, "用户注册成功", nil)
 }
 
 // Login 用户登录
@@ -42,19 +42,18 @@ func (h *UserHandler) Login(c *gin.Context) {
 	}
 
 	if err := c.ShouldBindJSON(&loginData); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		utils.BadRequest(c, "登录信息格式错误")
 		return
 	}
 
 	user, token, err := h.userService.Login(loginData.Username, loginData.Password)
 	if err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		utils.Unauthorized(c, "登录失败："+err.Error())
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"message": "Login successful",
-		"token":   token,
+	utils.Success(c, gin.H{
+		"token": token,
 		"user": gin.H{
 			"id":       user.ID,
 			"username": user.Username,
