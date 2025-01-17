@@ -17,7 +17,7 @@ const (
 type User struct {
 	gorm.Model
 	Username string   `gorm:"type:varchar(255);uniqueIndex;not null" json:"username"` // 用户名
-	Password string   `gorm:"type:varchar(255);not null" json:"-"`                    // 密码
+	Password string   `gorm:"type:varchar(255);not null" json:"password"`             // 密码
 	Type     UserType `gorm:"type:varchar(20);not null" json:"type"`                  // 用户类型
 	Name     string   `gorm:"type:varchar(50)" json:"name"`                           // 真实姓名
 	Phone    string   `gorm:"type:varchar(20)" json:"phone"`                          // 电话
