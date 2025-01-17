@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"strconv"
 	"time"
 
 	"github.com/hyperledger/fabric-chaincode-go/v2/pkg/cid"
@@ -73,7 +74,7 @@ func (s *SmartContract) GetClientIdentityMSPID(ctx contractapi.TransactionContex
 }
 
 // CreateRealEstate 创建房产信息
-func (s *SmartContract) CreateRealEstate(ctx contractapi.TransactionContextInterface, id string, address string, area float64, owner string, price float64) error {
+func (s *SmartContract) CreateRealEstate(ctx contractapi.TransactionContextInterface, id string, address string, area string, owner string, price string, createTimeUnix string) error {
 	// 检查调用者身份
 	clientMSPID, err := s.GetClientIdentityMSPID(ctx)
 	if err != nil {
@@ -95,15 +96,32 @@ func (s *SmartContract) CreateRealEstate(ctx contractapi.TransactionContextInter
 		return fmt.Errorf("房产ID %s 已存在", id)
 	}
 
+	// 转换参数
+	areaFloat, err := strconv.ParseFloat(area, 64)
+	if err != nil {
+		return fmt.Errorf("面积格式错误：%v", err)
+	}
+
+	priceFloat, err := strconv.ParseFloat(price, 64)
+	if err != nil {
+		return fmt.Errorf("价格格式错误：%v", err)
+	}
+
+	createTimeInt, err := strconv.ParseInt(createTimeUnix, 10, 64)
+	if err != nil {
+		return fmt.Errorf("时间格式错误：%v", err)
+	}
+	createTime := time.Unix(createTimeInt, 0)
+
 	realEstate := RealEstate{
 		ID:              id,
 		PropertyAddress: address,
-		Area:            area,
+		Area:            areaFloat,
 		CurrentOwner:    owner,
-		Price:           price,
+		Price:           priceFloat,
 		Status:          FOR_SALE,
-		CreateTime:      time.Now(),
-		UpdateTime:      time.Now(),
+		CreateTime:      createTime,
+		UpdateTime:      createTime,
 	}
 
 	realEstateJSON, err := json.Marshal(realEstate)
@@ -134,7 +152,7 @@ func (s *SmartContract) QueryRealEstate(ctx contractapi.TransactionContextInterf
 }
 
 // CreateTransaction 创建交易
-func (s *SmartContract) CreateTransaction(ctx contractapi.TransactionContextInterface, txID string, realEstateID string, seller string, buyer string, price float64) error {
+func (s *SmartContract) CreateTransaction(ctx contractapi.TransactionContextInterface, txID string, realEstateID string, seller string, buyer string, price string, createTimeUnix string) error {
 	realEstate, err := s.QueryRealEstate(ctx, realEstateID)
 	if err != nil {
 		return fmt.Errorf("查询房产信息失败：%v", err)
@@ -148,15 +166,27 @@ func (s *SmartContract) CreateTransaction(ctx contractapi.TransactionContextInte
 		return fmt.Errorf("卖家不是房产所有者")
 	}
 
+	// 转换参数
+	priceFloat, err := strconv.ParseFloat(price, 64)
+	if err != nil {
+		return fmt.Errorf("价格格式错误：%v", err)
+	}
+
+	createTimeInt, err := strconv.ParseInt(createTimeUnix, 10, 64)
+	if err != nil {
+		return fmt.Errorf("时间格式错误：%v", err)
+	}
+	createTime := time.Unix(createTimeInt, 0)
+
 	transaction := Transaction{
 		ID:           txID,
 		RealEstateID: realEstateID,
 		Seller:       seller,
 		Buyer:        buyer,
-		Price:        price,
+		Price:        priceFloat,
 		Status:       PENDING,
-		CreateTime:   time.Now(),
-		UpdateTime:   time.Now(),
+		CreateTime:   createTime,
+		UpdateTime:   createTime,
 	}
 
 	transactionJSON, err := json.Marshal(transaction)
@@ -166,7 +196,7 @@ func (s *SmartContract) CreateTransaction(ctx contractapi.TransactionContextInte
 
 	// 更新房产状态
 	realEstate.Status = IN_TRANSACTION
-	realEstate.UpdateTime = time.Now()
+	realEstate.UpdateTime = createTime
 	realEstateJSON, err := json.Marshal(realEstate)
 	if err != nil {
 		return fmt.Errorf("序列化房产信息失败：%v", err)
@@ -181,7 +211,7 @@ func (s *SmartContract) CreateTransaction(ctx contractapi.TransactionContextInte
 }
 
 // ConfirmEscrow 确认资金托管
-func (s *SmartContract) ConfirmEscrow(ctx contractapi.TransactionContextInterface, txID string) error {
+func (s *SmartContract) ConfirmEscrow(ctx contractapi.TransactionContextInterface, txID string, updateTimeUnix string) error {
 	// 检查调用者身份
 	clientMSPID, err := s.GetClientIdentityMSPID(ctx)
 	if err != nil {
@@ -213,8 +243,15 @@ func (s *SmartContract) ConfirmEscrow(ctx contractapi.TransactionContextInterfac
 		return fmt.Errorf("交易状态不正确，当前状态：%s，需要状态：待付款", transaction.Status)
 	}
 
+	// 转换时间参数
+	updateTimeInt, err := strconv.ParseInt(updateTimeUnix, 10, 64)
+	if err != nil {
+		return fmt.Errorf("时间格式错误：%v", err)
+	}
+	updateTime := time.Unix(updateTimeInt, 0)
+
 	transaction.Status = IN_ESCROW
-	transaction.UpdateTime = time.Now()
+	transaction.UpdateTime = updateTime
 
 	transactionJSON, err = json.Marshal(transaction)
 	if err != nil {
@@ -225,7 +262,7 @@ func (s *SmartContract) ConfirmEscrow(ctx contractapi.TransactionContextInterfac
 }
 
 // CompleteTransaction 完成交易
-func (s *SmartContract) CompleteTransaction(ctx contractapi.TransactionContextInterface, txID string) error {
+func (s *SmartContract) CompleteTransaction(ctx contractapi.TransactionContextInterface, txID string, updateTimeUnix string) error {
 	// 检查调用者身份
 	clientMSPID, err := s.GetClientIdentityMSPID(ctx)
 	if err != nil {
@@ -257,6 +294,13 @@ func (s *SmartContract) CompleteTransaction(ctx contractapi.TransactionContextIn
 		return fmt.Errorf("交易状态不正确，当前状态：%s，需要状态：已托管", transaction.Status)
 	}
 
+	// 转换时间参数
+	updateTimeInt, err := strconv.ParseInt(updateTimeUnix, 10, 64)
+	if err != nil {
+		return fmt.Errorf("时间格式错误：%v", err)
+	}
+	updateTime := time.Unix(updateTimeInt, 0)
+
 	// 更新房产所有权
 	realEstate, err := s.QueryRealEstate(ctx, transaction.RealEstateID)
 	if err != nil {
@@ -265,7 +309,7 @@ func (s *SmartContract) CompleteTransaction(ctx contractapi.TransactionContextIn
 
 	realEstate.CurrentOwner = transaction.Buyer
 	realEstate.Status = SOLD
-	realEstate.UpdateTime = time.Now()
+	realEstate.UpdateTime = updateTime
 
 	realEstateJSON, err := json.Marshal(realEstate)
 	if err != nil {
@@ -279,7 +323,7 @@ func (s *SmartContract) CompleteTransaction(ctx contractapi.TransactionContextIn
 
 	// 更新交易状态
 	transaction.Status = COMPLETED
-	transaction.UpdateTime = time.Now()
+	transaction.UpdateTime = updateTime
 
 	transactionJSON, err = json.Marshal(transaction)
 	if err != nil {
