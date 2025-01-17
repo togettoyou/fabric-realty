@@ -2,6 +2,7 @@ package model
 
 import (
 	"fmt"
+	"golang.org/x/crypto/bcrypt"
 	"log"
 
 	"application/config"
@@ -40,10 +41,12 @@ func InitDB() error {
 }
 
 func createDefaultAdmins() {
+	password, _ := bcrypt.GenerateFromPassword([]byte("123456"), bcrypt.DefaultCost)
+
 	// 创建默认房管局管理员
 	realtyAdmin := User{
 		Username: "realty_admin",
-		Password: "123456", // 实际应用中需要加密
+		Password: string(password),
 		Type:     RealtyAdmin,
 		Name:     "房管局管理员",
 	}
@@ -51,7 +54,7 @@ func createDefaultAdmins() {
 	// 创建默认银行管理员
 	bankAdmin := User{
 		Username: "bank_admin",
-		Password: "123456", // 实际应用中需要加密
+		Password: string(password),
 		Type:     BankAdmin,
 		Name:     "银行管理员",
 	}
