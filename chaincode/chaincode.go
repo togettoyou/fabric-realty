@@ -80,8 +80,6 @@ func (s *SmartContract) CreateRealEstate(ctx contractapi.TransactionContextInter
 		return fmt.Errorf("获取调用者身份失败：%v", err)
 	}
 
-	log.Println("clientMSPID", clientMSPID, REALTY_ORG_MSPID)
-
 	// 验证是否是房管局组织的成员
 	if clientMSPID != REALTY_ORG_MSPID {
 		return fmt.Errorf("只有房管局组织成员才能创建房产信息")
@@ -188,8 +186,6 @@ func (s *SmartContract) ConfirmEscrow(ctx contractapi.TransactionContextInterfac
 		return fmt.Errorf("获取调用者身份失败：%v", err)
 	}
 
-	log.Println("clientMSPID", clientMSPID, BANK_ORG_MSPID)
-
 	// 验证是否是银行组织的成员
 	if clientMSPID != BANK_ORG_MSPID {
 		return fmt.Errorf("只有银行组织成员才能确认资金托管")
@@ -231,8 +227,6 @@ func (s *SmartContract) CompleteTransaction(ctx contractapi.TransactionContextIn
 	if err != nil {
 		return fmt.Errorf("获取调用者身份失败：%v", err)
 	}
-
-	log.Println("clientMSPID", clientMSPID, BANK_ORG_MSPID)
 
 	// 验证是否是银行组织的成员
 	if clientMSPID != BANK_ORG_MSPID {
