@@ -102,3 +102,20 @@ func (s *RealtyService) CompleteTransaction(txID string) error {
 	}
 	return nil
 }
+
+// QueryTransaction 查询交易信息
+func (s *RealtyService) QueryTransaction(txID string) (map[string]interface{}, error) {
+	// 查询操作可以使用任意组织身份
+	contract := utils.GetContract(REALTY_ORG)
+	result, err := contract.EvaluateTransaction("QueryTransaction", txID)
+	if err != nil {
+		return nil, fmt.Errorf("查询交易信息失败：%s", extractErrorMessage(err))
+	}
+
+	var transaction map[string]interface{}
+	if err := json.Unmarshal(result, &transaction); err != nil {
+		return nil, fmt.Errorf("解析交易数据失败：%v", err)
+	}
+
+	return transaction, nil
+}

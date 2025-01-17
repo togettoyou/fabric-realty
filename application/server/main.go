@@ -68,6 +68,7 @@ func main() {
 
 			// 普通用户路由
 			realtyGroup.GET("/:id", realtyHandler.QueryRealEstate)
+			realtyGroup.GET("/transaction/:txId", realtyHandler.QueryTransaction)
 			realtyGroup.POST("/transaction", realtyHandler.CreateTransaction)
 		}
 	}

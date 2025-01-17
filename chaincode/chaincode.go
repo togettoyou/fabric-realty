@@ -283,6 +283,25 @@ func (s *SmartContract) CompleteTransaction(ctx contractapi.TransactionContextIn
 	return ctx.GetStub().PutState(txID, transactionJSON)
 }
 
+// QueryTransaction 查询交易信息
+func (s *SmartContract) QueryTransaction(ctx contractapi.TransactionContextInterface, txID string) (*Transaction, error) {
+	transactionJSON, err := ctx.GetStub().GetState(txID)
+	if err != nil {
+		return nil, fmt.Errorf("读取交易信息失败：%v", err)
+	}
+	if transactionJSON == nil {
+		return nil, fmt.Errorf("交易ID %s 不存在", txID)
+	}
+
+	var transaction Transaction
+	err = json.Unmarshal(transactionJSON, &transaction)
+	if err != nil {
+		return nil, fmt.Errorf("解析交易信息失败：%v", err)
+	}
+
+	return &transaction, nil
+}
+
 // RealEstateExists 检查房产是否存在
 func (s *SmartContract) RealEstateExists(ctx contractapi.TransactionContextInterface, id string) (bool, error) {
 	realEstateJSON, err := ctx.GetStub().GetState(id)

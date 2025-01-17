@@ -100,3 +100,15 @@ func (h *RealtyHandler) CompleteTransaction(c *gin.Context) {
 
 	utils.SuccessWithMessage(c, "交易完成", nil)
 }
+
+// QueryTransaction 查询交易信息
+func (h *RealtyHandler) QueryTransaction(c *gin.Context) {
+	txID := c.Param("txId")
+	transaction, err := h.realtyService.QueryTransaction(txID)
+	if err != nil {
+		utils.ServerError(c, "查询交易信息失败："+err.Error())
+		return
+	}
+
+	utils.Success(c, transaction)
+}
