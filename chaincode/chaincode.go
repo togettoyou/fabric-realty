@@ -245,12 +245,12 @@ func (s *SmartContract) RealEstateExists(ctx contractapi.TransactionContextInter
 
 // Hello 用于验证
 func (s *SmartContract) Hello(ctx contractapi.TransactionContextInterface) (string, error) {
-	return "你好", nil
+	return "hello", nil
 }
 
 // InitLedger 初始化账本
 func (s *SmartContract) InitLedger(ctx contractapi.TransactionContextInterface) error {
-	log.Println("初始化账本")
+	log.Println("InitLedger")
 	return nil
 }
 
