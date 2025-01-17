@@ -12,10 +12,28 @@ type UserService struct{}
 
 // Register 用户注册
 func (s *UserService) Register(user *model.User) error {
+	// 验证用户类型
+	switch user.Type {
+	case model.Buyer, model.Seller, model.RealtyAdmin, model.BankAdmin:
+		// 合法的用户类型
+	default:
+		return fmt.Errorf("invalid user type: %s", user.Type)
+	}
+
+	// 管理员账号不允许注册
+	if user.Type == model.RealtyAdmin || user.Type == model.BankAdmin {
+		return fmt.Errorf("admin accounts cannot be registered")
+	}
+
 	// 检查用户名是否已存在
 	var existingUser model.User
 	if err := model.DB.Where("username = ?", user.Username).First(&existingUser).Error; err == nil {
 		return fmt.Errorf("username already exists")
+	}
+
+	// 验证必填字段
+	if user.Username == "" || user.Password == "" || user.Name == "" || user.Phone == "" {
+		return fmt.Errorf("username, password, name and phone are required")
 	}
 
 	// 加密密码
