@@ -7,10 +7,9 @@ import (
 type UserType string
 
 const (
-	Buyer       UserType = "buyer"        // 买家
-	Seller      UserType = "seller"       // 卖家
-	RealtyAdmin UserType = "realty_admin" // 房管局管理员
-	BankAdmin   UserType = "bank_admin"   // 银行管理员
+	USER         UserType = "user"         // 普通用户
+	REALTY_ADMIN UserType = "realty_admin" // 房管局管理员
+	BANK_ADMIN   UserType = "bank_admin"   // 银行管理员
 )
 
 // User 用户模型

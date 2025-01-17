@@ -53,14 +53,14 @@ func main() {
 		{
 			// 房管局管理员路由
 			realtyAdmin := realtyGroup.Group("/admin")
-			realtyAdmin.Use(middleware.RequireRoles(model.RealtyAdmin))
+			realtyAdmin.Use(middleware.RequireRoles(model.REALTY_ADMIN))
 			{
 				realtyAdmin.POST("/create", realtyHandler.CreateRealEstate)
 			}
 
 			// 银行管理员路由
 			bankAdmin := realtyGroup.Group("/bank")
-			bankAdmin.Use(middleware.RequireRoles(model.BankAdmin))
+			bankAdmin.Use(middleware.RequireRoles(model.BANK_ADMIN))
 			{
 				bankAdmin.POST("/escrow/:txId", realtyHandler.ConfirmEscrow)
 				bankAdmin.POST("/complete/:txId", realtyHandler.CompleteTransaction)

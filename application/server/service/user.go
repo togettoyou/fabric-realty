@@ -14,14 +14,14 @@ type UserService struct{}
 func (s *UserService) Register(user *model.User) error {
 	// 验证用户类型
 	switch user.Type {
-	case model.Buyer, model.Seller, model.RealtyAdmin, model.BankAdmin:
+	case model.USER, model.REALTY_ADMIN, model.BANK_ADMIN:
 		// 合法的用户类型
 	default:
 		return fmt.Errorf("无效的用户类型：%s", user.Type)
 	}
 
 	// 管理员账号不允许注册
-	if user.Type == model.RealtyAdmin || user.Type == model.BankAdmin {
+	if user.Type == model.REALTY_ADMIN || user.Type == model.BANK_ADMIN {
 		return fmt.Errorf("管理员账号不允许通过此接口注册")
 	}
 

@@ -47,7 +47,7 @@ func createDefaultAdmins() {
 	realtyAdmin := User{
 		Username: "realty_admin",
 		Password: string(password),
-		Type:     RealtyAdmin,
+		Type:     REALTY_ADMIN,
 		Name:     "房管局管理员",
 	}
 
@@ -55,7 +55,7 @@ func createDefaultAdmins() {
 	bankAdmin := User{
 		Username: "bank_admin",
 		Password: string(password),
-		Type:     BankAdmin,
+		Type:     BANK_ADMIN,
 		Name:     "银行管理员",
 	}
 
