@@ -1,6 +1,7 @@
 package service
 
 import (
+	"application/model"
 	"application/utils"
 	"encoding/json"
 	"fmt"
@@ -47,6 +48,15 @@ func (s *RealtyService) CreateRealEstate(id, address string, area float64, owner
 	if err != nil {
 		return fmt.Errorf("创建房产信息失败：%s", extractErrorMessage(err))
 	}
+
+	// 记录房产ID到数据库
+	realEstate := model.RealEstate{
+		ID: id,
+	}
+	if err := model.DB.Create(&realEstate).Error; err != nil {
+		return fmt.Errorf("记录房产ID到数据库失败：%v", err)
+	}
+
 	return nil
 }
 
@@ -76,6 +86,16 @@ func (s *RealtyService) CreateTransaction(txID, realEstateID, seller, buyer stri
 	if err != nil {
 		return fmt.Errorf("创建交易失败：%s", extractErrorMessage(err))
 	}
+
+	// 记录交易ID到数据库
+	transaction := model.Transaction{
+		ID:           txID,
+		RealEstateID: realEstateID,
+	}
+	if err := model.DB.Create(&transaction).Error; err != nil {
+		return fmt.Errorf("记录交易ID到数据库失败：%v", err)
+	}
+
 	return nil
 }
 
