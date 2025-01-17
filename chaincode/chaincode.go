@@ -6,6 +6,7 @@ import (
 	"log"
 	"time"
 
+	"github.com/hyperledger/fabric-chaincode-go/v2/pkg/cid"
 	"github.com/hyperledger/fabric-contract-api-go/v2/contractapi"
 )
 
@@ -56,8 +57,36 @@ type Transaction struct {
 	UpdateTime   time.Time         `json:"updateTime"`   // 更新时间
 }
 
+// 组织 MSP ID 常量
+const (
+	REALTY_ORG_MSPID = "Org1MSP" // 房管局组织 MSP ID
+	BANK_ORG_MSPID   = "Org2MSP" // 银行组织 MSP ID
+)
+
+// GetClientIdentityMSPID 获取客户端身份信息
+func (s *SmartContract) GetClientIdentityMSPID(ctx contractapi.TransactionContextInterface) (string, error) {
+	clientID, err := cid.New(ctx.GetStub())
+	if err != nil {
+		return "", fmt.Errorf("获取客户端身份信息失败：%v", err)
+	}
+	return clientID.GetMSPID()
+}
+
 // CreateRealEstate 创建房产信息
 func (s *SmartContract) CreateRealEstate(ctx contractapi.TransactionContextInterface, id string, address string, area float64, owner string, price float64) error {
+	// 检查调用者身份
+	clientMSPID, err := s.GetClientIdentityMSPID(ctx)
+	if err != nil {
+		return fmt.Errorf("获取调用者身份失败：%v", err)
+	}
+
+	log.Println("clientMSPID", clientMSPID, REALTY_ORG_MSPID)
+
+	// 验证是否是房管局组织的成员
+	if clientMSPID != REALTY_ORG_MSPID {
+		return fmt.Errorf("只有房管局组织成员才能创建房产信息")
+	}
+
 	exists, err := s.RealEstateExists(ctx, id)
 	if err != nil {
 		return fmt.Errorf("检查房产是否存在时发生错误：%v", err)
@@ -153,6 +182,19 @@ func (s *SmartContract) CreateTransaction(ctx contractapi.TransactionContextInte
 
 // ConfirmEscrow 确认资金托管
 func (s *SmartContract) ConfirmEscrow(ctx contractapi.TransactionContextInterface, txID string) error {
+	// 检查调用者身份
+	clientMSPID, err := s.GetClientIdentityMSPID(ctx)
+	if err != nil {
+		return fmt.Errorf("获取调用者身份失败：%v", err)
+	}
+
+	log.Println("clientMSPID", clientMSPID, BANK_ORG_MSPID)
+
+	// 验证是否是银行组织的成员
+	if clientMSPID != BANK_ORG_MSPID {
+		return fmt.Errorf("只有银行组织成员才能确认资金托管")
+	}
+
 	transactionJSON, err := ctx.GetStub().GetState(txID)
 	if err != nil {
 		return fmt.Errorf("读取交易信息失败：%v", err)
@@ -184,6 +226,19 @@ func (s *SmartContract) ConfirmEscrow(ctx contractapi.TransactionContextInterfac
 
 // CompleteTransaction 完成交易
 func (s *SmartContract) CompleteTransaction(ctx contractapi.TransactionContextInterface, txID string) error {
+	// 检查调用者身份
+	clientMSPID, err := s.GetClientIdentityMSPID(ctx)
+	if err != nil {
+		return fmt.Errorf("获取调用者身份失败：%v", err)
+	}
+
+	log.Println("clientMSPID", clientMSPID, BANK_ORG_MSPID)
+
+	// 验证是否是银行组织的成员
+	if clientMSPID != BANK_ORG_MSPID {
+		return fmt.Errorf("只有银行组织成员才能完成交易")
+	}
+
 	transactionJSON, err := ctx.GetStub().GetState(txID)
 	if err != nil {
 		return fmt.Errorf("读取交易信息失败：%v", err)
