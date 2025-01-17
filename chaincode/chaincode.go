@@ -18,18 +18,18 @@ type SmartContract struct {
 type RealEstateStatus string
 
 const (
-	ForSale       RealEstateStatus = "ForSale"       // 待售
-	InTransaction RealEstateStatus = "InTransaction" // 交易中
-	Sold          RealEstateStatus = "Sold"          // 已售
+	FOR_SALE       RealEstateStatus = "FOR_SALE"       // 待售
+	IN_TRANSACTION RealEstateStatus = "IN_TRANSACTION" // 交易中
+	SOLD           RealEstateStatus = "SOLD"           // 已售出
 )
 
 // TransactionStatus 交易状态
 type TransactionStatus string
 
 const (
-	Pending   TransactionStatus = "Pending"   // 待付款
-	InEscrow  TransactionStatus = "InEscrow"  // 已托管
-	Completed TransactionStatus = "Completed" // 已完成
+	PENDING   TransactionStatus = "PENDING"   // 待付款
+	IN_ESCROW TransactionStatus = "IN_ESCROW" // 已托管
+	COMPLETED TransactionStatus = "COMPLETED" // 已完成
 )
 
 // RealEstate 房产信息
@@ -60,7 +60,7 @@ type Transaction struct {
 func (s *SmartContract) CreateRealEstate(ctx contractapi.TransactionContextInterface, id string, address string, area float64, owner string, price float64) error {
 	exists, err := s.RealEstateExists(ctx, id)
 	if err != nil {
-		return err
+		return fmt.Errorf("检查房产是否存在时发生错误：%v", err)
 	}
 	if exists {
 		return fmt.Errorf("房产ID %s 已存在", id)
@@ -72,14 +72,14 @@ func (s *SmartContract) CreateRealEstate(ctx contractapi.TransactionContextInter
 		Area:            area,
 		CurrentOwner:    owner,
 		Price:           price,
-		Status:          ForSale,
+		Status:          FOR_SALE,
 		CreateTime:      time.Now(),
 		UpdateTime:      time.Now(),
 	}
 
 	realEstateJSON, err := json.Marshal(realEstate)
 	if err != nil {
-		return err
+		return fmt.Errorf("序列化房产信息失败：%v", err)
 	}
 
 	return ctx.GetStub().PutState(id, realEstateJSON)
@@ -89,7 +89,7 @@ func (s *SmartContract) CreateRealEstate(ctx contractapi.TransactionContextInter
 func (s *SmartContract) QueryRealEstate(ctx contractapi.TransactionContextInterface, id string) (*RealEstate, error) {
 	realEstateJSON, err := ctx.GetStub().GetState(id)
 	if err != nil {
-		return nil, fmt.Errorf("failed to read real estate: %v", err)
+		return nil, fmt.Errorf("读取房产信息失败：%v", err)
 	}
 	if realEstateJSON == nil {
 		return nil, fmt.Errorf("房产ID %s 不存在", id)
@@ -98,7 +98,7 @@ func (s *SmartContract) QueryRealEstate(ctx contractapi.TransactionContextInterf
 	var realEstate RealEstate
 	err = json.Unmarshal(realEstateJSON, &realEstate)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("解析房产信息失败：%v", err)
 	}
 
 	return &realEstate, nil
@@ -108,10 +108,10 @@ func (s *SmartContract) QueryRealEstate(ctx contractapi.TransactionContextInterf
 func (s *SmartContract) CreateTransaction(ctx contractapi.TransactionContextInterface, txID string, realEstateID string, seller string, buyer string, price float64) error {
 	realEstate, err := s.QueryRealEstate(ctx, realEstateID)
 	if err != nil {
-		return err
+		return fmt.Errorf("查询房产信息失败：%v", err)
 	}
 
-	if realEstate.Status != ForSale {
+	if realEstate.Status != FOR_SALE {
 		return fmt.Errorf("房产不在可售状态")
 	}
 
@@ -125,27 +125,27 @@ func (s *SmartContract) CreateTransaction(ctx contractapi.TransactionContextInte
 		Seller:       seller,
 		Buyer:        buyer,
 		Price:        price,
-		Status:       Pending,
+		Status:       PENDING,
 		CreateTime:   time.Now(),
 		UpdateTime:   time.Now(),
 	}
 
 	transactionJSON, err := json.Marshal(transaction)
 	if err != nil {
-		return err
+		return fmt.Errorf("序列化交易信息失败：%v", err)
 	}
 
 	// 更新房产状态
-	realEstate.Status = InTransaction
+	realEstate.Status = IN_TRANSACTION
 	realEstate.UpdateTime = time.Now()
 	realEstateJSON, err := json.Marshal(realEstate)
 	if err != nil {
-		return err
+		return fmt.Errorf("序列化房产信息失败：%v", err)
 	}
 
 	err = ctx.GetStub().PutState(realEstateID, realEstateJSON)
 	if err != nil {
-		return err
+		return fmt.Errorf("更新房产状态失败：%v", err)
 	}
 
 	return ctx.GetStub().PutState(txID, transactionJSON)
@@ -155,7 +155,7 @@ func (s *SmartContract) CreateTransaction(ctx contractapi.TransactionContextInte
 func (s *SmartContract) ConfirmEscrow(ctx contractapi.TransactionContextInterface, txID string) error {
 	transactionJSON, err := ctx.GetStub().GetState(txID)
 	if err != nil {
-		return fmt.Errorf("failed to read transaction: %v", err)
+		return fmt.Errorf("读取交易信息失败：%v", err)
 	}
 	if transactionJSON == nil {
 		return fmt.Errorf("交易ID %s 不存在", txID)
@@ -164,19 +164,19 @@ func (s *SmartContract) ConfirmEscrow(ctx contractapi.TransactionContextInterfac
 	var transaction Transaction
 	err = json.Unmarshal(transactionJSON, &transaction)
 	if err != nil {
-		return err
+		return fmt.Errorf("解析交易信息失败：%v", err)
 	}
 
-	if transaction.Status != Pending {
-		return fmt.Errorf("交易状态不正确")
+	if transaction.Status != PENDING {
+		return fmt.Errorf("交易状态不正确，当前状态：%s，需要状态：待付款", transaction.Status)
 	}
 
-	transaction.Status = InEscrow
+	transaction.Status = IN_ESCROW
 	transaction.UpdateTime = time.Now()
 
 	transactionJSON, err = json.Marshal(transaction)
 	if err != nil {
-		return err
+		return fmt.Errorf("序列化交易信息失败：%v", err)
 	}
 
 	return ctx.GetStub().PutState(txID, transactionJSON)
@@ -186,7 +186,7 @@ func (s *SmartContract) ConfirmEscrow(ctx contractapi.TransactionContextInterfac
 func (s *SmartContract) CompleteTransaction(ctx contractapi.TransactionContextInterface, txID string) error {
 	transactionJSON, err := ctx.GetStub().GetState(txID)
 	if err != nil {
-		return fmt.Errorf("failed to read transaction: %v", err)
+		return fmt.Errorf("读取交易信息失败：%v", err)
 	}
 	if transactionJSON == nil {
 		return fmt.Errorf("交易ID %s 不存在", txID)
@@ -195,40 +195,40 @@ func (s *SmartContract) CompleteTransaction(ctx contractapi.TransactionContextIn
 	var transaction Transaction
 	err = json.Unmarshal(transactionJSON, &transaction)
 	if err != nil {
-		return err
+		return fmt.Errorf("解析交易信息失败：%v", err)
 	}
 
-	if transaction.Status != InEscrow {
-		return fmt.Errorf("交易状态不正确")
+	if transaction.Status != IN_ESCROW {
+		return fmt.Errorf("交易状态不正确，当前状态：%s，需要状态：已托管", transaction.Status)
 	}
 
 	// 更新房产所有权
 	realEstate, err := s.QueryRealEstate(ctx, transaction.RealEstateID)
 	if err != nil {
-		return err
+		return fmt.Errorf("查询房产信息失败：%v", err)
 	}
 
 	realEstate.CurrentOwner = transaction.Buyer
-	realEstate.Status = Sold
+	realEstate.Status = SOLD
 	realEstate.UpdateTime = time.Now()
 
 	realEstateJSON, err := json.Marshal(realEstate)
 	if err != nil {
-		return err
+		return fmt.Errorf("序列化房产信息失败：%v", err)
 	}
 
 	err = ctx.GetStub().PutState(transaction.RealEstateID, realEstateJSON)
 	if err != nil {
-		return err
+		return fmt.Errorf("更新房产信息失败：%v", err)
 	}
 
 	// 更新交易状态
-	transaction.Status = Completed
+	transaction.Status = COMPLETED
 	transaction.UpdateTime = time.Now()
 
 	transactionJSON, err = json.Marshal(transaction)
 	if err != nil {
-		return err
+		return fmt.Errorf("序列化交易信息失败：%v", err)
 	}
 
 	return ctx.GetStub().PutState(txID, transactionJSON)
@@ -238,29 +238,29 @@ func (s *SmartContract) CompleteTransaction(ctx contractapi.TransactionContextIn
 func (s *SmartContract) RealEstateExists(ctx contractapi.TransactionContextInterface, id string) (bool, error) {
 	realEstateJSON, err := ctx.GetStub().GetState(id)
 	if err != nil {
-		return false, fmt.Errorf("failed to read real estate: %v", err)
+		return false, fmt.Errorf("读取房产信息失败：%v", err)
 	}
 	return realEstateJSON != nil, nil
 }
 
 // Hello 用于验证
 func (s *SmartContract) Hello(ctx contractapi.TransactionContextInterface) (string, error) {
-	return "hello", nil
+	return "你好", nil
 }
 
 // InitLedger 初始化账本
 func (s *SmartContract) InitLedger(ctx contractapi.TransactionContextInterface) error {
-	log.Println("InitLedger")
+	log.Println("初始化账本")
 	return nil
 }
 
 func main() {
 	chaincode, err := contractapi.NewChaincode(&SmartContract{})
 	if err != nil {
-		log.Panicf("Error creating chaincode: %v", err)
+		log.Panicf("创建智能合约失败：%v", err)
 	}
 
 	if err := chaincode.Start(); err != nil {
-		log.Panicf("Error starting chaincode: %v", err)
+		log.Panicf("启动智能合约失败：%v", err)
 	}
 }
