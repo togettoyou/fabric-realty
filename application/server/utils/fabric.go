@@ -16,98 +16,121 @@ import (
 )
 
 var (
-	Contract *client.Contract
+	// 组织对应的合约客户端
+	contracts = make(map[string]*client.Contract)
 )
 
 // InitFabric 初始化 Fabric 客户端
 func InitFabric() error {
-	clientConnection := newGrpcConnection()
-	id := newIdentity()
-	sign := newSign()
+	// 为每个组织创建合约客户端
+	for orgName, orgConfig := range config.GlobalConfig.Fabric.Organizations {
+		// 创建 gRPC 连接
+		clientConnection, err := newGrpcConnection(orgConfig)
+		if err != nil {
+			return fmt.Errorf("创建组织[%s]的gRPC连接失败：%v", orgName, err)
+		}
 
-	// 创建 Gateway 连接
-	gw, err := client.Connect(
-		id,
-		client.WithSign(sign),
-		client.WithHash(hash.SHA256),
-		client.WithClientConnection(clientConnection),
-		client.WithEvaluateTimeout(5*time.Second),
-		client.WithEndorseTimeout(15*time.Second),
-		client.WithSubmitTimeout(5*time.Second),
-		client.WithCommitStatusTimeout(1*time.Minute),
-	)
-	if err != nil {
-		return fmt.Errorf("连接Fabric网关失败：%v", err)
+		// 创建组织身份
+		id, err := newIdentity(orgConfig)
+		if err != nil {
+			return fmt.Errorf("创建组织[%s]身份失败：%v", orgName, err)
+		}
+
+		// 创建签名函数
+		sign, err := newSign(orgConfig)
+		if err != nil {
+			return fmt.Errorf("创建组织[%s]签名函数失败：%v", orgName, err)
+		}
+
+		// 创建 Gateway 连接
+		gw, err := client.Connect(
+			id,
+			client.WithSign(sign),
+			client.WithHash(hash.SHA256),
+			client.WithClientConnection(clientConnection),
+			client.WithEvaluateTimeout(5*time.Second),
+			client.WithEndorseTimeout(15*time.Second),
+			client.WithSubmitTimeout(5*time.Second),
+			client.WithCommitStatusTimeout(1*time.Minute),
+		)
+		if err != nil {
+			return fmt.Errorf("连接组织[%s]的Fabric网关失败：%v", orgName, err)
+		}
+
+		network := gw.GetNetwork(config.GlobalConfig.Fabric.ChannelName)
+		contracts[orgName] = network.GetContract(config.GlobalConfig.Fabric.ChaincodeName)
 	}
-
-	network := gw.GetNetwork(config.GlobalConfig.Fabric.ChannelName)
-	Contract = network.GetContract(config.GlobalConfig.Fabric.ChaincodeName)
 
 	return nil
 }
 
+// GetContract 获取指定组织的合约客户端
+func GetContract(orgName string) *client.Contract {
+	return contracts[orgName]
+}
+
 // newGrpcConnection 创建 gRPC 连接
-func newGrpcConnection() *grpc.ClientConn {
-	certificatePEM, err := os.ReadFile(config.GlobalConfig.Fabric.TLSCertPath)
+func newGrpcConnection(orgConfig config.OrganizationConfig) (*grpc.ClientConn, error) {
+	certificatePEM, err := os.ReadFile(orgConfig.TLSCertPath)
 	if err != nil {
-		panic(fmt.Errorf("读取TLS证书文件失败：%w", err))
+		return nil, fmt.Errorf("读取TLS证书文件失败：%w", err)
 	}
 
 	certificate, err := identity.CertificateFromPEM(certificatePEM)
 	if err != nil {
-		panic(err)
+		return nil, fmt.Errorf("解析TLS证书失败：%w", err)
 	}
 
 	certPool := x509.NewCertPool()
 	certPool.AddCert(certificate)
-	transportCredentials := credentials.NewClientTLSFromCert(certPool, config.GlobalConfig.Fabric.GatewayPeer)
+	transportCredentials := credentials.NewClientTLSFromCert(certPool, orgConfig.GatewayPeer)
 
-	connection, err := grpc.Dial(config.GlobalConfig.Fabric.PeerEndpoint, grpc.WithTransportCredentials(transportCredentials))
+	connection, err := grpc.Dial(orgConfig.PeerEndpoint, grpc.WithTransportCredentials(transportCredentials))
 	if err != nil {
-		panic(fmt.Errorf("创建gRPC连接失败：%w", err))
+		return nil, fmt.Errorf("创建gRPC连接失败：%w", err)
 	}
 
-	return connection
+	return connection, nil
 }
 
 // newIdentity 创建身份
-func newIdentity() *identity.X509Identity {
-	certificatePEM, err := readFirstFile(config.GlobalConfig.Fabric.CertPath)
+func newIdentity(orgConfig config.OrganizationConfig) (*identity.X509Identity, error) {
+	certificatePEM, err := readFirstFile(orgConfig.CertPath)
 	if err != nil {
-		panic(fmt.Errorf("读取证书文件失败：%w", err))
+		return nil, fmt.Errorf("读取证书文件失败：%w", err)
 	}
 
 	certificate, err := identity.CertificateFromPEM(certificatePEM)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 
-	id, err := identity.NewX509Identity(config.GlobalConfig.Fabric.Org1MSPID, certificate)
+	id, err := identity.NewX509Identity(orgConfig.MSPID, certificate)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 
-	return id
+	return id, nil
 }
 
 // newSign 创建签名函数
-func newSign() identity.Sign {
-	privateKeyPEM, err := readFirstFile(config.GlobalConfig.Fabric.KeyPath)
+func newSign(orgConfig config.OrganizationConfig) (identity.Sign, error) {
+	privateKeyPEM, err := readFirstFile(orgConfig.KeyPath)
 	if err != nil {
-		panic(fmt.Errorf("读取私钥文件失败：%w", err))
+		return nil, fmt.Errorf("读取私钥文件失败：%w", err)
 	}
 
 	privateKey, err := identity.PrivateKeyFromPEM(privateKeyPEM)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 
 	sign, err := identity.NewPrivateKeySign(privateKey)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 
-	return sign
+	return sign, nil
 }
 
 // readFirstFile 读取目录中的第一个文件

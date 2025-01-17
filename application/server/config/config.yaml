@@ -15,10 +15,18 @@ jwt:
 fabric:
   channelName: mychannel
   chaincodeName: mychaincode
-  org1MSPID: Org1MSP
-  cryptoPath: ../../network/crypto-config/peerOrganizations/org1.togettoyou.com
-  certPath: ../../network/crypto-config/peerOrganizations/org1.togettoyou.com/users/User1@org1.togettoyou.com/msp/signcerts
-  keyPath: ../../network/crypto-config/peerOrganizations/org1.togettoyou.com/users/User1@org1.togettoyou.com/msp/keystore
-  tlsCertPath: ../../network/crypto-config/peerOrganizations/org1.togettoyou.com/peers/peer0.org1.togettoyou.com/tls/ca.crt
-  peerEndpoint: localhost:7051
-  gatewayPeer: peer0.org1.togettoyou.com
+  organizations:
+    org1:
+      mspID: Org1MSP
+      certPath: ../../network/crypto-config/peerOrganizations/org1.togettoyou.com/users/User1@org1.togettoyou.com/msp/signcerts
+      keyPath: ../../network/crypto-config/peerOrganizations/org1.togettoyou.com/users/User1@org1.togettoyou.com/msp/keystore
+      tlsCertPath: ../../network/crypto-config/peerOrganizations/org1.togettoyou.com/peers/peer0.org1.togettoyou.com/tls/ca.crt
+      peerEndpoint: localhost:7051
+      gatewayPeer: peer0.org1.togettoyou.com
+    org2:
+      mspID: Org2MSP
+      certPath: ../../network/crypto-config/peerOrganizations/org2.togettoyou.com/users/User1@org2.togettoyou.com/msp/signcerts
+      keyPath: ../../network/crypto-config/peerOrganizations/org2.togettoyou.com/users/User1@org2.togettoyou.com/msp/keystore
+      tlsCertPath: ../../network/crypto-config/peerOrganizations/org2.togettoyou.com/peers/peer0.org2.togettoyou.com/tls/ca.crt
+      peerEndpoint: localhost:27051
+      gatewayPeer: peer0.org2.togettoyou.com
