@@ -248,6 +248,12 @@ func (s *SmartContract) Hello(ctx contractapi.TransactionContextInterface) (stri
 	return "hello", nil
 }
 
+// InitLedger 初始化账本
+func (s *SmartContract) InitLedger(ctx contractapi.TransactionContextInterface) error {
+	log.Println("InitLedger")
+	return nil
+}
+
 func main() {
 	chaincode, err := contractapi.NewChaincode(&SmartContract{})
 	if err != nil {
