@@ -5,7 +5,7 @@
 <style>
 #app {
   min-height: 100vh;
-  background-color: #f5f5f5;
+  background-color: #fff;
   color: rgba(0, 0, 0, 0.88);
 }
 
@@ -21,7 +21,8 @@
 .ant-card {
   background: #fff;
   border-radius: 8px;
-  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.03);
+  box-shadow: none;
+  border: 1px solid #f0f0f0;
 }
 
 /* 卡片内容区域样式 */
@@ -95,7 +96,7 @@
 }
 
 ::-webkit-scrollbar-track {
-  background: #f5f5f5;
+  background: #fff;
   border-radius: 3px;
 }
 
