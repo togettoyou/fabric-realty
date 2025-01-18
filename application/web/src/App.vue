@@ -26,7 +26,14 @@
 
 /* 卡片内容区域样式 */
 .ant-card-body {
-  padding: 24px !important;
+  padding: 0 24px 24px !important;
+}
+
+/* 卡片头部样式 */
+.ant-card-head {
+  min-height: auto !important;
+  border-bottom: none !important;
+  padding: 24px 24px 16px !important;
 }
 
 /* 页头样式 */
