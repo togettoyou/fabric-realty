@@ -480,7 +480,7 @@ func (s *SmartContract) QueryRealEstateList(ctx contractapi.TransactionContextIn
 	}
 	defer iterator.Close()
 
-	var realEstates []interface{}
+	realEstates := make([]interface{}, 0)
 	for iterator.HasNext() {
 		queryResponse, err := iterator.Next()
 		if err != nil {
@@ -554,7 +554,7 @@ func (s *SmartContract) QueryTransactionList(ctx contractapi.TransactionContextI
 	}
 	defer iterator.Close()
 
-	var transactions []interface{}
+	transactions := make([]interface{}, 0)
 	for iterator.HasNext() {
 		queryResponse, err := iterator.Next()
 		if err != nil {
