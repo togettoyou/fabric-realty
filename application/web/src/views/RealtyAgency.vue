@@ -19,12 +19,22 @@
 
     <div class="content">
       <a-card :bordered="false">
+        <template #extra>
+          <a-radio-group v-model:value="statusFilter" button-style="solid">
+            <a-radio-button value="">全部</a-radio-button>
+            <a-radio-button value="NORMAL">正常</a-radio-button>
+            <a-radio-button value="IN_TRANSACTION">交易中</a-radio-button>
+          </a-radio-group>
+        </template>
+
         <a-table
           :columns="columns"
-          :data-source="realEstateList"
+          :data-source="filteredRealEstateList"
           :loading="loading"
           :pagination="false"
+          :scroll="{ x: 1500 }"
           row-key="id"
+          class="custom-table"
         >
           <template #bodyCell="{ column, record }">
             <template v-if="column.key === 'status'">
@@ -154,14 +164,14 @@ const columns = [
     title: '地址',
     dataIndex: 'propertyAddress',
     key: 'propertyAddress',
+    width: 120,
     ellipsis: { showTitle: true },
   },
   {
     title: '面积',
     dataIndex: 'area',
     key: 'area',
-    width: 150,
-    align: 'right' as const,
+    width: 80,
     customCell: () => ({
       style: { 
         fontVariantNumeric: 'tabular-nums',
@@ -278,6 +288,17 @@ const generateRandomAddress = () => {
   formState.address = `${city}${district}${street}${community}${building}号楼${unit}单元${room}室`;
 };
 
+// 添加状态筛选的响应式变量
+const statusFilter = ref('');
+
+// 添加筛选后的列表计算属性
+const filteredRealEstateList = computed(() => {
+  if (!statusFilter.value) {
+    return realEstateList.value;
+  }
+  return realEstateList.value.filter(item => item.status === statusFilter.value);
+});
+
 // 初始加载
 onMounted(() => {
   loadRealEstateList();
@@ -317,5 +338,13 @@ onMounted(() => {
 
 :deep(.ant-form-item-extra) {
   color: #666;
+}
+
+:deep(.custom-table) {
+  ::-webkit-scrollbar {
+    display: none;
+  }
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 </style> 

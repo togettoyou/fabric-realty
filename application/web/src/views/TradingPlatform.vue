@@ -19,12 +19,22 @@
 
     <div class="content">
       <a-card :bordered="false">
+        <template #extra>
+          <a-radio-group v-model:value="statusFilter" button-style="solid">
+            <a-radio-button value="">全部</a-radio-button>
+            <a-radio-button value="PENDING">待完成</a-radio-button>
+            <a-radio-button value="COMPLETED">已完成</a-radio-button>
+          </a-radio-group>
+        </template>
+
         <a-table
           :columns="columns"
-          :data-source="transactionList"
+          :data-source="filteredTransactionList"
           :loading="loading"
           :pagination="false"
+          :scroll="{ x: 1500 }"
           row-key="id"
+          class="custom-table"
         >
           <template #bodyCell="{ column, record }">
             <template v-if="column.key === 'status'">
@@ -182,8 +192,7 @@ const columns = [
     title: '价格',
     dataIndex: 'price',
     key: 'price',
-    width: 120,
-    align: 'right' as const,
+    width: 120
   },
   {
     title: '状态',
@@ -291,6 +300,17 @@ const handleModalCancel = () => {
   formRef.value?.resetFields();
 };
 
+// 添加状态筛选的响应式变量
+const statusFilter = ref('');
+
+// 添加筛选后的列表计算属性
+const filteredTransactionList = computed(() => {
+  if (!statusFilter.value) {
+    return transactionList.value;
+  }
+  return transactionList.value.filter(item => item.status === statusFilter.value);
+});
+
 // 初始加载
 onMounted(() => {
   loadTransactionList();
@@ -337,5 +357,13 @@ onMounted(() => {
 
 :deep(.ant-form-item-extra) {
   color: #666;
+}
+
+:deep(.custom-table) {
+  ::-webkit-scrollbar {
+    display: none;
+  }
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 </style> 
