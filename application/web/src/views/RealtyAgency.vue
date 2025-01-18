@@ -62,12 +62,6 @@
               </template>
             </template>
           </a-table>
-          <div v-if="realEstateList.length === 0" class="empty-placeholder">
-            <a-empty />
-          </div>
-          <div v-else-if="!bookmark" class="no-more-text">
-            没有更多数据了
-          </div>
         </div>
       </a-card>
     </div>
@@ -396,19 +390,12 @@ onMounted(() => {
   position: relative;
 }
 
-:deep(.ant-table-wrapper) {
-  margin-bottom: 16px;
+:deep(.ant-table) {
+  height: calc(100vh - 300px);
 }
 
-.empty-placeholder {
-  padding: 40px 0;
-}
-
-.no-more-text {
-  text-align: center;
-  color: rgba(0, 0, 0, 0.45);
-  padding: 16px 0;
-  font-size: 14px;
+:deep(.ant-table-body) {
+  max-height: calc(100vh - 360px) !important;
 }
 
 /* 固定表头样式 */
