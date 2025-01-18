@@ -51,6 +51,19 @@
                   </a-tooltip>
                 </div>
               </template>
+              <template v-else-if="column.key === 'currentOwner'">
+                <div class="id-cell">
+                  <a-tooltip :title="record.currentOwner">
+                    <span class="id-text">{{ record.currentOwner }}</span>
+                  </a-tooltip>
+                  <a-tooltip title="点击复制">
+                    <copy-outlined
+                      class="copy-icon"
+                      @click.stop="handleCopy(record.currentOwner)"
+                    />
+                  </a-tooltip>
+                </div>
+              </template>
               <template v-else-if="column.key === 'status'">
                 <a-tag :color="record.status === 'NORMAL' ? 'green' : 'blue'">
                   {{ record.status === 'NORMAL' ? '正常' : '交易中' }}
@@ -194,7 +207,13 @@ const columns = [
     dataIndex: 'currentOwner',
     key: 'currentOwner',
     width: 120,
-    ellipsis: true,
+    ellipsis: false,
+    customCell: () => ({
+      style: {
+        whiteSpace: 'nowrap',
+        overflow: 'hidden',
+      }
+    }),
   },
   {
     title: '状态',
