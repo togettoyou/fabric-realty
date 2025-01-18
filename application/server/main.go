@@ -25,32 +25,34 @@ func main() {
 	gin.SetMode(gin.ReleaseMode)
 	r := gin.Default()
 
+	apiGroup := r.Group("/api")
+
 	// 注册路由
 	realtyHandler := api.NewRealtyHandler()
 
 	// 不动产登记机构的接口
-	realty := r.Group("/realty-agency")
+	realty := apiGroup.Group("/realty-agency")
 	{
 		// 创建房产信息
 		realty.POST("/realty/create", realtyHandler.CreateRealEstate)
 	}
 
 	// 交易平台的接口
-	trading := r.Group("/trading-platform")
+	trading := apiGroup.Group("/trading-platform")
 	{
 		// 创建交易
 		trading.POST("/transaction/create", realtyHandler.CreateTransaction)
 	}
 
 	// 银行的接口
-	bank := r.Group("/bank")
+	bank := apiGroup.Group("/bank")
 	{
 		// 完成交易
 		bank.POST("/transaction/complete/:txId", realtyHandler.CompleteTransaction)
 	}
 
 	// 公共查询接口（所有组织都可以访问）
-	query := r.Group("/query")
+	query := apiGroup.Group("/query")
 	{
 		// 房产相关查询
 		realty := query.Group("/realty")
