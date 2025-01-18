@@ -18,13 +18,13 @@
           </a-radio-group>
         </template>
 
-        <div class="table-container" @scroll="handleScroll">
+        <div class="table-container">
           <a-table
             :columns="columns"
             :data-source="filteredTransactionList"
             :loading="loading"
             :pagination="false"
-            :scroll="{ x: 1500, y: 'calc(100vh - 300px)' }"
+            :scroll="{ x: 1500, y: 'calc(100vh - 350px)' }"
             row-key="id"
             class="custom-table"
           >
@@ -80,6 +80,15 @@
               </template>
             </template>
           </a-table>
+          <div class="load-more">
+            <a-button 
+              :loading="loading" 
+              @click="loadMore"
+              :disabled="!bookmark"
+            >
+              {{ bookmark ? '加载更多' : '没有更多数据了' }}
+            </a-button>
+          </div>
         </div>
       </a-card>
     </div>
@@ -247,16 +256,6 @@ const completeTransaction = async (txId: string) => {
   }
 };
 
-// 添加滚动加载函数
-const handleScroll = (e: Event) => {
-  const target = e.target as HTMLElement;
-  const { scrollHeight, scrollTop, clientHeight } = target;
-  // 当滚动到距离底部100px时触发加载
-  if (scrollHeight - scrollTop - clientHeight < 100 && !loading.value && bookmark.value) {
-    loadMore();
-  }
-};
-
 // 初始加载
 onMounted(() => {
   loadTransactionList();
@@ -317,6 +316,13 @@ onMounted(() => {
 .table-container {
   height: calc(100vh - 200px);
   position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+:deep(.ant-table-wrapper) {
+  flex: 1;
+  overflow: hidden;
 }
 
 :deep(.ant-table) {
@@ -334,5 +340,13 @@ onMounted(() => {
 
 :deep(.ant-table-header::-webkit-scrollbar) {
   display: none;
+}
+
+.load-more {
+  text-align: center;
+  margin-top: 16px;
+  padding: 8px 0;
+  background: #fff;
+  border-top: 1px solid #f0f0f0;
 }
 </style> 
