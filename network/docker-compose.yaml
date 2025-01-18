@@ -130,6 +130,52 @@ services:
       - orderer2.togettoyou.com
       - orderer3.togettoyou.com
 
+  peer0.org3.togettoyou.com:
+    extends:
+      file: docker-compose-base.yaml
+      service: peer-base
+    container_name: peer0.org3.togettoyou.com
+    environment:
+      - CORE_PEER_ID=peer0.org3.togettoyou.com
+      - CORE_PEER_LOCALMSPID=Org3MSP
+      - CORE_PEER_ADDRESS=peer0.org3.togettoyou.com:7051  # peer节点的访问地址
+      - CORE_PEER_CHAINCODEADDRESS=peer0.org3.togettoyou.com:7052 # peer节点的链码访问地址
+      - CORE_PEER_GOSSIP_BOOTSTRAP=peer1.org3.togettoyou.com:7051 # Gossip引导节点，联络列表中的其他 peer 节点进行消息的 gossip 传播
+      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.org3.togettoyou.com:7051 # 节点向组织外节点公开的服务地址（通过锚节点广播出去给其它组织节点）
+    ports:
+      - "47051:7051"
+      - "47053:7053"
+    volumes:
+      - ./crypto-config/peerOrganizations/org3.togettoyou.com/peers/peer0.org3.togettoyou.com:/etc/hyperledger/peer
+      - ./data/peer0.org3.togettoyou.com:/var/hyperledger/production
+    depends_on:
+      - orderer1.togettoyou.com
+      - orderer2.togettoyou.com
+      - orderer3.togettoyou.com
+
+  peer1.org3.togettoyou.com:
+    extends:
+      file: docker-compose-base.yaml
+      service: peer-base
+    container_name: peer1.org3.togettoyou.com
+    environment:
+      - CORE_PEER_ID=peer1.org3.togettoyou.com
+      - CORE_PEER_LOCALMSPID=Org3MSP
+      - CORE_PEER_ADDRESS=peer1.org3.togettoyou.com:7051  # peer节点的访问地址
+      - CORE_PEER_CHAINCODEADDRESS=peer1.org3.togettoyou.com:7052 # peer节点的链码访问地址
+      - CORE_PEER_GOSSIP_BOOTSTRAP=peer0.org3.togettoyou.com:7051 # Gossip引导节点，联络列表中的其他 peer 节点进行消息的 gossip 传播
+      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer1.org3.togettoyou.com:7051 # 节点向组织外节点公开的服务地址（通过锚节点广播出去给其它组织节点）
+    ports:
+      - "57051:7051"
+      - "57053:7053"
+    volumes:
+      - ./crypto-config/peerOrganizations/org3.togettoyou.com/peers/peer1.org3.togettoyou.com:/etc/hyperledger/peer
+      - ./data/peer1.org3.togettoyou.com:/var/hyperledger/production
+    depends_on:
+      - orderer1.togettoyou.com
+      - orderer2.togettoyou.com
+      - orderer3.togettoyou.com
+
   cli.togettoyou.com:
     container_name: cli.togettoyou.com
     image: hyperledger/fabric-tools:2.5.10

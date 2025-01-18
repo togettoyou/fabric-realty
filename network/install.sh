@@ -3,7 +3,7 @@
 ###########################################
 # Hyperledger Fabric 网络部署脚本
 # 版本: 1.0
-# 描述: 自动部署双组织四节点的Fabric网络
+# 描述: 自动部署三组织六节点的Fabric网络
 # 依赖:
 #   - docker & docker-compose
 ###########################################
@@ -166,6 +166,7 @@ CHAINCODE_INIT_WAIT=5
 DOMAIN="togettoyou.com"
 ORG1_DOMAIN="org1.${DOMAIN}"
 ORG2_DOMAIN="org2.${DOMAIN}"
+ORG3_DOMAIN="org3.${DOMAIN}"
 CLI_CONTAINER="cli.${DOMAIN}"
 
 # CLI命令前缀
@@ -223,7 +224,7 @@ CORE_PEER_TLS_KEY_FILE=\${ORG${org}_PEER${peer}_TLS_KEY_FILE}\""
 }
 
 # 生成所有节点配置
-for org in 1 2; do
+for org in 1 2 3; do
     for peer in 0 1; do
         generate_peer_config $org $peer
         generate_cli_config $org $peer
@@ -280,6 +281,7 @@ main() {
     show_progress 7 "定义组织锚节点" $start_time
     execute_with_timer "定义Org1锚节点" "$CLI_CMD \"configtxgen -configPath ${HYPERLEDGER_PATH} -profile SampleChannel -outputAnchorPeersUpdate ${CONFIG_PATH}/Org1Anchor.tx -channelID $ChannelName -asOrg Org1\""
     execute_with_timer "定义Org2锚节点" "$CLI_CMD \"configtxgen -configPath ${HYPERLEDGER_PATH} -profile SampleChannel -outputAnchorPeersUpdate ${CONFIG_PATH}/Org2Anchor.tx -channelID $ChannelName -asOrg Org2\""
+    execute_with_timer "定义Org3锚节点" "$CLI_CMD \"configtxgen -configPath ${HYPERLEDGER_PATH} -profile SampleChannel -outputAnchorPeersUpdate ${CONFIG_PATH}/Org3Anchor.tx -channelID $ChannelName -asOrg Org3\""
 
     # 启动所有节点
     show_progress 8 "启动所有节点" $start_time
@@ -296,11 +298,14 @@ main() {
     execute_with_timer "Org1Peer1加入通道" "$CLI_CMD \"$Org1Peer1Cli peer channel join -b ${CONFIG_PATH}/$ChannelName.block\""
     execute_with_timer "Org2Peer0加入通道" "$CLI_CMD \"$Org2Peer0Cli peer channel join -b ${CONFIG_PATH}/$ChannelName.block\""
     execute_with_timer "Org2Peer1加入通道" "$CLI_CMD \"$Org2Peer1Cli peer channel join -b ${CONFIG_PATH}/$ChannelName.block\""
+    execute_with_timer "Org3Peer0加入通道" "$CLI_CMD \"$Org3Peer0Cli peer channel join -b ${CONFIG_PATH}/$ChannelName.block\""
+    execute_with_timer "Org3Peer1加入通道" "$CLI_CMD \"$Org3Peer1Cli peer channel join -b ${CONFIG_PATH}/$ChannelName.block\""
 
     # 更新锚节点
     show_progress 11 "更新锚节点" $start_time
     execute_with_timer "更新Org1锚节点" "$CLI_CMD \"$Org1Peer0Cli peer channel update -o $ORDERER1_ADDRESS -c $ChannelName -f ${CONFIG_PATH}/Org1Anchor.tx --tls --cafile $ORDERER_CA\""
     execute_with_timer "更新Org2锚节点" "$CLI_CMD \"$Org2Peer0Cli peer channel update -o $ORDERER1_ADDRESS -c $ChannelName -f ${CONFIG_PATH}/Org2Anchor.tx --tls --cafile $ORDERER_CA\""
+    execute_with_timer "更新Org3锚节点" "$CLI_CMD \"$Org3Peer0Cli peer channel update -o $ORDERER1_ADDRESS -c $ChannelName -f ${CONFIG_PATH}/Org3Anchor.tx --tls --cafile $ORDERER_CA\""
 
     # 打包链码
     show_progress 12 "打包链码" $start_time
@@ -312,20 +317,23 @@ main() {
     execute_with_timer "Org1Peer1安装链码" "$CLI_CMD \"$Org1Peer1Cli peer lifecycle chaincode install ${CHAINCODE_PACKAGE}\""
     execute_with_timer "Org2Peer0安装链码" "$CLI_CMD \"$Org2Peer0Cli peer lifecycle chaincode install ${CHAINCODE_PACKAGE}\""
     execute_with_timer "Org2Peer1安装链码" "$CLI_CMD \"$Org2Peer1Cli peer lifecycle chaincode install ${CHAINCODE_PACKAGE}\""
+    execute_with_timer "Org3Peer0安装链码" "$CLI_CMD \"$Org3Peer0Cli peer lifecycle chaincode install ${CHAINCODE_PACKAGE}\""
+    execute_with_timer "Org3Peer1安装链码" "$CLI_CMD \"$Org3Peer1Cli peer lifecycle chaincode install ${CHAINCODE_PACKAGE}\""
 
     # 批准链码
     show_progress 14 "批准链码" $start_time
     PackageID=$($CLI_CMD "$Org1Peer0Cli peer lifecycle chaincode calculatepackageid ${CHAINCODE_PACKAGE}")
     execute_with_timer "Org1批准链码" "$CLI_CMD \"$Org1Peer0Cli peer lifecycle chaincode approveformyorg -o $ORDERER1_ADDRESS --channelID $ChannelName --name $ChainCodeName --version $Version --package-id $PackageID --sequence $Sequence --tls --cafile $ORDERER_CA\""
     execute_with_timer "Org2批准链码" "$CLI_CMD \"$Org2Peer0Cli peer lifecycle chaincode approveformyorg -o $ORDERER1_ADDRESS --channelID $ChannelName --name $ChainCodeName --version $Version --package-id $PackageID --sequence $Sequence --tls --cafile $ORDERER_CA\""
+    execute_with_timer "Org3批准链码" "$CLI_CMD \"$Org3Peer0Cli peer lifecycle chaincode approveformyorg -o $ORDERER1_ADDRESS --channelID $ChannelName --name $ChainCodeName --version $Version --package-id $PackageID --sequence $Sequence --tls --cafile $ORDERER_CA\""
 
     # 提交链码
     show_progress 15 "提交链码" $start_time
-    execute_with_timer "提交链码定义" "$CLI_CMD \"$Org1Peer0Cli peer lifecycle chaincode commit -o $ORDERER1_ADDRESS --channelID $ChannelName --name $ChainCodeName --version $Version --sequence $Sequence --tls --cafile $ORDERER_CA --peerAddresses $ORG1_PEER0_ADDRESS --tlsRootCertFiles $ORG1_PEER0_TLS_ROOTCERT_FILE --peerAddresses $ORG2_PEER0_ADDRESS --tlsRootCertFiles $ORG2_PEER0_TLS_ROOTCERT_FILE\""
+    execute_with_timer "提交链码定义" "$CLI_CMD \"$Org1Peer0Cli peer lifecycle chaincode commit -o $ORDERER1_ADDRESS --channelID $ChannelName --name $ChainCodeName --version $Version --sequence $Sequence --tls --cafile $ORDERER_CA --peerAddresses $ORG1_PEER0_ADDRESS --tlsRootCertFiles $ORG1_PEER0_TLS_ROOTCERT_FILE --peerAddresses $ORG2_PEER0_ADDRESS --tlsRootCertFiles $ORG2_PEER0_TLS_ROOTCERT_FILE --peerAddresses $ORG3_PEER0_ADDRESS --tlsRootCertFiles $ORG3_PEER0_TLS_ROOTCERT_FILE\""
 
     # 初始化并验证
     show_progress 16 "初始化并验证" $start_time
-    execute_with_timer "初始化链码" "$CLI_CMD \"$Org1Peer0Cli peer chaincode invoke -o $ORDERER1_ADDRESS -C $ChannelName -n $ChainCodeName -c '{\\\"function\\\":\\\"InitLedger\\\",\\\"Args\\\":[]}' --tls --cafile $ORDERER_CA --peerAddresses $ORG1_PEER0_ADDRESS --tlsRootCertFiles $ORG1_PEER0_TLS_ROOTCERT_FILE --peerAddresses $ORG2_PEER0_ADDRESS --tlsRootCertFiles $ORG2_PEER0_TLS_ROOTCERT_FILE\""
+    execute_with_timer "初始化链码" "$CLI_CMD \"$Org1Peer0Cli peer chaincode invoke -o $ORDERER1_ADDRESS -C $ChannelName -n $ChainCodeName -c '{\\\"function\\\":\\\"InitLedger\\\",\\\"Args\\\":[]}' --tls --cafile $ORDERER_CA --peerAddresses $ORG1_PEER0_ADDRESS --tlsRootCertFiles $ORG1_PEER0_TLS_ROOTCERT_FILE --peerAddresses $ORG2_PEER0_ADDRESS --tlsRootCertFiles $ORG2_PEER0_TLS_ROOTCERT_FILE --peerAddresses $ORG3_PEER0_ADDRESS --tlsRootCertFiles $ORG3_PEER0_TLS_ROOTCERT_FILE\""
 
     wait_for_completion "等待链码初始化（${CHAINCODE_INIT_WAIT}秒）" $CHAINCODE_INIT_WAIT
 

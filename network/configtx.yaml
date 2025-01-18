@@ -60,6 +60,27 @@ Organizations:
         Type: Signature
         Rule: "OR('Org2MSP.peer')"
 
+  - &Org3 # 组织3
+    Name: Org3
+    ID: Org3MSP
+    MSPDir: crypto-config/peerOrganizations/org3.togettoyou.com/msp
+    AnchorPeers:
+      - Host: peer0.org3.togettoyou.com
+        Port: 7051
+    Policies:
+      Readers:
+        Type: Signature
+        Rule: "OR('Org3MSP.admin', 'Org3MSP.peer', 'Org3MSP.client')"
+      Writers:
+        Type: Signature
+        Rule: "OR('Org3MSP.admin', 'Org3MSP.client')"
+      Admins:
+        Type: Signature
+        Rule: "OR('Org3MSP.admin')"
+      Endorsement:
+        Type: Signature
+        Rule: "OR('Org3MSP.peer')"
+
 Capabilities:
   Channel: &ChannelCapabilities
     V2_0: true
@@ -161,6 +182,7 @@ Profiles:
         Organizations:
           - *Org1
           - *Org2
+          - *Org3
   SampleChannel:
     <<: *ChannelDefaults
     # 所属联盟
@@ -171,3 +193,4 @@ Profiles:
       Organizations:
         - *Org1
         - *Org2
+        - *Org3
