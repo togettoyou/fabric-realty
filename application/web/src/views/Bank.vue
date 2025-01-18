@@ -1,10 +1,12 @@
 <template>
   <div class="bank">
-    <a-page-header
-      title="银行"
-      sub-title="负责交易的完成确认"
-      @back="() => $router.push('/')"
-    />
+    <div class="page-header">
+      <a-page-header
+        title="银行"
+        sub-title="负责交易的完成确认"
+        @back="() => $router.push('/')"
+      />
+    </div>
 
     <div class="content">
       <a-card :bordered="false">
@@ -33,10 +35,10 @@
               <span class="price">¥ {{ record.price.toLocaleString() }}</span>
             </template>
             <template v-else-if="column.key === 'createTime'">
-              {{ new Date(record.createTime).toLocaleString() }}
+              <time>{{ new Date(record.createTime).toLocaleString() }}</time>
             </template>
             <template v-else-if="column.key === 'updateTime'">
-              {{ new Date(record.updateTime).toLocaleString() }}
+              <time>{{ new Date(record.updateTime).toLocaleString() }}</time>
             </template>
             <template v-else-if="column.key === 'action'">
               <a-space>
@@ -94,24 +96,44 @@ const columns = [
     dataIndex: 'id',
     key: 'id',
     width: 180,
+    ellipsis: true,
+    customCell: () => ({
+      style: { cursor: 'copy' },
+      onClick: (e: MouseEvent) => {
+        const text = (e.target as HTMLElement).innerText;
+        navigator.clipboard.writeText(text);
+        message.success('已复制到剪贴板');
+      },
+    }),
   },
   {
     title: '房产ID',
     dataIndex: 'realEstateId',
     key: 'realEstateId',
     width: 180,
+    ellipsis: true,
+    customCell: () => ({
+      style: { cursor: 'copy' },
+      onClick: (e: MouseEvent) => {
+        const text = (e.target as HTMLElement).innerText;
+        navigator.clipboard.writeText(text);
+        message.success('已复制到剪贴板');
+      },
+    }),
   },
   {
     title: '卖家',
     dataIndex: 'seller',
     key: 'seller',
     width: 120,
+    ellipsis: true,
   },
   {
     title: '买家',
     dataIndex: 'buyer',
     key: 'buyer',
     width: 120,
+    ellipsis: true,
   },
   {
     title: '价格',
@@ -235,33 +257,19 @@ onMounted(() => {
 
 <style scoped>
 .bank {
-  padding: 24px;
-  background-color: #f0f2f5;
   min-height: 100vh;
+  background-color: #f0f2f5;
 }
 
-.content {
-  margin-top: 24px;
-}
-
-:deep(.ant-card-body) {
-  padding: 0;
-}
-
-:deep(.ant-card-extra) {
-  padding: 16px 24px;
-  border-bottom: 1px solid #f0f0f0;
-}
-
-:deep(.ant-table-thead > tr > th) {
-  background: #fafafa;
-}
-
-.table-footer {
-  padding: 16px;
-  text-align: center;
+.page-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
   background: #fff;
-  border-radius: 0 0 8px 8px;
+  padding: 16px 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
 .price {

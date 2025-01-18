@@ -1,19 +1,21 @@
 <template>
   <div class="realty-agency">
-    <a-page-header
-      title="不动产登记机构"
-      sub-title="负责房产信息的登记和所有权变更"
-      @back="() => $router.push('/')"
-    >
-      <template #extra>
-        <a-tooltip title="点击创建新的房产信息">
-          <a-button type="primary" @click="showCreateModal = true">
-            <template #icon><PlusOutlined /></template>
-            登记新房产
-          </a-button>
-        </a-tooltip>
-      </template>
-    </a-page-header>
+    <div class="page-header">
+      <a-page-header
+        title="不动产登记机构"
+        sub-title="负责房产信息的登记和所有权变更"
+        @back="() => $router.push('/')"
+      >
+        <template #extra>
+          <a-tooltip title="点击创建新的房产信息">
+            <a-button type="primary" @click="showCreateModal = true">
+              <template #icon><PlusOutlined /></template>
+              登记新房产
+            </a-button>
+          </a-tooltip>
+        </template>
+      </a-page-header>
+    </div>
 
     <div class="content">
       <a-card :bordered="false">
@@ -31,10 +33,10 @@
               </a-tag>
             </template>
             <template v-else-if="column.key === 'createTime'">
-              {{ new Date(record.createTime).toLocaleString() }}
+              <time>{{ new Date(record.createTime).toLocaleString() }}</time>
             </template>
             <template v-else-if="column.key === 'updateTime'">
-              {{ new Date(record.updateTime).toLocaleString() }}
+              <time>{{ new Date(record.updateTime).toLocaleString() }}</time>
             </template>
           </template>
         </a-table>
@@ -126,25 +128,41 @@ const columns = [
     dataIndex: 'id',
     key: 'id',
     width: 180,
+    ellipsis: true,
+    customCell: () => ({
+      style: { cursor: 'copy' },
+      onClick: (e: MouseEvent) => {
+        const text = (e.target as HTMLElement).innerText;
+        navigator.clipboard.writeText(text);
+        message.success('已复制到剪贴板');
+      },
+    }),
   },
   {
     title: '地址',
     dataIndex: 'propertyAddress',
     key: 'propertyAddress',
-    ellipsis: true,
+    ellipsis: { showTitle: true },
   },
   {
-    title: '面积（平方米）',
+    title: '面积',
     dataIndex: 'area',
     key: 'area',
-    width: 120,
+    width: 150,
     align: 'right' as const,
+    customCell: () => ({
+      style: { 
+        fontVariantNumeric: 'tabular-nums',
+      },
+    }),
+    customRender: ({ text }: { text: number }) => `${text} ㎡`,
   },
   {
     title: '当前所有者',
     dataIndex: 'currentOwner',
     key: 'currentOwner',
     width: 120,
+    ellipsis: true,
   },
   {
     title: '状态',
@@ -238,28 +256,19 @@ onMounted(() => {
 
 <style scoped>
 .realty-agency {
-  padding: 24px;
-  background-color: #f0f2f5;
   min-height: 100vh;
+  background-color: #f0f2f5;
 }
 
-.content {
-  margin-top: 24px;
-}
-
-:deep(.ant-card-body) {
-  padding: 0;
-}
-
-:deep(.ant-table-thead > tr > th) {
-  background: #fafafa;
-}
-
-.table-footer {
-  padding: 16px;
-  text-align: center;
+.page-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
   background: #fff;
-  border-radius: 0 0 8px 8px;
+  padding: 16px 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
 :deep(.ant-form-item-label) {
