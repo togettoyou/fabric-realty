@@ -113,7 +113,7 @@ func (s *RealtyService) QueryTransaction(txID string) (map[string]interface{}, e
 func (s *RealtyService) QueryRealEstateList(pageSize int32, bookmark string) (map[string]interface{}, error) {
 	// 查询操作可以使用任意组织身份
 	contract := utils.GetContract(REALTY_ORG)
-	result, err := contract.EvaluateTransaction("QueryRealEstateList", fmt.Sprintf("%d", pageSize), bookmark)
+	result, err := contract.EvaluateTransaction("QueryRealEstateList", fmt.Sprintf("%d", pageSize), bookmark, "")
 	if err != nil {
 		return nil, fmt.Errorf("查询房产列表失败：%s", extractErrorMessage(err))
 	}
@@ -130,7 +130,7 @@ func (s *RealtyService) QueryRealEstateList(pageSize int32, bookmark string) (ma
 func (s *RealtyService) QueryTransactionList(pageSize int32, bookmark string) (map[string]interface{}, error) {
 	// 查询操作可以使用任意组织身份
 	contract := utils.GetContract(REALTY_ORG)
-	result, err := contract.EvaluateTransaction("QueryTransactionList", fmt.Sprintf("%d", pageSize), bookmark)
+	result, err := contract.EvaluateTransaction("QueryTransactionList", fmt.Sprintf("%d", pageSize), bookmark, "")
 	if err != nil {
 		return nil, fmt.Errorf("查询交易列表失败：%s", extractErrorMessage(err))
 	}

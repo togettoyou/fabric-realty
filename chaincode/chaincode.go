@@ -7,7 +7,9 @@ import (
 	"time"
 
 	"github.com/hyperledger/fabric-chaincode-go/v2/pkg/cid"
+	"github.com/hyperledger/fabric-chaincode-go/v2/shim"
 	"github.com/hyperledger/fabric-contract-api-go/v2/contractapi"
+	"github.com/hyperledger/fabric-protos-go-apiv2/peer"
 )
 
 // SmartContract 提供房地产交易的功能
@@ -19,6 +21,10 @@ type SmartContract struct {
 const (
 	REAL_ESTATE = "RE" // 房产信息
 	TRANSACTION = "TX" // 交易信息
+
+	// 索引前缀
+	IDX_RE_STATUS_TIME = "RE_STATUS_TIME" // 房产状态时间索引
+	IDX_TX_STATUS_TIME = "TX_STATUS_TIME" // 交易状态时间索引
 )
 
 // RealEstateStatus 房产状态
@@ -134,7 +140,25 @@ func (s *SmartContract) CreateRealEstate(ctx contractapi.TransactionContextInter
 	}
 
 	// 保存房产信息
-	return ctx.GetStub().PutState(key, realEstateJSON)
+	err = ctx.GetStub().PutState(key, realEstateJSON)
+	if err != nil {
+		return fmt.Errorf("保存房产信息失败：%v", err)
+	}
+
+	// 创建状态时间索引
+	timeStr := createTime.Format("2006-01-02 15:04:05.000")
+	statusTimeKey, err := ctx.GetStub().CreateCompositeKey(IDX_RE_STATUS_TIME, []string{string(realEstate.Status), timeStr, id})
+	if err != nil {
+		return fmt.Errorf("创建状态时间索引失败：%v", err)
+	}
+
+	// 保存空值，我们只需要键
+	err = ctx.GetStub().PutState(statusTimeKey, []byte{0x00})
+	if err != nil {
+		return fmt.Errorf("保存状态时间索引失败：%v", err)
+	}
+
+	return nil
 }
 
 // CreateTransaction 创建交易（仅交易平台组织可以调用）
@@ -242,6 +266,19 @@ func (s *SmartContract) CreateTransaction(ctx contractapi.TransactionContextInte
 		return fmt.Errorf("保存交易信息失败：%v", err)
 	}
 
+	// 创建状态时间索引
+	timeStr := transaction.CreateTime.Format("2006-01-02 15:04:05.000")
+	statusTimeKey, err := ctx.GetStub().CreateCompositeKey(IDX_TX_STATUS_TIME, []string{string(transaction.Status), timeStr, txID})
+	if err != nil {
+		return fmt.Errorf("创建状态时间索引失败：%v", err)
+	}
+
+	// 保存空值，我们只需要键
+	err = ctx.GetStub().PutState(statusTimeKey, []byte{0x00})
+	if err != nil {
+		return fmt.Errorf("保存状态时间索引失败：%v", err)
+	}
+
 	return nil
 }
 
@@ -333,6 +370,27 @@ func (s *SmartContract) CompleteTransaction(ctx contractapi.TransactionContextIn
 		return fmt.Errorf("更新交易信息失败：%v", err)
 	}
 
+	// 删除旧的状态时间索引
+	oldTimeStr := transaction.CreateTime.Format("2006-01-02 15:04:05.000")
+	oldStatusTimeKey, err := ctx.GetStub().CreateCompositeKey(IDX_TX_STATUS_TIME, []string{string(PENDING), oldTimeStr, txID})
+	if err != nil {
+		return fmt.Errorf("创建旧状态时间索引失败：%v", err)
+	}
+	err = ctx.GetStub().DelState(oldStatusTimeKey)
+	if err != nil {
+		return fmt.Errorf("删除旧状态时间索引失败：%v", err)
+	}
+
+	// 创建新的状态时间索引（使用原来的创建时间）
+	newStatusTimeKey, err := ctx.GetStub().CreateCompositeKey(IDX_TX_STATUS_TIME, []string{string(COMPLETED), oldTimeStr, txID})
+	if err != nil {
+		return fmt.Errorf("创建新状态时间索引失败：%v", err)
+	}
+	err = ctx.GetStub().PutState(newStatusTimeKey, []byte{0x00})
+	if err != nil {
+		return fmt.Errorf("保存新状态时间索引失败：%v", err)
+	}
+
 	return nil
 }
 
@@ -393,9 +451,30 @@ type QueryResult struct {
 }
 
 // QueryRealEstateList 分页查询房产列表
-func (s *SmartContract) QueryRealEstateList(ctx contractapi.TransactionContextInterface, pageSize int32, bookmark string) (*QueryResult, error) {
-	// 使用部分复合键查询
-	iterator, metadata, err := ctx.GetStub().GetStateByPartialCompositeKeyWithPagination(REAL_ESTATE, []string{}, pageSize, bookmark)
+func (s *SmartContract) QueryRealEstateList(ctx contractapi.TransactionContextInterface, pageSize int32, bookmark string, status string) (*QueryResult, error) {
+	// 使用状态时间索引查询
+	var iterator shim.StateQueryIteratorInterface
+	var metadata *peer.QueryResponseMetadata
+	var err error
+
+	if status != "" {
+		// 如果指定了状态，使用状态前缀查询
+		iterator, metadata, err = ctx.GetStub().GetStateByPartialCompositeKeyWithPagination(
+			IDX_RE_STATUS_TIME,
+			[]string{status},
+			pageSize,
+			bookmark,
+		)
+	} else {
+		// 如果没有指定状态，查询所有记录
+		iterator, metadata, err = ctx.GetStub().GetStateByPartialCompositeKeyWithPagination(
+			IDX_RE_STATUS_TIME,
+			[]string{},
+			pageSize,
+			bookmark,
+		)
+	}
+
 	if err != nil {
 		return nil, fmt.Errorf("查询房产列表失败：%v", err)
 	}
@@ -408,11 +487,32 @@ func (s *SmartContract) QueryRealEstateList(ctx contractapi.TransactionContextIn
 			return nil, fmt.Errorf("获取下一条记录失败：%v", err)
 		}
 
+		// 从复合键中解析出房产ID
+		_, compositeKeyParts, err := ctx.GetStub().SplitCompositeKey(queryResponse.Key)
+		if err != nil {
+			return nil, fmt.Errorf("解析复合键失败：%v", err)
+		}
+
+		// 获取房产ID（复合键的最后一部分）
+		realEstateID := compositeKeyParts[len(compositeKeyParts)-1]
+
+		// 查询房产详细信息
+		realEstateKey, err := ctx.GetStub().CreateCompositeKey(REAL_ESTATE, []string{realEstateID})
+		if err != nil {
+			return nil, fmt.Errorf("创建房产键失败：%v", err)
+		}
+
+		realEstateBytes, err := ctx.GetStub().GetState(realEstateKey)
+		if err != nil {
+			return nil, fmt.Errorf("查询房产信息失败：%v", err)
+		}
+
 		var realEstate RealEstate
-		err = json.Unmarshal(queryResponse.Value, &realEstate)
+		err = json.Unmarshal(realEstateBytes, &realEstate)
 		if err != nil {
 			return nil, fmt.Errorf("解析房产数据失败：%v", err)
 		}
+
 		realEstates = append(realEstates, realEstate)
 	}
 
@@ -425,9 +525,30 @@ func (s *SmartContract) QueryRealEstateList(ctx contractapi.TransactionContextIn
 }
 
 // QueryTransactionList 分页查询交易列表
-func (s *SmartContract) QueryTransactionList(ctx contractapi.TransactionContextInterface, pageSize int32, bookmark string) (*QueryResult, error) {
-	// 使用部分复合键查询
-	iterator, metadata, err := ctx.GetStub().GetStateByPartialCompositeKeyWithPagination(TRANSACTION, []string{}, pageSize, bookmark)
+func (s *SmartContract) QueryTransactionList(ctx contractapi.TransactionContextInterface, pageSize int32, bookmark string, status string) (*QueryResult, error) {
+	// 使用状态时间索引查询
+	var iterator shim.StateQueryIteratorInterface
+	var metadata *peer.QueryResponseMetadata
+	var err error
+
+	if status != "" {
+		// 如果指定了状态，使用状态前缀查询
+		iterator, metadata, err = ctx.GetStub().GetStateByPartialCompositeKeyWithPagination(
+			IDX_TX_STATUS_TIME,
+			[]string{status},
+			pageSize,
+			bookmark,
+		)
+	} else {
+		// 如果没有指定状态，查询所有记录
+		iterator, metadata, err = ctx.GetStub().GetStateByPartialCompositeKeyWithPagination(
+			IDX_TX_STATUS_TIME,
+			[]string{},
+			pageSize,
+			bookmark,
+		)
+	}
+
 	if err != nil {
 		return nil, fmt.Errorf("查询交易列表失败：%v", err)
 	}
@@ -440,11 +561,32 @@ func (s *SmartContract) QueryTransactionList(ctx contractapi.TransactionContextI
 			return nil, fmt.Errorf("获取下一条记录失败：%v", err)
 		}
 
+		// 从复合键中解析出交易ID
+		_, compositeKeyParts, err := ctx.GetStub().SplitCompositeKey(queryResponse.Key)
+		if err != nil {
+			return nil, fmt.Errorf("解析复合键失败：%v", err)
+		}
+
+		// 获取交易ID（复合键的最后一部分）
+		txID := compositeKeyParts[len(compositeKeyParts)-1]
+
+		// 查询交易详细信息
+		txKey, err := ctx.GetStub().CreateCompositeKey(TRANSACTION, []string{txID})
+		if err != nil {
+			return nil, fmt.Errorf("创建交易键失败：%v", err)
+		}
+
+		txBytes, err := ctx.GetStub().GetState(txKey)
+		if err != nil {
+			return nil, fmt.Errorf("查询交易信息失败：%v", err)
+		}
+
 		var transaction Transaction
-		err = json.Unmarshal(queryResponse.Value, &transaction)
+		err = json.Unmarshal(txBytes, &transaction)
 		if err != nil {
 			return nil, fmt.Errorf("解析交易数据失败：%v", err)
 		}
+
 		transactions = append(transactions, transaction)
 	}
 
