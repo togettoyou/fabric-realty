@@ -105,6 +105,15 @@ const transactionList = ref<any[]>([]);
 const loading = ref(false);
 const bookmark = ref('');
 
+const handleCopy = async (text: string) => {
+  try {
+    await navigator.clipboard.writeText(text);
+    message.success('已复制到剪贴板');
+  } catch (err) {
+    message.error('复制失败');
+  }
+};
+
 const columns = [
   {
     title: '交易ID',
@@ -112,14 +121,6 @@ const columns = [
     key: 'id',
     width: 180,
     ellipsis: true,
-    customCell: () => ({
-      style: { cursor: 'copy' },
-      onClick: (e: MouseEvent) => {
-        const text = (e.target as HTMLElement).innerText;
-        navigator.clipboard.writeText(text);
-        message.success('已复制到剪贴板');
-      },
-    }),
   },
   {
     title: '房产ID',
@@ -127,14 +128,6 @@ const columns = [
     key: 'realEstateId',
     width: 180,
     ellipsis: true,
-    customCell: () => ({
-      style: { cursor: 'copy' },
-      onClick: (e: MouseEvent) => {
-        const text = (e.target as HTMLElement).innerText;
-        navigator.clipboard.writeText(text);
-        message.success('已复制到剪贴板');
-      },
-    }),
   },
   {
     title: '卖家',
