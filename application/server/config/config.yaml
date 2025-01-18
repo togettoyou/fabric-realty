@@ -1,16 +1,5 @@
-mysql:
-  host: localhost
-  port: 3306
-  user: root
-  password: 123456
-  dbname: realty
-
 server:
   port: 8080
-
-jwt:
-  secret: "2c39affd-8238-470b-88e6-39a146c15fc6"
-  expire_time: 24
 
 fabric:
   channelName: mychannel
@@ -30,3 +19,10 @@ fabric:
       tlsCertPath: ../../network/crypto-config/peerOrganizations/org2.togettoyou.com/peers/peer0.org2.togettoyou.com/tls/ca.crt
       peerEndpoint: localhost:27051
       gatewayPeer: peer0.org2.togettoyou.com
+    org3:
+      mspID: Org3MSP
+      certPath: ../../network/crypto-config/peerOrganizations/org3.togettoyou.com/users/User1@org3.togettoyou.com/msp/signcerts
+      keyPath: ../../network/crypto-config/peerOrganizations/org3.togettoyou.com/users/User1@org3.togettoyou.com/msp/keystore
+      tlsCertPath: ../../network/crypto-config/peerOrganizations/org3.togettoyou.com/peers/peer0.org3.togettoyou.com/tls/ca.crt
+      peerEndpoint: localhost:47051
+      gatewayPeer: peer0.org3.togettoyou.com

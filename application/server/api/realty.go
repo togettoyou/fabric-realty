@@ -18,14 +18,13 @@ func NewRealtyHandler() *RealtyHandler {
 	}
 }
 
-// CreateRealEstate 创建房产信息
+// CreateRealEstate 创建房产信息（仅不动产登记机构组织可以调用）
 func (h *RealtyHandler) CreateRealEstate(c *gin.Context) {
 	var req struct {
 		ID      string  `json:"id"`
 		Address string  `json:"address"`
 		Area    float64 `json:"area"`
 		Owner   string  `json:"owner"`
-		Price   float64 `json:"price"`
 	}
 
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -33,7 +32,7 @@ func (h *RealtyHandler) CreateRealEstate(c *gin.Context) {
 		return
 	}
 
-	err := h.realtyService.CreateRealEstate(req.ID, req.Address, req.Area, req.Owner, req.Price)
+	err := h.realtyService.CreateRealEstate(req.ID, req.Address, req.Area, req.Owner)
 	if err != nil {
 		utils.ServerError(c, "创建房产信息失败："+err.Error())
 		return
@@ -54,7 +53,7 @@ func (h *RealtyHandler) QueryRealEstate(c *gin.Context) {
 	utils.Success(c, realEstate)
 }
 
-// CreateTransaction 创建交易
+// CreateTransaction 创建交易（仅交易平台组织可以调用）
 func (h *RealtyHandler) CreateTransaction(c *gin.Context) {
 	var req struct {
 		TxID         string  `json:"txId"`
@@ -78,19 +77,7 @@ func (h *RealtyHandler) CreateTransaction(c *gin.Context) {
 	utils.SuccessWithMessage(c, "交易创建成功", nil)
 }
 
-// ConfirmEscrow 确认资金托管
-func (h *RealtyHandler) ConfirmEscrow(c *gin.Context) {
-	txID := c.Param("txId")
-	err := h.realtyService.ConfirmEscrow(txID)
-	if err != nil {
-		utils.ServerError(c, "确认资金托管失败："+err.Error())
-		return
-	}
-
-	utils.SuccessWithMessage(c, "资金托管确认成功", nil)
-}
-
-// CompleteTransaction 完成交易
+// CompleteTransaction 完成交易（仅银行组织可以调用）
 func (h *RealtyHandler) CompleteTransaction(c *gin.Context) {
 	txID := c.Param("txId")
 	err := h.realtyService.CompleteTransaction(txID)
@@ -136,41 +123,6 @@ func (h *RealtyHandler) QueryTransactionList(c *gin.Context) {
 	bookmark := c.DefaultQuery("bookmark", "")
 
 	result, err := h.realtyService.QueryTransactionList(int32(pageSize), bookmark)
-	if err != nil {
-		utils.ServerError(c, err.Error())
-		return
-	}
-
-	utils.Success(c, result)
-}
-
-// QueryRealEstateByFilter 按条件查询房产列表
-func (h *RealtyHandler) QueryRealEstateByFilter(c *gin.Context) {
-	// 获取查询参数
-	owner := c.Query("owner")
-	status := c.Query("status")
-	pageSize, _ := strconv.Atoi(c.DefaultQuery("pageSize", "10"))
-	bookmark := c.DefaultQuery("bookmark", "")
-
-	result, err := h.realtyService.QueryRealEstateByFilter(owner, status, int32(pageSize), bookmark)
-	if err != nil {
-		utils.ServerError(c, err.Error())
-		return
-	}
-
-	utils.Success(c, result)
-}
-
-// QueryTransactionByFilter 按条件查询交易列表
-func (h *RealtyHandler) QueryTransactionByFilter(c *gin.Context) {
-	// 获取查询参数
-	seller := c.Query("seller")
-	buyer := c.Query("buyer")
-	status := c.Query("status")
-	pageSize, _ := strconv.Atoi(c.DefaultQuery("pageSize", "10"))
-	bookmark := c.DefaultQuery("bookmark", "")
-
-	result, err := h.realtyService.QueryTransactionByFilter(seller, buyer, status, int32(pageSize), bookmark)
 	if err != nil {
 		utils.ServerError(c, err.Error())
 		return

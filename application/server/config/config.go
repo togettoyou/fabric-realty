@@ -9,30 +9,13 @@ import (
 
 // Config 配置
 type Config struct {
-	MySQL  MySQLConfig  `yaml:"mysql"`
 	Server ServerConfig `yaml:"server"`
-	JWT    JWTConfig    `yaml:"jwt"`
 	Fabric FabricConfig `yaml:"fabric"`
-}
-
-// MySQLConfig MySQL配置
-type MySQLConfig struct {
-	Host     string `yaml:"host"`
-	Port     int    `yaml:"port"`
-	User     string `yaml:"user"`
-	Password string `yaml:"password"`
-	DBName   string `yaml:"dbname"`
 }
 
 // ServerConfig 服务器配置
 type ServerConfig struct {
 	Port int `yaml:"port"`
-}
-
-// JWTConfig JWT配置
-type JWTConfig struct {
-	Secret     string `yaml:"secret"`
-	ExpireTime int64  `yaml:"expire_time"`
 }
 
 // FabricConfig Fabric配置

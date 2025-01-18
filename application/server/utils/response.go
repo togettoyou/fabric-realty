@@ -54,11 +54,3 @@ func ServerError(c *gin.Context, message string) {
 	}
 	Fail(c, http.StatusInternalServerError, message)
 }
-
-// Unauthorized 401错误响应
-func Unauthorized(c *gin.Context, message string) {
-	if message == "" {
-		message = "未授权访问"
-	}
-	Fail(c, http.StatusUnauthorized, message)
-}

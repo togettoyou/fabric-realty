@@ -3,8 +3,6 @@ package main
 import (
 	"application/api"
 	"application/config"
-	"application/middleware"
-	"application/model"
 	"application/utils"
 	"fmt"
 	"log"
@@ -18,11 +16,6 @@ func main() {
 		log.Fatalf("初始化配置失败：%v", err)
 	}
 
-	// 初始化数据库
-	if err := model.InitDB(); err != nil {
-		log.Fatalf("初始化数据库失败：%v", err)
-	}
-
 	// 初始化 Fabric 客户端
 	if err := utils.InitFabric(); err != nil {
 		log.Fatalf("初始化Fabric客户端失败：%v", err)
@@ -30,48 +23,51 @@ func main() {
 
 	// 创建 Gin 路由
 	gin.SetMode(gin.ReleaseMode)
-
 	r := gin.Default()
 
-	// 创建处理器实例
-	userHandler := api.NewUserHandler()
+	// 注册路由
 	realtyHandler := api.NewRealtyHandler()
 
-	// 用户相关路由
-	userGroup := r.Group("/api/user")
+	// 不动产登记机构的接口
+	realty := r.Group("/realty-agency")
 	{
-		userGroup.POST("/register", userHandler.Register)
-		userGroup.POST("/login", userHandler.Login)
+		// 创建房产信息
+		realty.POST("/realty/create", realtyHandler.CreateRealEstate)
 	}
 
-	// 需要认证的路由
-	authorized := r.Group("/api")
-	authorized.Use(middleware.AuthMiddleware())
+	// 交易平台的接口
+	trading := r.Group("/trading-platform")
 	{
-		// 房产相关路由
-		realtyGroup := authorized.Group("/realty")
+		// 创建交易
+		trading.POST("/transaction/create", realtyHandler.CreateTransaction)
+	}
+
+	// 银行的接口
+	bank := r.Group("/bank")
+	{
+		// 完成交易
+		bank.POST("/transaction/complete/:txId", realtyHandler.CompleteTransaction)
+	}
+
+	// 公共查询接口（所有组织都可以访问）
+	query := r.Group("/query")
+	{
+		// 房产相关查询
+		realty := query.Group("/realty")
 		{
-			// 房管局管理员路由
-			realtyAdmin := realtyGroup.Group("/admin")
-			realtyAdmin.Use(middleware.RequireRoles(model.REALTY_ADMIN))
-			{
-				realtyAdmin.POST("/create", realtyHandler.CreateRealEstate)
-			}
+			// 查询房产信息
+			realty.GET("/:id", realtyHandler.QueryRealEstate)
+			// 分页查询房产列表
+			realty.GET("/list", realtyHandler.QueryRealEstateList)
+		}
 
-			// 银行管理员路由
-			bankAdmin := realtyGroup.Group("/bank")
-			bankAdmin.Use(middleware.RequireRoles(model.BANK_ADMIN))
-			{
-				bankAdmin.POST("/escrow/:txId", realtyHandler.ConfirmEscrow)
-				bankAdmin.POST("/complete/:txId", realtyHandler.CompleteTransaction)
-			}
-
-			// 普通用户路由
-			realtyGroup.GET("/:id", realtyHandler.QueryRealEstate)
-			realtyGroup.GET("/transaction/:txId", realtyHandler.QueryTransaction)
-			realtyGroup.GET("/transaction/list", realtyHandler.QueryTransactionList)
-			realtyGroup.GET("/transaction/filter", realtyHandler.QueryTransactionByFilter)
-			realtyGroup.POST("/transaction", realtyHandler.CreateTransaction)
+		// 交易相关查询
+		transaction := query.Group("/transaction")
+		{
+			// 查询交易信息
+			transaction.GET("/:txId", realtyHandler.QueryTransaction)
+			// 分页查询交易列表
+			transaction.GET("/list", realtyHandler.QueryTransactionList)
 		}
 	}
 
