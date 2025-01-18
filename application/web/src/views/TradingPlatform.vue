@@ -93,6 +93,7 @@
       @ok="handleModalOk"
       @cancel="handleModalCancel"
       :confirmLoading="modalLoading"
+      :style="{ top: '40px' }"
     >
       <a-form
         ref="formRef"
