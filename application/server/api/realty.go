@@ -3,6 +3,7 @@ package api
 import (
 	"application/service"
 	"application/utils"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
@@ -111,4 +112,69 @@ func (h *RealtyHandler) QueryTransaction(c *gin.Context) {
 	}
 
 	utils.Success(c, transaction)
+}
+
+// QueryRealEstateList 分页查询房产列表
+func (h *RealtyHandler) QueryRealEstateList(c *gin.Context) {
+	// 获取分页参数
+	pageSize, _ := strconv.Atoi(c.DefaultQuery("pageSize", "10"))
+	bookmark := c.DefaultQuery("bookmark", "")
+
+	result, err := h.realtyService.QueryRealEstateList(int32(pageSize), bookmark)
+	if err != nil {
+		utils.ServerError(c, err.Error())
+		return
+	}
+
+	utils.Success(c, result)
+}
+
+// QueryTransactionList 分页查询交易列表
+func (h *RealtyHandler) QueryTransactionList(c *gin.Context) {
+	// 获取分页参数
+	pageSize, _ := strconv.Atoi(c.DefaultQuery("pageSize", "10"))
+	bookmark := c.DefaultQuery("bookmark", "")
+
+	result, err := h.realtyService.QueryTransactionList(int32(pageSize), bookmark)
+	if err != nil {
+		utils.ServerError(c, err.Error())
+		return
+	}
+
+	utils.Success(c, result)
+}
+
+// QueryRealEstateByFilter 按条件查询房产列表
+func (h *RealtyHandler) QueryRealEstateByFilter(c *gin.Context) {
+	// 获取查询参数
+	owner := c.Query("owner")
+	status := c.Query("status")
+	pageSize, _ := strconv.Atoi(c.DefaultQuery("pageSize", "10"))
+	bookmark := c.DefaultQuery("bookmark", "")
+
+	result, err := h.realtyService.QueryRealEstateByFilter(owner, status, int32(pageSize), bookmark)
+	if err != nil {
+		utils.ServerError(c, err.Error())
+		return
+	}
+
+	utils.Success(c, result)
+}
+
+// QueryTransactionByFilter 按条件查询交易列表
+func (h *RealtyHandler) QueryTransactionByFilter(c *gin.Context) {
+	// 获取查询参数
+	seller := c.Query("seller")
+	buyer := c.Query("buyer")
+	status := c.Query("status")
+	pageSize, _ := strconv.Atoi(c.DefaultQuery("pageSize", "10"))
+	bookmark := c.DefaultQuery("bookmark", "")
+
+	result, err := h.realtyService.QueryTransactionByFilter(seller, buyer, status, int32(pageSize), bookmark)
+	if err != nil {
+		utils.ServerError(c, err.Error())
+		return
+	}
+
+	utils.Success(c, result)
 }

@@ -29,7 +29,7 @@ func InitDB() error {
 	}
 
 	// 自动迁移数据库结构
-	err = DB.AutoMigrate(&User{}, &RealEstate{}, &Transaction{})
+	err = DB.AutoMigrate(&User{})
 	if err != nil {
 		return fmt.Errorf("数据库迁移失败：%v", err)
 	}

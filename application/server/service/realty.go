@@ -1,7 +1,6 @@
 package service
 
 import (
-	"application/model"
 	"application/utils"
 	"encoding/json"
 	"fmt"
@@ -48,15 +47,6 @@ func (s *RealtyService) CreateRealEstate(id, address string, area float64, owner
 	if err != nil {
 		return fmt.Errorf("创建房产信息失败：%s", extractErrorMessage(err))
 	}
-
-	// 记录房产ID到数据库
-	realEstate := model.RealEstate{
-		ID: id,
-	}
-	if err := model.DB.Create(&realEstate).Error; err != nil {
-		return fmt.Errorf("记录房产ID到数据库失败：%v", err)
-	}
-
 	return nil
 }
 
@@ -77,6 +67,23 @@ func (s *RealtyService) QueryRealEstate(id string) (map[string]interface{}, erro
 	return realEstate, nil
 }
 
+// QueryRealEstateByFilter 按条件查询房产列表
+func (s *RealtyService) QueryRealEstateByFilter(owner string, status string, pageSize int32, bookmark string) (map[string]interface{}, error) {
+	// 查询操作可以使用任意组织身份
+	contract := utils.GetContract(REALTY_ORG)
+	result, err := contract.EvaluateTransaction("QueryRealEstateByFilter", owner, status, fmt.Sprintf("%d", pageSize), bookmark)
+	if err != nil {
+		return nil, fmt.Errorf("查询房产列表失败：%s", extractErrorMessage(err))
+	}
+
+	var queryResult map[string]interface{}
+	if err := json.Unmarshal(result, &queryResult); err != nil {
+		return nil, fmt.Errorf("解析查询结果失败：%v", err)
+	}
+
+	return queryResult, nil
+}
+
 // CreateTransaction 创建交易
 func (s *RealtyService) CreateTransaction(txID, realEstateID, seller, buyer string, price float64) error {
 	// 创建交易可以使用任意组织身份
@@ -86,16 +93,6 @@ func (s *RealtyService) CreateTransaction(txID, realEstateID, seller, buyer stri
 	if err != nil {
 		return fmt.Errorf("创建交易失败：%s", extractErrorMessage(err))
 	}
-
-	// 记录交易ID到数据库
-	transaction := model.Transaction{
-		ID:           txID,
-		RealEstateID: realEstateID,
-	}
-	if err := model.DB.Create(&transaction).Error; err != nil {
-		return fmt.Errorf("记录交易ID到数据库失败：%v", err)
-	}
-
 	return nil
 }
 
@@ -138,4 +135,55 @@ func (s *RealtyService) QueryTransaction(txID string) (map[string]interface{}, e
 	}
 
 	return transaction, nil
+}
+
+// QueryTransactionByFilter 按条件查询交易列表
+func (s *RealtyService) QueryTransactionByFilter(seller string, buyer string, status string, pageSize int32, bookmark string) (map[string]interface{}, error) {
+	// 查询操作可以使用任意组织身份
+	contract := utils.GetContract(REALTY_ORG)
+	result, err := contract.EvaluateTransaction("QueryTransactionByFilter", seller, buyer, status, fmt.Sprintf("%d", pageSize), bookmark)
+	if err != nil {
+		return nil, fmt.Errorf("查询交易列表失败：%s", extractErrorMessage(err))
+	}
+
+	var queryResult map[string]interface{}
+	if err := json.Unmarshal(result, &queryResult); err != nil {
+		return nil, fmt.Errorf("解析查询结果失败：%v", err)
+	}
+
+	return queryResult, nil
+}
+
+// QueryRealEstateList 分页查询房产列表
+func (s *RealtyService) QueryRealEstateList(pageSize int32, bookmark string) (map[string]interface{}, error) {
+	// 查询操作可以使用任意组织身份
+	contract := utils.GetContract(REALTY_ORG)
+	result, err := contract.EvaluateTransaction("QueryRealEstateList", fmt.Sprintf("%d", pageSize), bookmark)
+	if err != nil {
+		return nil, fmt.Errorf("查询房产列表失败：%s", extractErrorMessage(err))
+	}
+
+	var queryResult map[string]interface{}
+	if err := json.Unmarshal(result, &queryResult); err != nil {
+		return nil, fmt.Errorf("解析查询结果失败：%v", err)
+	}
+
+	return queryResult, nil
+}
+
+// QueryTransactionList 分页查询交易列表
+func (s *RealtyService) QueryTransactionList(pageSize int32, bookmark string) (map[string]interface{}, error) {
+	// 查询操作可以使用任意组织身份
+	contract := utils.GetContract(REALTY_ORG)
+	result, err := contract.EvaluateTransaction("QueryTransactionList", fmt.Sprintf("%d", pageSize), bookmark)
+	if err != nil {
+		return nil, fmt.Errorf("查询交易列表失败：%s", extractErrorMessage(err))
+	}
+
+	var queryResult map[string]interface{}
+	if err := json.Unmarshal(result, &queryResult); err != nil {
+		return nil, fmt.Errorf("解析查询结果失败：%v", err)
+	}
+
+	return queryResult, nil
 }
