@@ -21,7 +21,7 @@
   background: #fff;
   border-radius: 8px;
   box-shadow: none;
-  border: 1px solid #f0f0f0;
+  border: none;
 }
 
 /* 卡片内容区域样式 */
@@ -32,7 +32,8 @@
 /* 页头样式 */
 .page-header {
   background: #fff;
-  border-bottom: 1px solid rgba(5, 5, 5, 0.06);
+  border-bottom: none;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
 }
 
 /* 表单样式 */
@@ -64,6 +65,24 @@
 .ant-table-thead > tr > th {
   background: #fafafa;
   font-weight: 600;
+  border-bottom: none !important;
+}
+
+.ant-table-tbody > tr > td {
+  border-bottom: 1px solid #f5f5f5 !important;
+}
+
+.ant-table-tbody > tr:last-child > td {
+  border-bottom: none !important;
+}
+
+/* 去掉表格外边框 */
+.ant-table-container {
+  border: none !important;
+}
+
+.ant-table-cell {
+  border-right: none !important;
 }
 
 /* 标签样式 */
@@ -75,6 +94,7 @@
   padding: 0 8px;
   font-size: 13px;
   border-radius: 4px;
+  border: none;
 }
 
 /* 价格样式 */
@@ -100,11 +120,26 @@
 }
 
 .table-container::-webkit-scrollbar-thumb {
-  background: #ccc;
+  background: #eee;
   border-radius: 3px;
 }
 
 .table-container::-webkit-scrollbar-thumb:hover {
-  background: #999;
+  background: #ddd;
+}
+
+/* 单选按钮组样式 */
+.ant-radio-group-solid .ant-radio-button-wrapper {
+  border: none !important;
+  background: #f5f5f5;
+  margin-right: 8px;
+}
+
+.ant-radio-group-solid .ant-radio-button-wrapper:not(:first-child)::before {
+  display: none;
+}
+
+.ant-radio-group-solid .ant-radio-button-wrapper-checked:not(.ant-radio-button-wrapper-disabled) {
+  background: #1890ff;
 }
 </style>
