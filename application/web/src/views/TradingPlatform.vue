@@ -40,7 +40,9 @@
             <template #bodyCell="{ column, record }">
               <template v-if="column.key === 'id'">
                 <div class="id-cell">
-                  <span class="id-text">{{ record.id }}</span>
+                  <a-tooltip :title="record.id">
+                    <span class="id-text">{{ record.id }}</span>
+                  </a-tooltip>
                   <a-tooltip title="点击复制">
                     <copy-outlined
                       class="copy-icon"
@@ -51,7 +53,9 @@
               </template>
               <template v-else-if="column.key === 'realEstateId'">
                 <div class="id-cell">
-                  <span class="id-text">{{ record.realEstateId }}</span>
+                  <a-tooltip :title="record.realEstateId">
+                    <span class="id-text">{{ record.realEstateId }}</span>
+                  </a-tooltip>
                   <a-tooltip title="点击复制">
                     <copy-outlined
                       class="copy-icon"
@@ -168,14 +172,26 @@ const columns = [
     dataIndex: 'id',
     key: 'id',
     width: 180,
-    ellipsis: true,
+    ellipsis: false,
+    customCell: () => ({
+      style: {
+        whiteSpace: 'nowrap',
+        overflow: 'hidden',
+      }
+    }),
   },
   {
     title: '房产ID',
     dataIndex: 'realEstateId',
     key: 'realEstateId',
     width: 180,
-    ellipsis: true,
+    ellipsis: false,
+    customCell: () => ({
+      style: {
+        whiteSpace: 'nowrap',
+        overflow: 'hidden',
+      }
+    }),
   },
   {
     title: '卖家',

@@ -40,7 +40,9 @@
             <template #bodyCell="{ column, record }">
               <template v-if="column.key === 'id'">
                 <div class="id-cell">
-                  <span class="id-text">{{ record.id }}</span>
+                  <a-tooltip :title="record.id">
+                    <span class="id-text">{{ record.id }}</span>
+                  </a-tooltip>
                   <a-tooltip title="点击复制">
                     <copy-outlined
                       class="copy-icon"
@@ -160,7 +162,13 @@ const columns = [
     dataIndex: 'id',
     key: 'id',
     width: 180,
-    ellipsis: true,
+    ellipsis: false,
+    customCell: () => ({
+      style: {
+        whiteSpace: 'nowrap',
+        overflow: 'hidden',
+      }
+    }),
   },
   {
     title: '地址',
