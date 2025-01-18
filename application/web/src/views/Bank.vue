@@ -265,6 +265,27 @@ onMounted(() => {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
+.content {
+  margin-top: 80px;
+  padding: 24px;
+}
+
+.table-footer {
+  margin-top: 16px;
+  display: flex;
+  justify-content: center;
+}
+
+:deep(.form-tips) {
+  background-color: #e6f7ff;
+  padding: 8px 12px;
+  border-radius: 4px;
+  color: #666;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+}
+
 .price {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
     'Helvetica Neue', Arial, 'Noto Sans', sans-serif, 'Apple Color Emoji',

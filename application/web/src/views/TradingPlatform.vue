@@ -334,18 +334,18 @@ onMounted(() => {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
-:deep(.ant-form-item-label) {
-  font-weight: 500;
+.content {
+  margin-top: 80px;
+  padding: 24px;
 }
 
-.price {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
-    'Helvetica Neue', Arial, 'Noto Sans', sans-serif, 'Apple Color Emoji',
-    'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
-  font-variant-numeric: tabular-nums;
+.table-footer {
+  margin-top: 16px;
+  display: flex;
+  justify-content: center;
 }
 
-.form-tips {
+:deep(.form-tips) {
   background-color: #e6f7ff;
   padding: 8px 12px;
   border-radius: 4px;
@@ -355,8 +355,15 @@ onMounted(() => {
   align-items: center;
 }
 
-:deep(.ant-form-item-extra) {
-  color: #666;
+:deep(.ant-form-item-label) {
+  font-weight: 500;
+}
+
+.price {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+    'Helvetica Neue', Arial, 'Noto Sans', sans-serif, 'Apple Color Emoji',
+    'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+  font-variant-numeric: tabular-nums;
 }
 
 :deep(.custom-table) {
