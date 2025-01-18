@@ -70,7 +70,19 @@
         layout="vertical"
       >
         <a-form-item label="房产地址" name="address" extra="请输入完整的房产地址信息">
-          <a-input v-model:value="formState.address" placeholder="例如: 北京市朝阳区xxx街道xxx号" />
+          <a-input-group compact>
+            <a-input
+              v-model:value="formState.address"
+              placeholder="例如: 北京市朝阳区xxx街道xxx号"
+              style="width: calc(100% - 110px)"
+            />
+            <a-tooltip title="随机生成一个地址">
+              <a-button @click="generateRandomAddress">
+                <template #icon><ReloadOutlined /></template>
+                随机生成
+              </a-button>
+            </a-tooltip>
+          </a-input-group>
         </a-form-item>
 
         <a-form-item label="面积（平方米）" name="area" extra="请输入大于0的数值">
@@ -98,7 +110,7 @@
 
 <script setup lang="ts">
 import { message } from 'ant-design-vue';
-import { PlusOutlined, EyeOutlined, DownOutlined, InfoCircleOutlined } from '@ant-design/icons-vue';
+import { PlusOutlined, EyeOutlined, DownOutlined, InfoCircleOutlined, ReloadOutlined } from '@ant-design/icons-vue';
 import { realtyApi } from '../api';
 import type { FormInstance } from 'ant-design-vue';
 
@@ -246,6 +258,24 @@ const handleModalOk = () => {
 const handleModalCancel = () => {
   showCreateModal.value = false;
   formRef.value?.resetFields();
+};
+
+// 随机生成地址
+const cities = ['北京市', '上海市', '广州市', '深圳市', '杭州市', '南京市', '成都市', '武汉市'];
+const districts = ['东城区', '西城区', '朝阳区', '海淀区', '丰台区', '昌平区'];
+const streets = ['长安街', '建国路', '复兴路', '中关村大街', '金融街', '望京街'];
+const communities = ['阳光小区', '和平花园', '翠湖园', '金色家园', '龙湖花园', '碧桂园'];
+
+const generateRandomAddress = () => {
+  const city = cities[Math.floor(Math.random() * cities.length)];
+  const district = districts[Math.floor(Math.random() * districts.length)];
+  const street = streets[Math.floor(Math.random() * streets.length)];
+  const community = communities[Math.floor(Math.random() * communities.length)];
+  const building = Math.floor(Math.random() * 20 + 1);
+  const unit = Math.floor(Math.random() * 6 + 1);
+  const room = Math.floor(Math.random() * 2000 + 101);
+  
+  formState.address = `${city}${district}${street}${community}${building}号楼${unit}单元${room}室`;
 };
 
 // 初始加载

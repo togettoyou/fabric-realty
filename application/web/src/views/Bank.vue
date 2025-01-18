@@ -23,7 +23,9 @@
           :data-source="filteredTransactionList"
           :loading="loading"
           :pagination="false"
+          :scroll="{ x: 1500 }"
           row-key="id"
+          class="custom-table"
         >
           <template #bodyCell="{ column, record }">
             <template v-if="column.key === 'status'">
@@ -42,11 +44,6 @@
             </template>
             <template v-else-if="column.key === 'action'">
               <a-space>
-                <a-tooltip title="查看详情">
-                  <a-button type="link" @click="viewDetail(record)">
-                    <template #icon><EyeOutlined /></template>
-                  </a-button>
-                </a-tooltip>
                 <a-tooltip title="完成交易">
                   <a-button
                     type="primary"
@@ -55,7 +52,7 @@
                     :loading="record.loading"
                     size="small"
                   >
-                    <template #icon><CheckOutlined /></template>
+                    <CheckOutlined />
                     完成交易
                   </a-button>
                 </a-tooltip>
@@ -82,7 +79,7 @@
 
 <script setup lang="ts">
 import { message } from 'ant-design-vue';
-import { EyeOutlined, CheckOutlined, DownOutlined } from '@ant-design/icons-vue';
+import { CheckOutlined, DownOutlined } from '@ant-design/icons-vue';
 import { transactionApi } from '../api';
 
 const statusFilter = ref('');
@@ -125,14 +122,14 @@ const columns = [
     title: '卖家',
     dataIndex: 'seller',
     key: 'seller',
-    width: 120,
+    width: 100,
     ellipsis: true,
   },
   {
     title: '买家',
     dataIndex: 'buyer',
     key: 'buyer',
-    width: 120,
+    width: 100,
     ellipsis: true,
   },
   {
@@ -146,24 +143,25 @@ const columns = [
     title: '状态',
     dataIndex: 'status',
     key: 'status',
-    width: 100,
+    width: 80,
   },
   {
     title: '创建时间',
     dataIndex: 'createTime',
     key: 'createTime',
-    width: 180,
+    width: 160,
   },
   {
     title: '更新时间',
     dataIndex: 'updateTime',
     key: 'updateTime',
-    width: 180,
+    width: 160,
   },
   {
     title: '操作',
     key: 'action',
-    width: 200,
+    fixed: 'right',
+    width: 100,
     align: 'center' as const,
   },
 ];
@@ -244,11 +242,6 @@ const completeTransaction = async (txId: string) => {
   }
 };
 
-const viewDetail = (record: any) => {
-  console.log('查看详情:', record);
-  message.info('详情功能开发中');
-};
-
 // 初始加载
 onMounted(() => {
   loadTransactionList();
@@ -277,5 +270,13 @@ onMounted(() => {
     'Helvetica Neue', Arial, 'Noto Sans', sans-serif, 'Apple Color Emoji',
     'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
   font-variant-numeric: tabular-nums;
+}
+
+:deep(.custom-table) {
+  ::-webkit-scrollbar {
+    display: none;
+  }
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 </style> 
