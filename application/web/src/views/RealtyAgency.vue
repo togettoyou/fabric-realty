@@ -393,8 +393,11 @@ onMounted(() => {
 
 .table-container {
   height: calc(100vh - 200px);
-  overflow-y: auto;
   position: relative;
+}
+
+:deep(.ant-table-wrapper) {
+  margin-bottom: 16px;
 }
 
 .empty-placeholder {
