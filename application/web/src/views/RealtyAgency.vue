@@ -27,51 +27,47 @@
           </a-radio-group>
         </template>
 
-        <a-table
-          :columns="columns"
-          :data-source="filteredRealEstateList"
-          :loading="loading"
-          :pagination="false"
-          :scroll="{ x: 1500 }"
-          row-key="id"
-          class="custom-table"
-        >
-          <template #bodyCell="{ column, record }">
-            <template v-if="column.key === 'id'">
-              <div class="id-cell">
-                <span class="id-text">{{ record.id }}</span>
-                <a-tooltip title="点击复制">
-                  <copy-outlined
-                    class="copy-icon"
-                    @click.stop="handleCopy(record.id)"
-                  />
-                </a-tooltip>
-              </div>
-            </template>
-            <template v-else-if="column.key === 'status'">
-              <a-tag :color="record.status === 'NORMAL' ? 'green' : 'blue'">
-                {{ record.status === 'NORMAL' ? '正常' : '交易中' }}
-              </a-tag>
-            </template>
-            <template v-else-if="column.key === 'createTime'">
-              <time>{{ new Date(record.createTime).toLocaleString() }}</time>
-            </template>
-            <template v-else-if="column.key === 'updateTime'">
-              <time>{{ new Date(record.updateTime).toLocaleString() }}</time>
-            </template>
-          </template>
-        </a-table>
-        <div class="table-footer">
-          <a-button
-            :disabled="!bookmark"
-            @click="loadMore"
+        <div class="table-container" @scroll="handleScroll">
+          <a-table
+            :columns="columns"
+            :data-source="filteredRealEstateList"
             :loading="loading"
-            v-if="realEstateList.length > 0"
+            :pagination="false"
+            :scroll="{ x: 1500 }"
+            row-key="id"
+            class="custom-table"
           >
-            <template #icon><DownOutlined /></template>
-            加载更多
-          </a-button>
-          <a-empty v-else />
+            <template #bodyCell="{ column, record }">
+              <template v-if="column.key === 'id'">
+                <div class="id-cell">
+                  <span class="id-text">{{ record.id }}</span>
+                  <a-tooltip title="点击复制">
+                    <copy-outlined
+                      class="copy-icon"
+                      @click.stop="handleCopy(record.id)"
+                    />
+                  </a-tooltip>
+                </div>
+              </template>
+              <template v-else-if="column.key === 'status'">
+                <a-tag :color="record.status === 'NORMAL' ? 'green' : 'blue'">
+                  {{ record.status === 'NORMAL' ? '正常' : '交易中' }}
+                </a-tag>
+              </template>
+              <template v-else-if="column.key === 'createTime'">
+                <time>{{ new Date(record.createTime).toLocaleString() }}</time>
+              </template>
+              <template v-else-if="column.key === 'updateTime'">
+                <time>{{ new Date(record.updateTime).toLocaleString() }}</time>
+              </template>
+            </template>
+          </a-table>
+          <div v-if="realEstateList.length === 0" class="empty-placeholder">
+            <a-empty />
+          </div>
+          <div v-else-if="!bookmark" class="no-more-text">
+            没有更多数据了
+          </div>
         </div>
       </a-card>
     </div>
@@ -312,6 +308,16 @@ const handleCopy = async (text: string) => {
   }
 };
 
+// 添加滚动加载函数
+const handleScroll = (e: Event) => {
+  const target = e.target as HTMLElement;
+  const { scrollHeight, scrollTop, clientHeight } = target;
+  // 当滚动到距离底部100px时触发加载
+  if (scrollHeight - scrollTop - clientHeight < 100 && !loading.value && bookmark.value) {
+    loadMore();
+  }
+};
+
 // 初始加载
 onMounted(() => {
   loadRealEstateList();
@@ -379,5 +385,22 @@ onMounted(() => {
 
 :deep(.ant-table-cell:hover .copy-icon) {
   opacity: 1;
+}
+
+.table-container {
+  height: calc(100vh - 200px);
+  overflow-y: auto;
+  position: relative;
+}
+
+.empty-placeholder {
+  padding: 40px 0;
+}
+
+.no-more-text {
+  text-align: center;
+  color: rgba(0, 0, 0, 0.45);
+  padding: 16px 0;
+  font-size: 14px;
 }
 </style> 

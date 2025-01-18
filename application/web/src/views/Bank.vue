@@ -3,7 +3,7 @@
     <div class="page-header">
       <a-page-header
         title="银行"
-        sub-title="负责交易的完成确认"
+        sub-title="负责管理交易资金"
         @back="() => $router.push('/')"
       />
     </div>
@@ -18,59 +18,74 @@
           </a-radio-group>
         </template>
 
-        <a-table
-          :columns="columns"
-          :data-source="filteredTransactionList"
-          :loading="loading"
-          :pagination="false"
-          :scroll="{ x: 1500 }"
-          row-key="id"
-          class="custom-table"
-        >
-          <template #bodyCell="{ column, record }">
-            <template v-if="column.key === 'status'">
-              <a-tag :color="getStatusColor(record.status)">
-                {{ getStatusText(record.status) }}
-              </a-tag>
-            </template>
-            <template v-else-if="column.key === 'price'">
-              <span class="price">¥ {{ record.price.toLocaleString() }}</span>
-            </template>
-            <template v-else-if="column.key === 'createTime'">
-              <time>{{ new Date(record.createTime).toLocaleString() }}</time>
-            </template>
-            <template v-else-if="column.key === 'updateTime'">
-              <time>{{ new Date(record.updateTime).toLocaleString() }}</time>
-            </template>
-            <template v-else-if="column.key === 'action'">
-              <a-space>
-                <a-tooltip title="完成交易">
-                  <a-button
-                    type="primary"
-                    :disabled="record.status !== 'PENDING'"
-                    @click="completeTransaction(record.id)"
-                    :loading="record.loading"
-                    size="small"
-                  >
-                    <CheckOutlined />
-                    完成交易
-                  </a-button>
-                </a-tooltip>
-              </a-space>
-            </template>
-          </template>
-        </a-table>
-        <div class="table-footer">
-          <a-button
-            :disabled="!bookmark"
-            @click="loadMore"
+        <div class="table-container" @scroll="handleScroll">
+          <a-table
+            :columns="columns"
+            :data-source="filteredTransactionList"
             :loading="loading"
-            v-if="transactionList.length > 0"
+            :pagination="false"
+            :scroll="{ x: 1500 }"
+            row-key="id"
+            class="custom-table"
           >
-            <template #icon><DownOutlined /></template>
-            加载更多
-          </a-button>
-          <a-empty v-else />
+            <template #bodyCell="{ column, record }">
+              <template v-if="column.key === 'id'">
+                <div class="id-cell">
+                  <span class="id-text">{{ record.id }}</span>
+                  <a-tooltip title="点击复制">
+                    <copy-outlined
+                      class="copy-icon"
+                      @click.stop="handleCopy(record.id)"
+                    />
+                  </a-tooltip>
+                </div>
+              </template>
+              <template v-else-if="column.key === 'realEstateId'">
+                <div class="id-cell">
+                  <span class="id-text">{{ record.realEstateId }}</span>
+                  <a-tooltip title="点击复制">
+                    <copy-outlined
+                      class="copy-icon"
+                      @click.stop="handleCopy(record.realEstateId)"
+                    />
+                  </a-tooltip>
+                </div>
+              </template>
+              <template v-else-if="column.key === 'status'">
+                <a-tag :color="getStatusColor(record.status)">
+                  {{ getStatusText(record.status) }}
+                </a-tag>
+              </template>
+              <template v-else-if="column.key === 'createTime'">
+                <time>{{ new Date(record.createTime).toLocaleString() }}</time>
+              </template>
+              <template v-else-if="column.key === 'updateTime'">
+                <time>{{ new Date(record.updateTime).toLocaleString() }}</time>
+              </template>
+              <template v-else-if="column.key === 'action'">
+                <a-space>
+                  <a-tooltip title="完成交易">
+                    <a-button
+                      type="primary"
+                      :disabled="record.status !== 'PENDING'"
+                      @click="completeTransaction(record.id)"
+                      :loading="record.loading"
+                      size="small"
+                    >
+                      <template #icon><check-outlined /></template>
+                      完成交易
+                    </a-button>
+                  </a-tooltip>
+                </a-space>
+              </template>
+            </template>
+          </a-table>
+          <div v-if="transactionList.length === 0" class="empty-placeholder">
+            <a-empty />
+          </div>
+          <div v-else-if="!bookmark" class="no-more-text">
+            没有更多数据了
+          </div>
         </div>
       </a-card>
     </div>
@@ -79,7 +94,7 @@
 
 <script setup lang="ts">
 import { message } from 'ant-design-vue';
-import { CheckOutlined, DownOutlined } from '@ant-design/icons-vue';
+import { CheckOutlined, DownOutlined, CopyOutlined } from '@ant-design/icons-vue';
 import { transactionApi } from '../api';
 
 const statusFilter = ref('');
@@ -161,7 +176,7 @@ const columns = [
     title: '操作',
     key: 'action',
     fixed: 'right',
-    width: 100,
+    width: 120,
     align: 'center' as const,
   },
 ];
@@ -203,8 +218,6 @@ const getStatusColor = (status: string) => {
       return 'blue';
     case 'COMPLETED':
       return 'green';
-    case 'CANCELLED':
-      return 'red';
     default:
       return 'default';
   }
@@ -216,8 +229,6 @@ const getStatusText = (status: string) => {
       return '待完成';
     case 'COMPLETED':
       return '已完成';
-    case 'CANCELLED':
-      return '已取消';
     default:
       return '未知';
   }
@@ -239,6 +250,16 @@ const completeTransaction = async (txId: string) => {
     message.error(error.message || '完成交易失败');
   } finally {
     transaction.loading = false;
+  }
+};
+
+// 添加滚动加载函数
+const handleScroll = (e: Event) => {
+  const target = e.target as HTMLElement;
+  const { scrollHeight, scrollTop, clientHeight } = target;
+  // 当滚动到距离底部100px时触发加载
+  if (scrollHeight - scrollTop - clientHeight < 100 && !loading.value && bookmark.value) {
+    loadMore();
   }
 };
 
@@ -267,34 +288,48 @@ onMounted(() => {
   padding: 24px;
 }
 
-.table-footer {
-  margin-top: 16px;
-  display: flex;
-  justify-content: center;
-}
-
-:deep(.form-tips) {
-  background-color: #e6f7ff;
-  padding: 8px 12px;
-  border-radius: 4px;
-  color: rgba(0, 0, 0, 0.65);
-  font-size: 14px;
+.id-cell {
   display: flex;
   align-items: center;
+  gap: 8px;
 }
 
-.price {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
-    'Helvetica Neue', Arial, 'Noto Sans', sans-serif, 'Apple Color Emoji',
-    'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
-  font-variant-numeric: tabular-nums;
+.id-text {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-:deep(.custom-table) {
-  ::-webkit-scrollbar {
-    display: none;
+:deep(.copy-icon) {
+  color: rgba(0, 0, 0, 0.45);
+  font-size: 14px;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.2s;
+  
+  &:hover {
+    color: #1890ff;
   }
-  -ms-overflow-style: none;
-  scrollbar-width: none;
+}
+
+:deep(.ant-table-cell:hover .copy-icon) {
+  opacity: 1;
+}
+
+.table-container {
+  height: calc(100vh - 200px);
+  overflow-y: auto;
+  position: relative;
+}
+
+.empty-placeholder {
+  padding: 40px 0;
+}
+
+.no-more-text {
+  text-align: center;
+  color: rgba(0, 0, 0, 0.45);
+  padding: 16px 0;
+  font-size: 14px;
 }
 </style> 
