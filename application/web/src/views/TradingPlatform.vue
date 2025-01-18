@@ -4,168 +4,182 @@
       title="交易平台"
       sub-title="负责创建和管理交易信息"
       @back="() => $router.push('/')"
-    />
+    >
+      <template #extra>
+        <a-tooltip title="点击创建新的交易">
+          <a-button type="primary" @click="showCreateModal = true">
+            <template #icon><PlusOutlined /></template>
+            创建新交易
+          </a-button>
+        </a-tooltip>
+      </template>
+    </a-page-header>
 
     <div class="content">
-      <a-row :gutter="[24, 24]">
-        <a-col :span="24">
-          <a-card title="创建交易">
-            <a-form
-              :model="formState"
-              name="createTransaction"
-              @finish="onFinish"
-              @finishFailed="onFinishFailed"
-            >
-              <a-form-item
-                label="交易ID"
-                name="txId"
-                :rules="[{ required: true, message: '请输入交易ID' }]"
-              >
-                <a-input v-model:value="formState.txId" />
-              </a-form-item>
-
-              <a-form-item
-                label="房产ID"
-                name="realEstateId"
-                :rules="[{ required: true, message: '请输入房产ID' }]"
-              >
-                <a-input v-model:value="formState.realEstateId" />
-              </a-form-item>
-
-              <a-form-item
-                label="卖家"
-                name="seller"
-                :rules="[{ required: true, message: '请输入卖家' }]"
-              >
-                <a-input v-model:value="formState.seller" />
-              </a-form-item>
-
-              <a-form-item
-                label="买家"
-                name="buyer"
-                :rules="[{ required: true, message: '请输入买家' }]"
-              >
-                <a-input v-model:value="formState.buyer" />
-              </a-form-item>
-
-              <a-form-item
-                label="价格"
-                name="price"
-                :rules="[{ required: true, message: '请输入价格' }]"
-              >
-                <a-input-number
-                  v-model:value="formState.price"
-                  :min="0"
-                  :step="0.01"
-                  style="width: 100%"
-                />
-              </a-form-item>
-
-              <a-form-item>
-                <a-button type="primary" html-type="submit">创建</a-button>
-              </a-form-item>
-            </a-form>
-          </a-card>
-        </a-col>
-
-        <a-col :span="24">
-          <a-card title="交易列表">
-            <a-table
-              :columns="columns"
-              :data-source="transactionList"
-              :loading="loading"
-              :pagination="false"
-              row-key="id"
-            >
-              <template #bodyCell="{ column, record }">
-                <template v-if="column.key === 'status'">
-                  <a-tag :color="getStatusColor(record.status)">
-                    {{ getStatusText(record.status) }}
-                  </a-tag>
-                </template>
-                <template v-else-if="column.key === 'createTime'">
-                  {{ new Date(record.createTime).toLocaleString() }}
-                </template>
-                <template v-else-if="column.key === 'updateTime'">
-                  {{ new Date(record.updateTime).toLocaleString() }}
-                </template>
-                <template v-else-if="column.key === 'action'">
-                  <a-button type="link" @click="viewDetail(record)">查看</a-button>
-                </template>
-              </template>
-            </a-table>
-            <div style="margin-top: 16px; text-align: right">
-              <a-button
-                :disabled="!bookmark"
-                @click="loadMore"
-                :loading="loading"
-              >
-                加载更多
-              </a-button>
-            </div>
-          </a-card>
-        </a-col>
-      </a-row>
+      <a-card :bordered="false">
+        <a-table
+          :columns="columns"
+          :data-source="transactionList"
+          :loading="loading"
+          :pagination="false"
+          row-key="id"
+        >
+          <template #bodyCell="{ column, record }">
+            <template v-if="column.key === 'status'">
+              <a-tag :color="getStatusColor(record.status)">
+                {{ getStatusText(record.status) }}
+              </a-tag>
+            </template>
+            <template v-else-if="column.key === 'price'">
+              <span class="price">¥ {{ record.price.toLocaleString() }}</span>
+            </template>
+            <template v-else-if="column.key === 'createTime'">
+              {{ new Date(record.createTime).toLocaleString() }}
+            </template>
+            <template v-else-if="column.key === 'updateTime'">
+              {{ new Date(record.updateTime).toLocaleString() }}
+            </template>
+          </template>
+        </a-table>
+        <div class="table-footer">
+          <a-button
+            :disabled="!bookmark"
+            @click="loadMore"
+            :loading="loading"
+            v-if="transactionList.length > 0"
+          >
+            <template #icon><DownOutlined /></template>
+            加载更多
+          </a-button>
+          <a-empty v-else />
+        </div>
+      </a-card>
     </div>
+
+    <!-- 创建交易的对话框 -->
+    <a-modal
+      v-model:visible="showCreateModal"
+      title="创建新交易"
+      @ok="handleModalOk"
+      @cancel="handleModalCancel"
+      :confirmLoading="modalLoading"
+    >
+      <a-form
+        ref="formRef"
+        :model="formState"
+        :rules="rules"
+        layout="vertical"
+      >
+        <a-form-item label="房产ID" name="realEstateId" extra="请输入要交易的房产ID">
+          <a-input v-model:value="formState.realEstateId" placeholder="请输入房产ID" />
+        </a-form-item>
+
+        <a-form-item label="卖家" name="seller" extra="可以输入任意模拟用户名作为卖家">
+          <a-input v-model:value="formState.seller" placeholder="请输入卖家姓名" />
+        </a-form-item>
+
+        <a-form-item label="买家" name="buyer" extra="可以输入任意模拟用户名作为买家">
+          <a-input v-model:value="formState.buyer" placeholder="请输入买家姓名" />
+        </a-form-item>
+
+        <a-form-item label="价格" name="price" extra="请输入大于0的交易金额">
+          <a-input-number
+            v-model:value="formState.price"
+            :min="0.01"
+            :step="0.01"
+            style="width: 100%"
+            placeholder="请输入价格"
+            :formatter="value => `¥ ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
+            :parser="value => value!.replace(/\¥\s?|(,*)/g, '')"
+          />
+        </a-form-item>
+
+        <div class="form-tips">
+          <InfoCircleOutlined style="color: #1890ff; margin-right: 8px;" />
+          <span>交易ID将由系统自动生成</span>
+        </div>
+      </a-form>
+    </a-modal>
   </div>
 </template>
 
 <script setup lang="ts">
 import { message } from 'ant-design-vue';
+import { PlusOutlined, EyeOutlined, DownOutlined, InfoCircleOutlined } from '@ant-design/icons-vue';
 import { transactionApi } from '../api';
+import type { FormInstance } from 'ant-design-vue';
+
+const formRef = ref<FormInstance>();
+const showCreateModal = ref(false);
+const modalLoading = ref(false);
 
 const formState = reactive({
   txId: '',
   realEstateId: '',
   seller: '',
   buyer: '',
-  price: 0,
+  price: undefined as number | undefined,
 });
+
+const rules = {
+  realEstateId: [{ required: true, message: '请输入房产ID' }],
+  seller: [{ required: true, message: '请输入卖家' }],
+  buyer: [{ required: true, message: '请输入买家' }],
+  price: [
+    { required: true, message: '请输入价格' },
+    { type: 'number', min: 0.01, message: '价格必须大于0' }
+  ],
+};
 
 const columns = [
   {
     title: '交易ID',
     dataIndex: 'id',
     key: 'id',
+    width: 180,
   },
   {
     title: '房产ID',
     dataIndex: 'realEstateId',
     key: 'realEstateId',
+    width: 180,
   },
   {
     title: '卖家',
     dataIndex: 'seller',
     key: 'seller',
+    width: 120,
   },
   {
     title: '买家',
     dataIndex: 'buyer',
     key: 'buyer',
+    width: 120,
   },
   {
     title: '价格',
     dataIndex: 'price',
     key: 'price',
+    width: 120,
+    align: 'right' as const,
   },
   {
     title: '状态',
     dataIndex: 'status',
     key: 'status',
+    width: 100,
   },
   {
     title: '创建时间',
     dataIndex: 'createTime',
     key: 'createTime',
+    width: 180,
   },
   {
     title: '更新时间',
     dataIndex: 'updateTime',
     key: 'updateTime',
-  },
-  {
-    title: '操作',
-    key: 'action',
+    width: 180,
   },
 ];
 
@@ -219,31 +233,40 @@ const getStatusText = (status: string) => {
   }
 };
 
-const onFinish = async (values: any) => {
-  try {
-    await transactionApi.createTransaction(values);
-    message.success('交易创建成功');
-    // 重置表单
-    formState.txId = '';
-    formState.realEstateId = '';
-    formState.seller = '';
-    formState.buyer = '';
-    formState.price = 0;
-    // 刷新列表
-    transactionList.value = [];
-    bookmark.value = '';
-    loadTransactionList();
-  } catch (error: any) {
-    message.error(error.message || '交易创建失败');
-  }
+const generateUUID = () => {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    const r = Math.random() * 16 | 0;
+    const v = c === 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+  });
 };
 
-const onFinishFailed = (errorInfo: any) => {
-  console.log('Failed:', errorInfo);
+const handleModalOk = () => {
+  formRef.value?.validate().then(async () => {
+    modalLoading.value = true;
+    try {
+      const transactionData = {
+        ...formState,
+        txId: generateUUID(),
+      };
+      await transactionApi.createTransaction(transactionData);
+      message.success('交易创建成功');
+      showCreateModal.value = false;
+      formRef.value?.resetFields();
+      transactionList.value = [];
+      bookmark.value = '';
+      loadTransactionList();
+    } catch (error: any) {
+      message.error(error.message || '交易创建失败');
+    } finally {
+      modalLoading.value = false;
+    }
+  });
 };
 
-const viewDetail = (record: any) => {
-  console.log('查看详情:', record);
+const handleModalCancel = () => {
+  showCreateModal.value = false;
+  formRef.value?.resetFields();
 };
 
 // 初始加载
@@ -261,5 +284,45 @@ onMounted(() => {
 
 .content {
   margin-top: 24px;
+}
+
+:deep(.ant-card-body) {
+  padding: 0;
+}
+
+:deep(.ant-table-thead > tr > th) {
+  background: #fafafa;
+}
+
+.table-footer {
+  padding: 16px;
+  text-align: center;
+  background: #fff;
+  border-radius: 0 0 8px 8px;
+}
+
+:deep(.ant-form-item-label) {
+  font-weight: 500;
+}
+
+.price {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+    'Helvetica Neue', Arial, 'Noto Sans', sans-serif, 'Apple Color Emoji',
+    'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+  font-variant-numeric: tabular-nums;
+}
+
+.form-tips {
+  background-color: #e6f7ff;
+  padding: 8px 12px;
+  border-radius: 4px;
+  color: #666;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+}
+
+:deep(.ant-form-item-extra) {
+  color: #666;
 }
 </style> 

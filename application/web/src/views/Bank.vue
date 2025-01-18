@@ -3,162 +3,234 @@
     <a-page-header
       title="银行"
       sub-title="负责交易的完成确认"
-      @back="$router.push('/')"
+      @back="() => $router.push('/')"
     />
+
     <div class="content">
-      <a-row :gutter="[24, 24]">
-        <a-col :span="24">
-          <a-card title="交易列表">
-            <a-table
-              :columns="columns"
-              :data-source="transactionList"
-              :loading="loading"
-              :pagination="false"
-              row-key="id"
-            >
-              <template #bodyCell="{ column, record }">
-                <template v-if="column.key === 'status'">
-                  <a-tag :color="record.status === 'COMPLETED' ? 'green' : 'blue'">
-                    {{ record.status === 'COMPLETED' ? '已完成' : '待付款' }}
-                  </a-tag>
-                </template>
-                <template v-else-if="column.key === 'createTime'">
-                  {{ new Date(record.createTime).toLocaleString() }}
-                </template>
-                <template v-else-if="column.key === 'updateTime'">
-                  {{ new Date(record.updateTime).toLocaleString() }}
-                </template>
-                <template v-else-if="column.key === 'action'">
+      <a-card :bordered="false">
+        <template #extra>
+          <a-radio-group v-model:value="statusFilter" button-style="solid">
+            <a-radio-button value="">全部</a-radio-button>
+            <a-radio-button value="PENDING">待完成</a-radio-button>
+            <a-radio-button value="COMPLETED">已完成</a-radio-button>
+          </a-radio-group>
+        </template>
+
+        <a-table
+          :columns="columns"
+          :data-source="filteredTransactionList"
+          :loading="loading"
+          :pagination="false"
+          row-key="id"
+        >
+          <template #bodyCell="{ column, record }">
+            <template v-if="column.key === 'status'">
+              <a-tag :color="getStatusColor(record.status)">
+                {{ getStatusText(record.status) }}
+              </a-tag>
+            </template>
+            <template v-else-if="column.key === 'price'">
+              <span class="price">¥ {{ record.price.toLocaleString() }}</span>
+            </template>
+            <template v-else-if="column.key === 'createTime'">
+              {{ new Date(record.createTime).toLocaleString() }}
+            </template>
+            <template v-else-if="column.key === 'updateTime'">
+              {{ new Date(record.updateTime).toLocaleString() }}
+            </template>
+            <template v-else-if="column.key === 'action'">
+              <a-space>
+                <a-tooltip title="查看详情">
+                  <a-button type="link" @click="viewDetail(record)">
+                    <template #icon><EyeOutlined /></template>
+                  </a-button>
+                </a-tooltip>
+                <a-tooltip title="完成交易">
                   <a-button
                     type="primary"
-                    size="small"
-                    :disabled="record.status === 'COMPLETED'"
+                    :disabled="record.status !== 'PENDING'"
                     @click="completeTransaction(record.id)"
                     :loading="record.loading"
+                    size="small"
                   >
+                    <template #icon><CheckOutlined /></template>
                     完成交易
                   </a-button>
-                </template>
-              </template>
-            </a-table>
-            <div style="margin-top: 16px; text-align: right">
-              <a-button
-                :disabled="!bookmark"
-                @click="loadMore"
-                :loading="loading"
-              >
-                加载更多
-              </a-button>
-            </div>
-          </a-card>
-        </a-col>
-      </a-row>
+                </a-tooltip>
+              </a-space>
+            </template>
+          </template>
+        </a-table>
+        <div class="table-footer">
+          <a-button
+            :disabled="!bookmark"
+            @click="loadMore"
+            :loading="loading"
+            v-if="transactionList.length > 0"
+          >
+            <template #icon><DownOutlined /></template>
+            加载更多
+          </a-button>
+          <a-empty v-else />
+        </div>
+      </a-card>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { message } from 'ant-design-vue'
-import { transactionApi } from '../api'
+import { message } from 'ant-design-vue';
+import { EyeOutlined, CheckOutlined, DownOutlined } from '@ant-design/icons-vue';
+import { transactionApi } from '../api';
+
+const statusFilter = ref('');
+const transactionList = ref<any[]>([]);
+const loading = ref(false);
+const bookmark = ref('');
 
 const columns = [
   {
     title: '交易ID',
     dataIndex: 'id',
     key: 'id',
+    width: 180,
   },
   {
     title: '房产ID',
     dataIndex: 'realEstateId',
     key: 'realEstateId',
+    width: 180,
   },
   {
     title: '卖家',
     dataIndex: 'seller',
     key: 'seller',
+    width: 120,
   },
   {
     title: '买家',
     dataIndex: 'buyer',
     key: 'buyer',
+    width: 120,
   },
   {
     title: '价格',
     dataIndex: 'price',
     key: 'price',
+    width: 120,
+    align: 'right' as const,
   },
   {
     title: '状态',
     dataIndex: 'status',
     key: 'status',
+    width: 100,
   },
   {
     title: '创建时间',
     dataIndex: 'createTime',
     key: 'createTime',
+    width: 180,
   },
   {
     title: '更新时间',
     dataIndex: 'updateTime',
     key: 'updateTime',
+    width: 180,
   },
   {
     title: '操作',
     key: 'action',
+    width: 200,
+    align: 'center' as const,
   },
-]
+];
 
-const transactionList = ref<any[]>([])
-const loading = ref(false)
-const bookmark = ref('')
+const filteredTransactionList = computed(() => {
+  if (!statusFilter.value) {
+    return transactionList.value;
+  }
+  return transactionList.value.filter(item => item.status === statusFilter.value);
+});
 
 const loadTransactionList = async () => {
   try {
-    loading.value = true
+    loading.value = true;
     const result = await transactionApi.getTransactionList({
       pageSize: 10,
       bookmark: bookmark.value,
-    })
+    });
     const records = result.records.map((record: any) => ({
       ...record,
       loading: false,
-    }))
-    transactionList.value = [...transactionList.value, ...records]
-    bookmark.value = result.bookmark
+    }));
+    transactionList.value = [...transactionList.value, ...records];
+    bookmark.value = result.bookmark;
   } catch (error: any) {
-    message.error(error.message || '加载交易列表失败')
+    message.error(error.message || '加载交易列表失败');
   } finally {
-    loading.value = false
+    loading.value = false;
   }
-}
+};
 
 const loadMore = () => {
-  loadTransactionList()
-}
+  loadTransactionList();
+};
+
+const getStatusColor = (status: string) => {
+  switch (status) {
+    case 'PENDING':
+      return 'blue';
+    case 'COMPLETED':
+      return 'green';
+    case 'CANCELLED':
+      return 'red';
+    default:
+      return 'default';
+  }
+};
+
+const getStatusText = (status: string) => {
+  switch (status) {
+    case 'PENDING':
+      return '待完成';
+    case 'COMPLETED':
+      return '已完成';
+    case 'CANCELLED':
+      return '已取消';
+    default:
+      return '未知';
+  }
+};
 
 const completeTransaction = async (txId: string) => {
-  const transaction = transactionList.value.find((t) => t.id === txId)
-  if (!transaction) return
+  const transaction = transactionList.value.find((t) => t.id === txId);
+  if (!transaction) return;
 
   try {
-    transaction.loading = true
-    await transactionApi.completeTransaction(txId)
-    message.success('交易完成')
+    transaction.loading = true;
+    await transactionApi.completeTransaction(txId);
+    message.success('交易完成');
     // 刷新列表
-    transactionList.value = []
-    bookmark.value = ''
-    loadTransactionList()
+    transactionList.value = [];
+    bookmark.value = '';
+    loadTransactionList();
   } catch (error: any) {
-    message.error(error.message || '完成交易失败')
+    message.error(error.message || '完成交易失败');
   } finally {
-    transaction.loading = false
+    transaction.loading = false;
   }
-}
+};
+
+const viewDetail = (record: any) => {
+  console.log('查看详情:', record);
+  message.info('详情功能开发中');
+};
 
 // 初始加载
 onMounted(() => {
-  loadTransactionList()
-})
+  loadTransactionList();
+});
 </script>
 
 <style scoped>
@@ -170,5 +242,32 @@ onMounted(() => {
 
 .content {
   margin-top: 24px;
+}
+
+:deep(.ant-card-body) {
+  padding: 0;
+}
+
+:deep(.ant-card-extra) {
+  padding: 16px 24px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+:deep(.ant-table-thead > tr > th) {
+  background: #fafafa;
+}
+
+.table-footer {
+  padding: 16px;
+  text-align: center;
+  background: #fff;
+  border-radius: 0 0 8px 8px;
+}
+
+.price {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+    'Helvetica Neue', Arial, 'Noto Sans', sans-serif, 'Apple Color Emoji',
+    'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+  font-variant-numeric: tabular-nums;
 }
 </style> 
