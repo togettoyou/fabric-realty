@@ -7,13 +7,12 @@
   min-height: 100vh;
   background-color: #fff;
   color: rgba(0, 0, 0, 0.88);
+  overflow: hidden;
 }
 
 /* 内容区域样式 */
 .content {
-  margin: 0 auto;
-  margin-top: 96px;
-  max-width: 1200px;
+  margin-top: 72px;
   padding: 24px;
 }
 
@@ -89,23 +88,23 @@
   color: rgba(0, 0, 0, 0.45);
 }
 
-/* 滚动条美化 */
-::-webkit-scrollbar {
+/* 表格滚动条样式 */
+.table-container::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 
-::-webkit-scrollbar-track {
+.table-container::-webkit-scrollbar-track {
   background: #fff;
   border-radius: 3px;
 }
 
-::-webkit-scrollbar-thumb {
+.table-container::-webkit-scrollbar-thumb {
   background: #ccc;
   border-radius: 3px;
 }
 
-::-webkit-scrollbar-thumb:hover {
+.table-container::-webkit-scrollbar-thumb:hover {
   background: #999;
 }
 </style>

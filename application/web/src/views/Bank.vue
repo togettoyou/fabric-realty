@@ -271,7 +271,9 @@ onMounted(() => {
 
 <style scoped>
 .bank {
-  min-height: 100vh;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
 
 .page-header {
@@ -284,8 +286,10 @@ onMounted(() => {
 }
 
 .content {
-  margin-top: 80px;
+  flex: 1;
+  margin-top: 72px;
   padding: 24px;
+  overflow: hidden;
 }
 
 .id-cell {
