@@ -2,7 +2,10 @@ module chaincode
 
 go 1.23.1
 
-require github.com/hyperledger/fabric-contract-api-go/v2 v2.0.0
+require (
+	github.com/hyperledger/fabric-chaincode-go/v2 v2.0.0-20240618210511-f7903324a8af
+	github.com/hyperledger/fabric-contract-api-go/v2 v2.0.0
+)
 
 require (
 	github.com/go-openapi/jsonpointer v0.21.0 // indirect
@@ -12,7 +15,6 @@ require (
 	github.com/gobuffalo/envy v1.10.2 // indirect
 	github.com/gobuffalo/packd v1.0.2 // indirect
 	github.com/gobuffalo/packr v1.30.1 // indirect
-	github.com/hyperledger/fabric-chaincode-go/v2 v2.0.0-20240618210511-f7903324a8af // indirect
 	github.com/hyperledger/fabric-protos-go-apiv2 v0.3.3 // indirect
 	github.com/joho/godotenv v1.5.1 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
