@@ -70,9 +70,15 @@
 }
 
 .ant-table-thead > tr > th {
-  background: #fafafa;
+  background: #fafafa !important;
   font-weight: 600;
   border-bottom: none !important;
+  transition: background 0.3s ease;
+}
+
+.ant-table-thead > tr > th.ant-table-cell-fix-left,
+.ant-table-thead > tr > th.ant-table-cell-fix-right {
+  background: #fafafa !important;
 }
 
 .ant-table-tbody > tr > td {
@@ -90,6 +96,32 @@
 
 .ant-table-cell {
   border-right: none !important;
+}
+
+/* 固定列阴影 */
+.ant-table-cell-fix-left-last::after,
+.ant-table-cell-fix-right-first::after {
+  box-shadow: inset 10px 0 8px -8px rgba(0, 0, 0, 0.05) !important;
+}
+
+/* 表格滚动条 */
+.ant-table-body::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.ant-table-body::-webkit-scrollbar-track {
+  background: #fff;
+  border-radius: 3px;
+}
+
+.ant-table-body::-webkit-scrollbar-thumb {
+  background: #eee;
+  border-radius: 3px;
+}
+
+.ant-table-body::-webkit-scrollbar-thumb:hover {
+  background: #ddd;
 }
 
 /* 标签样式 */
@@ -113,26 +145,6 @@
 /* 文字颜色 */
 .text-secondary {
   color: rgba(0, 0, 0, 0.45);
-}
-
-/* 表格滚动条样式 */
-.table-container::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
-}
-
-.table-container::-webkit-scrollbar-track {
-  background: #fff;
-  border-radius: 3px;
-}
-
-.table-container::-webkit-scrollbar-thumb {
-  background: #eee;
-  border-radius: 3px;
-}
-
-.table-container::-webkit-scrollbar-thumb:hover {
-  background: #ddd;
 }
 
 /* 单选按钮组样式 */

@@ -33,7 +33,7 @@
             :data-source="filteredTransactionList"
             :loading="loading"
             :pagination="false"
-            :scroll="{ x: 1500 }"
+            :scroll="{ x: 1500, y: 'calc(100vh - 300px)' }"
             row-key="id"
             class="custom-table"
           >
@@ -410,5 +410,14 @@ onMounted(() => {
   color: rgba(0, 0, 0, 0.45);
   padding: 16px 0;
   font-size: 14px;
+}
+
+/* 固定表头样式 */
+:deep(.ant-table-header) {
+  background: #fff;
+}
+
+:deep(.ant-table-header::-webkit-scrollbar) {
+  display: none;
 }
 </style> 
