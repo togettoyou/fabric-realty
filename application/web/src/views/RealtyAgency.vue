@@ -37,7 +37,18 @@
           class="custom-table"
         >
           <template #bodyCell="{ column, record }">
-            <template v-if="column.key === 'status'">
+            <template v-if="column.key === 'id'">
+              <div class="id-cell">
+                <span class="id-text">{{ record.id }}</span>
+                <a-tooltip title="点击复制">
+                  <copy-outlined
+                    class="copy-icon"
+                    @click.stop="handleCopy(record.id)"
+                  />
+                </a-tooltip>
+              </div>
+            </template>
+            <template v-else-if="column.key === 'status'">
               <a-tag :color="record.status === 'NORMAL' ? 'green' : 'blue'">
                 {{ record.status === 'NORMAL' ? '正常' : '交易中' }}
               </a-tag>
@@ -120,7 +131,7 @@
 
 <script setup lang="ts">
 import { message } from 'ant-design-vue';
-import { PlusOutlined, EyeOutlined, DownOutlined, InfoCircleOutlined, ReloadOutlined } from '@ant-design/icons-vue';
+import { PlusOutlined, EyeOutlined, DownOutlined, InfoCircleOutlined, ReloadOutlined, CopyOutlined } from '@ant-design/icons-vue';
 import { realtyApi } from '../api';
 import type { FormInstance } from 'ant-design-vue';
 
@@ -151,14 +162,6 @@ const columns = [
     key: 'id',
     width: 180,
     ellipsis: true,
-    customCell: () => ({
-      style: { cursor: 'copy' },
-      onClick: (e: MouseEvent) => {
-        const text = (e.target as HTMLElement).innerText;
-        navigator.clipboard.writeText(text);
-        message.success('已复制到剪贴板');
-      },
-    }),
   },
   {
     title: '地址',
@@ -299,6 +302,16 @@ const filteredRealEstateList = computed(() => {
   return realEstateList.value.filter(item => item.status === statusFilter.value);
 });
 
+// 添加复制函数
+const handleCopy = async (text: string) => {
+  try {
+    await navigator.clipboard.writeText(text);
+    message.success('已复制到剪贴板');
+  } catch (err) {
+    message.error('复制失败');
+  }
+};
+
 // 初始加载
 onMounted(() => {
   loadRealEstateList();
@@ -338,5 +351,33 @@ onMounted(() => {
   font-size: 14px;
   display: flex;
   align-items: center;
+}
+
+.id-cell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.id-text {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+:deep(.copy-icon) {
+  color: rgba(0, 0, 0, 0.45);
+  font-size: 14px;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.2s;
+  
+  &:hover {
+    color: #1890ff;
+  }
+}
+
+:deep(.ant-table-cell:hover .copy-icon) {
+  opacity: 1;
 }
 </style> 

@@ -37,13 +37,32 @@
           class="custom-table"
         >
           <template #bodyCell="{ column, record }">
-            <template v-if="column.key === 'status'">
+            <template v-if="column.key === 'id'">
+              <div class="id-cell">
+                <span class="id-text">{{ record.id }}</span>
+                <a-tooltip title="点击复制">
+                  <copy-outlined
+                    class="copy-icon"
+                    @click.stop="handleCopy(record.id)"
+                  />
+                </a-tooltip>
+              </div>
+            </template>
+            <template v-else-if="column.key === 'realEstateId'">
+              <div class="id-cell">
+                <span class="id-text">{{ record.realEstateId }}</span>
+                <a-tooltip title="点击复制">
+                  <copy-outlined
+                    class="copy-icon"
+                    @click.stop="handleCopy(record.realEstateId)"
+                  />
+                </a-tooltip>
+              </div>
+            </template>
+            <template v-else-if="column.key === 'status'">
               <a-tag :color="getStatusColor(record.status)">
                 {{ getStatusText(record.status) }}
               </a-tag>
-            </template>
-            <template v-else-if="column.key === 'price'">
-              <span class="price">¥ {{ record.price.toLocaleString() }}</span>
             </template>
             <template v-else-if="column.key === 'createTime'">
               <time>{{ new Date(record.createTime).toLocaleString() }}</time>
@@ -117,7 +136,7 @@
 
 <script setup lang="ts">
 import { message } from 'ant-design-vue';
-import { PlusOutlined, EyeOutlined, DownOutlined, InfoCircleOutlined } from '@ant-design/icons-vue';
+import { PlusOutlined, EyeOutlined, DownOutlined, InfoCircleOutlined, CopyOutlined } from '@ant-design/icons-vue';
 import { transactionApi } from '../api';
 import type { FormInstance } from 'ant-design-vue';
 
@@ -150,14 +169,6 @@ const columns = [
     key: 'id',
     width: 180,
     ellipsis: true,
-    customCell: () => ({
-      style: { cursor: 'copy' },
-      onClick: (e: MouseEvent) => {
-        const text = (e.target as HTMLElement).innerText;
-        navigator.clipboard.writeText(text);
-        message.success('已复制到剪贴板');
-      },
-    }),
   },
   {
     title: '房产ID',
@@ -165,14 +176,6 @@ const columns = [
     key: 'realEstateId',
     width: 180,
     ellipsis: true,
-    customCell: () => ({
-      style: { cursor: 'copy' },
-      onClick: (e: MouseEvent) => {
-        const text = (e.target as HTMLElement).innerText;
-        navigator.clipboard.writeText(text);
-        message.success('已复制到剪贴板');
-      },
-    }),
   },
   {
     title: '卖家',
@@ -192,7 +195,9 @@ const columns = [
     title: '价格',
     dataIndex: 'price',
     key: 'price',
-    width: 120
+    width: 120,
+    customRender: ({ text }: { text: number }) => 
+      `¥ ${text}`.replace(/\B(?=(\d{3})+(?!\d))/g, ','),
   },
   {
     title: '状态',
@@ -311,6 +316,16 @@ const filteredTransactionList = computed(() => {
   return transactionList.value.filter(item => item.status === statusFilter.value);
 });
 
+// 添加复制函数
+const handleCopy = async (text: string) => {
+  try {
+    await navigator.clipboard.writeText(text);
+    message.success('已复制到剪贴板');
+  } catch (err) {
+    message.error('复制失败');
+  }
+};
+
 // 初始加载
 onMounted(() => {
   loadTransactionList();
@@ -369,5 +384,33 @@ onMounted(() => {
   }
   -ms-overflow-style: none;
   scrollbar-width: none;
+}
+
+.id-cell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.id-text {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+:deep(.copy-icon) {
+  color: rgba(0, 0, 0, 0.45);
+  font-size: 14px;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.2s;
+  
+  &:hover {
+    color: #1890ff;
+  }
+}
+
+:deep(.ant-table-cell:hover .copy-icon) {
+  opacity: 1;
 }
 </style> 
