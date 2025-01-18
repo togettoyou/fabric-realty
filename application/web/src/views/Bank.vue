@@ -251,7 +251,6 @@ onMounted(() => {
 <style scoped>
 .bank {
   min-height: 100vh;
-  background-color: #f0f2f5;
 }
 
 .page-header {
@@ -260,9 +259,7 @@ onMounted(() => {
   left: 0;
   right: 0;
   z-index: 100;
-  background: #fff;
   padding: 16px 24px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
 .content {
@@ -280,7 +277,7 @@ onMounted(() => {
   background-color: #e6f7ff;
   padding: 8px 12px;
   border-radius: 4px;
-  color: #666;
+  color: rgba(0, 0, 0, 0.65);
   font-size: 14px;
   display: flex;
   align-items: center;
