@@ -41,18 +41,6 @@ func (h *RealtyHandler) CreateRealEstate(c *gin.Context) {
 	utils.SuccessWithMessage(c, "房产信息创建成功", nil)
 }
 
-// QueryRealEstate 查询房产信息
-func (h *RealtyHandler) QueryRealEstate(c *gin.Context) {
-	id := c.Param("id")
-	realEstate, err := h.realtyService.QueryRealEstate(id)
-	if err != nil {
-		utils.ServerError(c, "查询房产信息失败："+err.Error())
-		return
-	}
-
-	utils.Success(c, realEstate)
-}
-
 // CreateTransaction 创建交易（仅交易平台组织可以调用）
 func (h *RealtyHandler) CreateTransaction(c *gin.Context) {
 	var req struct {
@@ -87,6 +75,18 @@ func (h *RealtyHandler) CompleteTransaction(c *gin.Context) {
 	}
 
 	utils.SuccessWithMessage(c, "交易完成", nil)
+}
+
+// QueryRealEstate 查询房产信息
+func (h *RealtyHandler) QueryRealEstate(c *gin.Context) {
+	id := c.Param("id")
+	realEstate, err := h.realtyService.QueryRealEstate(id)
+	if err != nil {
+		utils.ServerError(c, "查询房产信息失败："+err.Error())
+		return
+	}
+
+	utils.Success(c, realEstate)
 }
 
 // QueryTransaction 查询交易信息

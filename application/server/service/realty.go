@@ -51,23 +51,6 @@ func (s *RealtyService) CreateRealEstate(id, address string, area float64, owner
 	return nil
 }
 
-// QueryRealEstate 查询房产信息
-func (s *RealtyService) QueryRealEstate(id string) (map[string]interface{}, error) {
-	// 查询操作可以使用任意组织身份
-	contract := utils.GetContract(REALTY_ORG)
-	result, err := contract.EvaluateTransaction("QueryRealEstate", id)
-	if err != nil {
-		return nil, fmt.Errorf("查询房产信息失败：%s", extractErrorMessage(err))
-	}
-
-	var realEstate map[string]interface{}
-	if err := json.Unmarshal(result, &realEstate); err != nil {
-		return nil, fmt.Errorf("解析房产数据失败：%v", err)
-	}
-
-	return realEstate, nil
-}
-
 // CreateTransaction 创建交易（仅交易平台组织可以调用）
 func (s *RealtyService) CreateTransaction(txID, realEstateID, seller, buyer string, price float64) error {
 	// 使用交易平台组织身份
@@ -90,6 +73,23 @@ func (s *RealtyService) CompleteTransaction(txID string) error {
 		return fmt.Errorf("完成交易失败：%s", extractErrorMessage(err))
 	}
 	return nil
+}
+
+// QueryRealEstate 查询房产信息
+func (s *RealtyService) QueryRealEstate(id string) (map[string]interface{}, error) {
+	// 查询操作可以使用任意组织身份
+	contract := utils.GetContract(REALTY_ORG)
+	result, err := contract.EvaluateTransaction("QueryRealEstate", id)
+	if err != nil {
+		return nil, fmt.Errorf("查询房产信息失败：%s", extractErrorMessage(err))
+	}
+
+	var realEstate map[string]interface{}
+	if err := json.Unmarshal(result, &realEstate); err != nil {
+		return nil, fmt.Errorf("解析房产数据失败：%v", err)
+	}
+
+	return realEstate, nil
 }
 
 // QueryTransaction 查询交易信息
