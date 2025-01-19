@@ -106,27 +106,55 @@
         layout="vertical"
       >
         <a-form-item label="房产ID" name="realEstateId" extra="请输入要交易的房产ID">
-          <a-input v-model:value="formState.realEstateId" placeholder="请输入房产ID" />
+          <a-input 
+            v-model:value="formState.realEstateId" 
+            placeholder="请输入房产ID" 
+            @change="handleRealEstateIdChange"
+          />
         </a-form-item>
 
-        <a-form-item label="卖家" name="seller" extra="可以输入任意模拟用户名作为卖家">
-          <a-input v-model:value="formState.seller" placeholder="请输入卖家姓名" />
+        <a-form-item label="卖家" name="seller" extra="当前房产所有者">
+          <a-input 
+            v-model:value="formState.seller" 
+            placeholder="自动填入当前所有者" 
+            disabled
+          />
         </a-form-item>
 
         <a-form-item label="买家" name="buyer" extra="可以输入任意模拟用户名作为买家">
-          <a-input v-model:value="formState.buyer" placeholder="请输入买家姓名" />
+          <a-input-group compact>
+            <a-input 
+              v-model:value="formState.buyer" 
+              placeholder="请输入买家姓名"
+              style="width: calc(100% - 110px)"
+            />
+            <a-tooltip title="随机生成一个用户名">
+              <a-button @click="generateRandomBuyer">
+                <template #icon><ReloadOutlined /></template>
+                随机生成
+              </a-button>
+            </a-tooltip>
+          </a-input-group>
         </a-form-item>
 
         <a-form-item label="价格" name="price" extra="请输入大于0的交易金额">
-          <a-input-number
-            v-model:value="formState.price"
-            :min="0.01"
-            :step="0.01"
-            style="width: 100%"
-            placeholder="请输入价格"
-            :formatter="value => `¥ ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
-            :parser="value => value!.replace(/\¥\s?|(,*)/g, '')"
-          />
+          <a-input-group compact>
+            <a-input-number
+              v-model:value="formState.price"
+              :min="0.01"
+              :step="0.01"
+              style="width: calc(100% - 110px)"
+              placeholder="请输入价格"
+              :formatter="value => `¥ ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
+              :parser="value => value!.replace(/\¥\s?|(,*)/g, '')"
+            />
+            <a-tooltip title="随机生成一个价格">
+              <a-button @click="generateRandomPrice">
+                <template #icon><ReloadOutlined /></template>
+                随机生成
+              </a-button>
+            </a-tooltip>
+          </a-input-group>
         </a-form-item>
 
         <div class="form-tips">
@@ -140,8 +168,8 @@
 
 <script setup lang="ts">
 import { message } from 'ant-design-vue';
-import { PlusOutlined, InfoCircleOutlined, CopyOutlined } from '@ant-design/icons-vue';
-import { transactionApi } from '../api';
+import { PlusOutlined, InfoCircleOutlined, CopyOutlined, ReloadOutlined } from '@ant-design/icons-vue';
+import { transactionApi, realtyApi } from '../api';
 import type { FormInstance } from 'ant-design-vue';
 
 const formRef = ref<FormInstance>();
@@ -336,6 +364,44 @@ const handleCopy = async (text: string) => {
   } catch (err) {
     message.error('复制失败');
   }
+};
+
+const handleRealEstateIdChange = async (e: Event) => {
+  const id = (e.target as HTMLInputElement).value;
+  if (!id) {
+    formState.seller = '';
+    return;
+  }
+
+  try {
+    const result = await realtyApi.getRealEstate(id);
+    if (result.status !== 'NORMAL') {
+      message.error('该房产不是正常状态，无法创建交易');
+      formState.realEstateId = '';
+      formState.seller = '';
+      return;
+    }
+    formState.seller = result.currentOwner;
+  } catch (error: any) {
+    message.error(error.message || '获取房产信息失败');
+    formState.seller = '';
+  }
+};
+
+// 随机生成买家姓名
+const lastNames = ['张', '王', '李', '赵', '刘', '陈', '杨', '黄', '周', '吴'];
+const firstNames = ['伟', '芳', '娜', '秀英', '敏', '静', '丽', '强', '磊', '洋', '艳', '勇', '军', '杰', '娟', '涛', '明', '超', '秀兰', '霞'];
+
+const generateRandomBuyer = () => {
+  const lastName = lastNames[Math.floor(Math.random() * lastNames.length)];
+  const firstName = firstNames[Math.floor(Math.random() * firstNames.length)];
+  formState.buyer = lastName + firstName;
+};
+
+// 随机生成价格
+const generateRandomPrice = () => {
+  // 生成 50-1000 万之间的随机价格（单位：元），保留2位小数
+  formState.price = Number((Math.random() * (10000000 - 500000) + 500000).toFixed(2));
 };
 
 onMounted(() => {
