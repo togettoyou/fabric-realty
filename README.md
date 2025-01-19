@@ -49,11 +49,17 @@ API 接口设计：
   POST /transaction/create    # 创建交易（使用交易平台身份操作）
 
 /api/bank
-  POST /transaction/complete  # 完成交易（使用银行身份操作）
+  POST /transaction/complete/:txId  # 完成交易（使用银行身份操作）
 
 /api/query
   GET  /realty/:id           # 查询房产信息
   GET  /realty/list          # 分页查询房产列表
+    - pageSize: 每页记录数
+    - bookmark: 分页标记
+    - status: 房产状态（可选，NORMAL-正常、IN_TRANSACTION-交易中）
   GET  /transaction/:txId    # 查询交易信息
   GET  /transaction/list     # 分页查询交易列表
+    - pageSize: 每页记录数
+    - bookmark: 分页标记
+    - status: 交易状态（可选，PENDING-待付款、COMPLETED-已完成）
 ```
