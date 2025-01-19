@@ -121,17 +121,37 @@
         </a-form-item>
 
         <a-form-item label="面积（平方米）" name="area" extra="请输入大于0的数值">
-          <a-input-number
-            v-model:value="formState.area"
-            :min="0.01"
-            :step="0.01"
-            style="width: 100%"
-            placeholder="请输入面积"
-          />
+          <a-input-group compact>
+            <a-input-number
+              v-model:value="formState.area"
+              :min="0.01"
+              :step="0.01"
+              style="width: calc(100% - 110px)"
+              placeholder="请输入面积"
+            />
+            <a-tooltip title="随机生成一个面积">
+              <a-button @click="generateRandomArea">
+                <template #icon><ReloadOutlined /></template>
+                随机生成
+              </a-button>
+            </a-tooltip>
+          </a-input-group>
         </a-form-item>
 
         <a-form-item label="所有者" name="owner" extra="可以输入任意模拟用户名">
-          <a-input v-model:value="formState.owner" placeholder="请输入所有者姓名" />
+          <a-input-group compact>
+            <a-input 
+              v-model:value="formState.owner" 
+              placeholder="请输入所有者姓名"
+              style="width: calc(100% - 110px)"
+            />
+            <a-tooltip title="随机生成一个用户名">
+              <a-button @click="generateRandomOwner">
+                <template #icon><ReloadOutlined /></template>
+                随机生成
+              </a-button>
+            </a-tooltip>
+          </a-input-group>
         </a-form-item>
 
         <div class="form-tips">
@@ -319,6 +339,22 @@ const generateRandomAddress = () => {
   const room = Math.floor(Math.random() * 2000 + 101);
   
   formState.address = `${city}${district}${street}${community}${building}号楼${unit}单元${room}室`;
+};
+
+// 随机生成面积
+const generateRandomArea = () => {
+  // 生成 50-300 之间的随机面积，保留2位小数
+  formState.area = Number((Math.random() * (300 - 50) + 50).toFixed(2));
+};
+
+// 随机生成所有者姓名
+const lastNames = ['张', '王', '李', '赵', '刘', '陈', '杨', '黄', '周', '吴'];
+const firstNames = ['伟', '芳', '娜', '秀英', '敏', '静', '丽', '强', '磊', '洋', '艳', '勇', '军', '杰', '娟', '涛', '明', '超', '秀兰', '霞'];
+
+const generateRandomOwner = () => {
+  const lastName = lastNames[Math.floor(Math.random() * lastNames.length)];
+  const firstName = firstNames[Math.floor(Math.random() * firstNames.length)];
+  formState.owner = lastName + firstName;
 };
 
 // 添加状态筛选的响应式变量
