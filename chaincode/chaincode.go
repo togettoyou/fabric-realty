@@ -21,10 +21,6 @@ type SmartContract struct {
 const (
 	REAL_ESTATE = "RE" // 房产信息
 	TRANSACTION = "TX" // 交易信息
-
-	// 索引前缀
-	IDX_RE_STATUS_TIME = "RE_STATUS_TIME" // 房产状态时间索引
-	IDX_TX_STATUS_TIME = "TX_STATUS_TIME" // 交易状态时间索引
 )
 
 // RealEstateStatus 房产状态
@@ -130,95 +126,6 @@ func (s *SmartContract) putState(ctx contractapi.TransactionContextInterface, ke
 	return nil
 }
 
-// 通用方法：更新状态时间索引
-func (s *SmartContract) updateStatusTimeIndex(ctx contractapi.TransactionContextInterface, indexType string, oldStatus string, newStatus string, createTime time.Time, id string) error {
-	timeStr := createTime.Format("2006-01-02 15:04:05.000")
-
-	// 删除旧索引
-	if oldStatus != "" {
-		oldKey, err := s.getCompositeKey(ctx, indexType, []string{oldStatus, timeStr, id})
-		if err != nil {
-			return fmt.Errorf("获取旧状态时间索引复合键失败：%v", err)
-		}
-		err = ctx.GetStub().DelState(oldKey)
-		if err != nil {
-			return fmt.Errorf("删除旧状态时间索引失败：%v", err)
-		}
-	}
-
-	// 创建新索引
-	newKey, err := s.getCompositeKey(ctx, indexType, []string{newStatus, timeStr, id})
-	if err != nil {
-		return fmt.Errorf("获取新状态时间索引复合键失败：%v", err)
-	}
-	err = ctx.GetStub().PutState(newKey, []byte{0x00})
-	if err != nil {
-		return fmt.Errorf("保存新状态时间索引失败：%v", err)
-	}
-
-	return nil
-}
-
-// 通用方法：分页查询
-func (s *SmartContract) queryByStatusTimePagination(ctx contractapi.TransactionContextInterface, indexType string, status string, pageSize int32, bookmark string, queryFunc func(string) (interface{}, error)) (*QueryResult, error) {
-	var iterator shim.StateQueryIteratorInterface
-	var metadata *peer.QueryResponseMetadata
-	var err error
-
-	if status != "" {
-		iterator, metadata, err = ctx.GetStub().GetStateByPartialCompositeKeyWithPagination(
-			indexType,
-			[]string{status},
-			pageSize,
-			bookmark,
-		)
-	} else {
-		iterator, metadata, err = ctx.GetStub().GetStateByPartialCompositeKeyWithPagination(
-			indexType,
-			[]string{},
-			pageSize,
-			bookmark,
-		)
-	}
-
-	if err != nil {
-		return nil, fmt.Errorf("查询列表失败：%v", err)
-	}
-	defer iterator.Close()
-
-	records := make([]interface{}, 0)
-	for iterator.HasNext() {
-		queryResponse, err := iterator.Next()
-		if err != nil {
-			return nil, fmt.Errorf("获取下一条记录失败：%v", err)
-		}
-
-		// 从复合键中解析出ID
-		_, compositeKeyParts, err := ctx.GetStub().SplitCompositeKey(queryResponse.Key)
-		if err != nil {
-			return nil, fmt.Errorf("解析复合键失败：%v", err)
-		}
-
-		// 获取ID（复合键的最后一部分）
-		id := compositeKeyParts[len(compositeKeyParts)-1]
-
-		// 查询详细信息
-		record, err := queryFunc(id)
-		if err != nil {
-			return nil, err
-		}
-
-		records = append(records, record)
-	}
-
-	return &QueryResult{
-		Records:             records,
-		RecordsCount:        int32(len(records)),
-		Bookmark:            metadata.Bookmark,
-		FetchedRecordsCount: metadata.FetchedRecordsCount,
-	}, nil
-}
-
 // CreateRealEstate 创建房产信息（仅不动产登记机构组织可以调用）
 func (s *SmartContract) CreateRealEstate(ctx contractapi.TransactionContextInterface, id string, address string, area float64, owner string, createTime time.Time) error {
 	// 检查调用者身份
@@ -247,16 +154,13 @@ func (s *SmartContract) CreateRealEstate(ctx contractapi.TransactionContextInter
 	}
 
 	// 检查房产是否已存在
-	key, err := s.getCompositeKey(ctx, REAL_ESTATE, []string{id})
-	if err != nil {
-		return err
-	}
-
-	realEstateBytes, err := ctx.GetStub().GetState(key)
+	iterator, err := ctx.GetStub().GetStateByPartialCompositeKey(REAL_ESTATE, []string{id})
 	if err != nil {
 		return fmt.Errorf("查询房产信息失败：%v", err)
 	}
-	if realEstateBytes != nil {
+	defer iterator.Close()
+
+	if iterator.HasNext() {
 		return fmt.Errorf("房产ID %s 已存在", id)
 	}
 
@@ -271,14 +175,13 @@ func (s *SmartContract) CreateRealEstate(ctx contractapi.TransactionContextInter
 		UpdateTime:      createTime,
 	}
 
-	// 保存房产信息
-	err = s.putState(ctx, key, realEstate)
+	// 保存房产信息（复合键：类型_ID_状态）
+	key, err := s.getCompositeKey(ctx, REAL_ESTATE, []string{id, string(NORMAL)})
 	if err != nil {
 		return err
 	}
 
-	// 创建状态时间索引
-	err = s.updateStatusTimeIndex(ctx, IDX_RE_STATUS_TIME, "", string(NORMAL), createTime, id)
+	err = s.putState(ctx, key, realEstate)
 	if err != nil {
 		return err
 	}
@@ -320,7 +223,7 @@ func (s *SmartContract) CreateTransaction(ctx contractapi.TransactionContextInte
 	}
 
 	// 查询房产信息
-	realEstateKey, err := s.getCompositeKey(ctx, REAL_ESTATE, []string{realEstateID})
+	realEstateKey, err := s.getCompositeKey(ctx, REAL_ESTATE, []string{realEstateID, string(NORMAL)})
 	if err != nil {
 		return err
 	}
@@ -329,11 +232,6 @@ func (s *SmartContract) CreateTransaction(ctx contractapi.TransactionContextInte
 	err = s.getState(ctx, realEstateKey, &realEstate)
 	if err != nil {
 		return err
-	}
-
-	// 检查房产状态
-	if realEstate.Status != NORMAL {
-		return fmt.Errorf("房产状态不正确，当前状态：%s，需要状态：%s", realEstate.Status, NORMAL)
 	}
 
 	// 检查卖家是否是房产所有者
@@ -358,7 +256,19 @@ func (s *SmartContract) CreateTransaction(ctx contractapi.TransactionContextInte
 	realEstate.UpdateTime = createTime
 
 	// 保存状态
-	txKey, err := s.getCompositeKey(ctx, TRANSACTION, []string{txID})
+	txKey, err := s.getCompositeKey(ctx, TRANSACTION, []string{txID, string(PENDING)})
+	if err != nil {
+		return err
+	}
+
+	// 删除旧的房产记录
+	err = ctx.GetStub().DelState(realEstateKey)
+	if err != nil {
+		return fmt.Errorf("删除旧的房产记录失败：%v", err)
+	}
+
+	// 创建新的房产记录（使用新状态）
+	newRealEstateKey, err := s.getCompositeKey(ctx, REAL_ESTATE, []string{realEstateID, string(IN_TRANSACTION)})
 	if err != nil {
 		return err
 	}
@@ -368,18 +278,7 @@ func (s *SmartContract) CreateTransaction(ctx contractapi.TransactionContextInte
 		return err
 	}
 
-	err = s.putState(ctx, realEstateKey, realEstate)
-	if err != nil {
-		return err
-	}
-
-	// 更新索引
-	err = s.updateStatusTimeIndex(ctx, IDX_RE_STATUS_TIME, string(NORMAL), string(IN_TRANSACTION), realEstate.CreateTime, realEstateID)
-	if err != nil {
-		return err
-	}
-
-	err = s.updateStatusTimeIndex(ctx, IDX_TX_STATUS_TIME, "", string(PENDING), createTime, txID)
+	err = s.putState(ctx, newRealEstateKey, realEstate)
 	if err != nil {
 		return err
 	}
@@ -401,7 +300,7 @@ func (s *SmartContract) CompleteTransaction(ctx contractapi.TransactionContextIn
 	}
 
 	// 查询交易信息
-	txKey, err := s.getCompositeKey(ctx, TRANSACTION, []string{txID})
+	txKey, err := s.getCompositeKey(ctx, TRANSACTION, []string{txID, string(PENDING)})
 	if err != nil {
 		return err
 	}
@@ -412,13 +311,8 @@ func (s *SmartContract) CompleteTransaction(ctx contractapi.TransactionContextIn
 		return err
 	}
 
-	// 检查交易状态
-	if transaction.Status != PENDING {
-		return fmt.Errorf("交易状态不正确，当前状态：%s，需要状态：%s", transaction.Status, PENDING)
-	}
-
 	// 查询房产信息
-	realEstateKey, err := s.getCompositeKey(ctx, REAL_ESTATE, []string{transaction.RealEstateID})
+	realEstateKey, err := s.getCompositeKey(ctx, REAL_ESTATE, []string{transaction.RealEstateID, string(IN_TRANSACTION)})
 	if err != nil {
 		return err
 	}
@@ -437,24 +331,34 @@ func (s *SmartContract) CompleteTransaction(ctx contractapi.TransactionContextIn
 	transaction.Status = COMPLETED
 	transaction.UpdateTime = updateTime
 
-	// 保存状态
-	err = s.putState(ctx, realEstateKey, realEstate)
+	// 删除旧记录
+	err = ctx.GetStub().DelState(txKey)
+	if err != nil {
+		return fmt.Errorf("删除旧的交易记录失败：%v", err)
+	}
+
+	err = ctx.GetStub().DelState(realEstateKey)
+	if err != nil {
+		return fmt.Errorf("删除旧的房产记录失败：%v", err)
+	}
+
+	// 创建新记录
+	newTxKey, err := s.getCompositeKey(ctx, TRANSACTION, []string{txID, string(COMPLETED)})
 	if err != nil {
 		return err
 	}
 
-	err = s.putState(ctx, txKey, transaction)
+	newRealEstateKey, err := s.getCompositeKey(ctx, REAL_ESTATE, []string{transaction.RealEstateID, string(NORMAL)})
 	if err != nil {
 		return err
 	}
 
-	// 更新索引
-	err = s.updateStatusTimeIndex(ctx, IDX_RE_STATUS_TIME, string(IN_TRANSACTION), string(NORMAL), realEstate.CreateTime, realEstate.ID)
+	err = s.putState(ctx, newTxKey, transaction)
 	if err != nil {
 		return err
 	}
 
-	err = s.updateStatusTimeIndex(ctx, IDX_TX_STATUS_TIME, string(PENDING), string(COMPLETED), transaction.CreateTime, txID)
+	err = s.putState(ctx, newRealEstateKey, realEstate)
 	if err != nil {
 		return err
 	}
@@ -464,15 +368,27 @@ func (s *SmartContract) CompleteTransaction(ctx contractapi.TransactionContextIn
 
 // QueryRealEstate 查询房产信息
 func (s *SmartContract) QueryRealEstate(ctx contractapi.TransactionContextInterface, id string) (*RealEstate, error) {
-	key, err := s.getCompositeKey(ctx, REAL_ESTATE, []string{id})
+	// 查询所有状态的房产
+	iterator, err := ctx.GetStub().GetStateByPartialCompositeKey(REAL_ESTATE, []string{id})
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("查询房产信息失败：%v", err)
+	}
+	defer iterator.Close()
+
+	if !iterator.HasNext() {
+		return nil, fmt.Errorf("房产ID %s 不存在", id)
+	}
+
+	// 获取第一条记录（因为一个ID只会有一个状态）
+	queryResponse, err := iterator.Next()
+	if err != nil {
+		return nil, fmt.Errorf("获取房产信息失败：%v", err)
 	}
 
 	var realEstate RealEstate
-	err = s.getState(ctx, key, &realEstate)
+	err = json.Unmarshal(queryResponse.Value, &realEstate)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("解析房产信息失败：%v", err)
 	}
 
 	return &realEstate, nil
@@ -480,15 +396,27 @@ func (s *SmartContract) QueryRealEstate(ctx contractapi.TransactionContextInterf
 
 // QueryTransaction 查询交易信息
 func (s *SmartContract) QueryTransaction(ctx contractapi.TransactionContextInterface, txID string) (*Transaction, error) {
-	key, err := s.getCompositeKey(ctx, TRANSACTION, []string{txID})
+	// 查询所有状态的交易
+	iterator, err := ctx.GetStub().GetStateByPartialCompositeKey(TRANSACTION, []string{txID})
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("查询交易信息失败：%v", err)
+	}
+	defer iterator.Close()
+
+	if !iterator.HasNext() {
+		return nil, fmt.Errorf("交易ID %s 不存在", txID)
+	}
+
+	// 获取第一条记录（因为一个ID只会有一个状态）
+	queryResponse, err := iterator.Next()
+	if err != nil {
+		return nil, fmt.Errorf("获取交易信息失败：%v", err)
 	}
 
 	var transaction Transaction
-	err = s.getState(ctx, key, &transaction)
+	err = json.Unmarshal(queryResponse.Value, &transaction)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("解析交易信息失败：%v", err)
 	}
 
 	return &transaction, nil
@@ -496,16 +424,110 @@ func (s *SmartContract) QueryTransaction(ctx contractapi.TransactionContextInter
 
 // QueryRealEstateList 分页查询房产列表
 func (s *SmartContract) QueryRealEstateList(ctx contractapi.TransactionContextInterface, pageSize int32, bookmark string, status string) (*QueryResult, error) {
-	return s.queryByStatusTimePagination(ctx, IDX_RE_STATUS_TIME, status, pageSize, bookmark, func(id string) (interface{}, error) {
-		return s.QueryRealEstate(ctx, id)
-	})
+	var iterator shim.StateQueryIteratorInterface
+	var metadata *peer.QueryResponseMetadata
+	var err error
+
+	// 使用状态作为复合键的第二部分进行查询
+	if status != "" {
+		// 查询所有指定状态的房产
+		iterator, metadata, err = ctx.GetStub().GetStateByPartialCompositeKeyWithPagination(
+			REAL_ESTATE,
+			[]string{status},
+			pageSize,
+			bookmark,
+		)
+	} else {
+		// 查询所有房产
+		iterator, metadata, err = ctx.GetStub().GetStateByPartialCompositeKeyWithPagination(
+			REAL_ESTATE,
+			[]string{},
+			pageSize,
+			bookmark,
+		)
+	}
+
+	if err != nil {
+		return nil, fmt.Errorf("查询列表失败：%v", err)
+	}
+	defer iterator.Close()
+
+	records := make([]interface{}, 0)
+	for iterator.HasNext() {
+		queryResponse, err := iterator.Next()
+		if err != nil {
+			return nil, fmt.Errorf("获取下一条记录失败：%v", err)
+		}
+
+		var realEstate RealEstate
+		err = json.Unmarshal(queryResponse.Value, &realEstate)
+		if err != nil {
+			return nil, fmt.Errorf("解析房产信息失败：%v", err)
+		}
+
+		records = append(records, realEstate)
+	}
+
+	return &QueryResult{
+		Records:             records,
+		RecordsCount:        int32(len(records)),
+		Bookmark:            metadata.Bookmark,
+		FetchedRecordsCount: metadata.FetchedRecordsCount,
+	}, nil
 }
 
 // QueryTransactionList 分页查询交易列表
 func (s *SmartContract) QueryTransactionList(ctx contractapi.TransactionContextInterface, pageSize int32, bookmark string, status string) (*QueryResult, error) {
-	return s.queryByStatusTimePagination(ctx, IDX_TX_STATUS_TIME, status, pageSize, bookmark, func(id string) (interface{}, error) {
-		return s.QueryTransaction(ctx, id)
-	})
+	var iterator shim.StateQueryIteratorInterface
+	var metadata *peer.QueryResponseMetadata
+	var err error
+
+	// 使用状态作为复合键的第二部分进行查询
+	if status != "" {
+		// 查询所有指定状态的交易
+		iterator, metadata, err = ctx.GetStub().GetStateByPartialCompositeKeyWithPagination(
+			TRANSACTION,
+			[]string{status},
+			pageSize,
+			bookmark,
+		)
+	} else {
+		// 查询所有交易
+		iterator, metadata, err = ctx.GetStub().GetStateByPartialCompositeKeyWithPagination(
+			TRANSACTION,
+			[]string{},
+			pageSize,
+			bookmark,
+		)
+	}
+
+	if err != nil {
+		return nil, fmt.Errorf("查询列表失败：%v", err)
+	}
+	defer iterator.Close()
+
+	records := make([]interface{}, 0)
+	for iterator.HasNext() {
+		queryResponse, err := iterator.Next()
+		if err != nil {
+			return nil, fmt.Errorf("获取下一条记录失败：%v", err)
+		}
+
+		var transaction Transaction
+		err = json.Unmarshal(queryResponse.Value, &transaction)
+		if err != nil {
+			return nil, fmt.Errorf("解析交易信息失败：%v", err)
+		}
+
+		records = append(records, transaction)
+	}
+
+	return &QueryResult{
+		Records:             records,
+		RecordsCount:        int32(len(records)),
+		Bookmark:            metadata.Bookmark,
+		FetchedRecordsCount: metadata.FetchedRecordsCount,
+	}, nil
 }
 
 // Hello 用于验证
