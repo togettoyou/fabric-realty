@@ -255,6 +255,27 @@ func (s *SmartContract) CreateTransaction(ctx contractapi.TransactionContextInte
 		return fmt.Errorf("序列化房产信息失败：%v", err)
 	}
 
+	// 删除旧的房产状态时间索引
+	oldRETimeStr := realEstate.CreateTime.Format("2006-01-02 15:04:05.000")
+	oldREStatusTimeKey, err := ctx.GetStub().CreateCompositeKey(IDX_RE_STATUS_TIME, []string{string(NORMAL), oldRETimeStr, realEstateID})
+	if err != nil {
+		return fmt.Errorf("创建旧房产状态时间索引失败：%v", err)
+	}
+	err = ctx.GetStub().DelState(oldREStatusTimeKey)
+	if err != nil {
+		return fmt.Errorf("删除旧房产状态时间索引失败：%v", err)
+	}
+
+	// 创建新的房产状态时间索引（使用原来的创建时间）
+	newREStatusTimeKey, err := ctx.GetStub().CreateCompositeKey(IDX_RE_STATUS_TIME, []string{string(IN_TRANSACTION), oldRETimeStr, realEstateID})
+	if err != nil {
+		return fmt.Errorf("创建新房产状态时间索引失败：%v", err)
+	}
+	err = ctx.GetStub().PutState(newREStatusTimeKey, []byte{0x00})
+	if err != nil {
+		return fmt.Errorf("保存新房产状态时间索引失败：%v", err)
+	}
+
 	// 保存状态
 	err = ctx.GetStub().PutState(realEstateKey, realEstateJSON)
 	if err != nil {
@@ -266,7 +287,7 @@ func (s *SmartContract) CreateTransaction(ctx contractapi.TransactionContextInte
 		return fmt.Errorf("保存交易信息失败：%v", err)
 	}
 
-	// 创建状态时间索引
+	// 创建交易状态时间索引
 	timeStr := transaction.CreateTime.Format("2006-01-02 15:04:05.000")
 	statusTimeKey, err := ctx.GetStub().CreateCompositeKey(IDX_TX_STATUS_TIME, []string{string(transaction.Status), timeStr, txID})
 	if err != nil {
@@ -370,25 +391,46 @@ func (s *SmartContract) CompleteTransaction(ctx contractapi.TransactionContextIn
 		return fmt.Errorf("更新交易信息失败：%v", err)
 	}
 
-	// 删除旧的状态时间索引
-	oldTimeStr := transaction.CreateTime.Format("2006-01-02 15:04:05.000")
-	oldStatusTimeKey, err := ctx.GetStub().CreateCompositeKey(IDX_TX_STATUS_TIME, []string{string(PENDING), oldTimeStr, txID})
+	// 删除旧的房产状态时间索引
+	oldRETimeStr := realEstate.CreateTime.Format("2006-01-02 15:04:05.000")
+	oldREStatusTimeKey, err := ctx.GetStub().CreateCompositeKey(IDX_RE_STATUS_TIME, []string{string(IN_TRANSACTION), oldRETimeStr, realEstate.ID})
 	if err != nil {
-		return fmt.Errorf("创建旧状态时间索引失败：%v", err)
+		return fmt.Errorf("创建旧房产状态时间索引失败：%v", err)
 	}
-	err = ctx.GetStub().DelState(oldStatusTimeKey)
+	err = ctx.GetStub().DelState(oldREStatusTimeKey)
 	if err != nil {
-		return fmt.Errorf("删除旧状态时间索引失败：%v", err)
+		return fmt.Errorf("删除旧房产状态时间索引失败：%v", err)
 	}
 
-	// 创建新的状态时间索引（使用原来的创建时间）
-	newStatusTimeKey, err := ctx.GetStub().CreateCompositeKey(IDX_TX_STATUS_TIME, []string{string(COMPLETED), oldTimeStr, txID})
+	// 创建新的房产状态时间索引（使用原来的创建时间）
+	newREStatusTimeKey, err := ctx.GetStub().CreateCompositeKey(IDX_RE_STATUS_TIME, []string{string(NORMAL), oldRETimeStr, realEstate.ID})
 	if err != nil {
-		return fmt.Errorf("创建新状态时间索引失败：%v", err)
+		return fmt.Errorf("创建新房产状态时间索引失败：%v", err)
 	}
-	err = ctx.GetStub().PutState(newStatusTimeKey, []byte{0x00})
+	err = ctx.GetStub().PutState(newREStatusTimeKey, []byte{0x00})
 	if err != nil {
-		return fmt.Errorf("保存新状态时间索引失败：%v", err)
+		return fmt.Errorf("保存新房产状态时间索引失败：%v", err)
+	}
+
+	// 删除旧的交易状态时间索引
+	oldTxTimeStr := transaction.CreateTime.Format("2006-01-02 15:04:05.000")
+	oldTxStatusTimeKey, err := ctx.GetStub().CreateCompositeKey(IDX_TX_STATUS_TIME, []string{string(PENDING), oldTxTimeStr, txID})
+	if err != nil {
+		return fmt.Errorf("创建旧交易状态时间索引失败：%v", err)
+	}
+	err = ctx.GetStub().DelState(oldTxStatusTimeKey)
+	if err != nil {
+		return fmt.Errorf("删除旧交易状态时间索引失败：%v", err)
+	}
+
+	// 创建新的交易状态时间索引（使用原来的创建时间）
+	newTxStatusTimeKey, err := ctx.GetStub().CreateCompositeKey(IDX_TX_STATUS_TIME, []string{string(COMPLETED), oldTxTimeStr, txID})
+	if err != nil {
+		return fmt.Errorf("创建新交易状态时间索引失败：%v", err)
+	}
+	err = ctx.GetStub().PutState(newTxStatusTimeKey, []byte{0x00})
+	if err != nil {
+		return fmt.Errorf("保存新交易状态时间索引失败：%v", err)
 	}
 
 	return nil
