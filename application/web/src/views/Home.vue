@@ -1,34 +1,40 @@
 <template>
   <div class="home">
     <div class="page-header">
-      <h1 class="page-title">基于区块链的房地产交易系统</h1>
-      <p class="page-description">选择您要进入的功能模块</p>
+      <h1 class="page-title">选择您的组织身份</h1>
+      <p class="page-description">本系统由三个组织构成的联盟链网络共同维护</p>
     </div>
 
     <div class="content">
       <router-link to="/realty-agency" class="card">
-        <HomeOutlined class="card-icon" />
-        <div class="card-title">房产管理</div>
-        <div class="card-description">负责房产信息的登记和管理</div>
+        <div class="card-icon">
+          <HomeOutlined />
+        </div>
+        <div class="card-title">不动产登记机构（Org1）</div>
+        <div class="card-description">负责房产信息的登记</div>
       </router-link>
 
       <router-link to="/trading-platform" class="card">
-        <ShopOutlined class="card-icon" />
-        <div class="card-title">交易管理</div>
-        <div class="card-description">负责房产交易的创建和管理</div>
+        <div class="card-icon">
+          <ShopOutlined />
+        </div>
+        <div class="card-title">交易平台（Org3）</div>
+        <div class="card-description">负责创建交易信息</div>
       </router-link>
 
       <router-link to="/bank" class="card">
-        <CheckCircleOutlined class="card-icon" />
-        <div class="card-title">交易确认</div>
-        <div class="card-description">负责房产交易的确认和完成</div>
+        <div class="card-icon">
+          <BankOutlined />
+        </div>
+        <div class="card-title">银行（Org2）</div>
+        <div class="card-description">负责交易的完成确认</div>
       </router-link>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { HomeOutlined, ShopOutlined, CheckCircleOutlined } from '@ant-design/icons-vue';
+import { HomeOutlined, ShopOutlined, BankOutlined } from '@ant-design/icons-vue';
 </script>
 
 <style scoped>
