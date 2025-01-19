@@ -30,7 +30,7 @@
         <div class="table-container">
           <a-table
             :columns="columns"
-            :data-source="filteredTransactionList"
+            :data-source="transactionList"
             :loading="loading"
             :pagination="false"
             :scroll="{ x: 1500, y: 'calc(100vh - 350px)' }"
@@ -245,8 +245,13 @@ const loadTransactionList = async () => {
     const result = await transactionApi.getTransactionList({
       pageSize: 10,
       bookmark: bookmark.value,
+      status: statusFilter.value,
     });
-    transactionList.value = [...transactionList.value, ...result.records];
+    if (!bookmark.value) {
+      transactionList.value = result.records;
+    } else {
+      transactionList.value = [...transactionList.value, ...result.records];
+    }
     bookmark.value = result.bookmark;
   } catch (error: any) {
     message.error(error.message || '加载交易列表失败');
@@ -317,18 +322,14 @@ const handleModalCancel = () => {
   formRef.value?.resetFields();
 };
 
-// 添加状态筛选的响应式变量
 const statusFilter = ref('');
 
-// 添加筛选后的列表计算属性
-const filteredTransactionList = computed(() => {
-  if (!statusFilter.value) {
-    return transactionList.value;
-  }
-  return transactionList.value.filter(item => item.status === statusFilter.value);
+watch(statusFilter, () => {
+  transactionList.value = [];
+  bookmark.value = '';
+  loadTransactionList();
 });
 
-// 添加复制函数
 const handleCopy = async (text: string) => {
   try {
     await navigator.clipboard.writeText(text);
@@ -338,7 +339,6 @@ const handleCopy = async (text: string) => {
   }
 };
 
-// 初始加载
 onMounted(() => {
   loadTransactionList();
 });

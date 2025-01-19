@@ -3,7 +3,7 @@
     <div class="page-header">
       <a-page-header
         title="银行"
-        sub-title="负责管理交易资金"
+        sub-title="负责交易的完成确认"
         @back="() => $router.push('/')"
       />
     </div>
@@ -21,7 +21,7 @@
         <div class="table-container">
           <a-table
             :columns="columns"
-            :data-source="filteredTransactionList"
+            :data-source="transactionList"
             :loading="loading"
             :pagination="false"
             :scroll="{ x: 1500, y: 'calc(100vh - 350px)' }"
@@ -67,20 +67,15 @@
                 <time>{{ new Date(record.updateTime).toLocaleString() }}</time>
               </template>
               <template v-else-if="column.key === 'action'">
-                <a-space>
-                  <a-tooltip title="完成交易">
-                    <a-button
-                      type="primary"
-                      :disabled="record.status !== 'PENDING'"
-                      @click="completeTransaction(record.id)"
-                      :loading="record.loading"
-                      size="small"
-                    >
-                      <template #icon><check-outlined /></template>
-                      完成交易
-                    </a-button>
-                  </a-tooltip>
-                </a-space>
+                <a-button
+                  type="primary"
+                  size="small"
+                  @click="handleComplete(record)"
+                  :loading="record.completing"
+                  :disabled="record.status === 'COMPLETED'"
+                >
+                  完成交易
+                </a-button>
               </template>
             </template>
           </a-table>
@@ -101,104 +96,13 @@
 
 <script setup lang="ts">
 import { message } from 'ant-design-vue';
-import { CheckOutlined, DownOutlined, CopyOutlined } from '@ant-design/icons-vue';
+import { CopyOutlined } from '@ant-design/icons-vue';
 import { transactionApi } from '../api';
 
-const statusFilter = ref('');
 const transactionList = ref<any[]>([]);
 const loading = ref(false);
 const bookmark = ref('');
-
-const handleCopy = async (text: string) => {
-  try {
-    await navigator.clipboard.writeText(text);
-    message.success('已复制到剪贴板');
-  } catch (err) {
-    message.error('复制失败');
-  }
-};
-
-const columns = [
-  {
-    title: '交易ID',
-    dataIndex: 'id',
-    key: 'id',
-    width: 180,
-    ellipsis: false,
-    customCell: () => ({
-      style: {
-        whiteSpace: 'nowrap',
-        overflow: 'hidden',
-      }
-    }),
-  },
-  {
-    title: '房产ID',
-    dataIndex: 'realEstateId',
-    key: 'realEstateId',
-    width: 180,
-    ellipsis: false,
-    customCell: () => ({
-      style: {
-        whiteSpace: 'nowrap',
-        overflow: 'hidden',
-      }
-    }),
-  },
-  {
-    title: '卖家',
-    dataIndex: 'seller',
-    key: 'seller',
-    width: 100,
-    ellipsis: true,
-  },
-  {
-    title: '买家',
-    dataIndex: 'buyer',
-    key: 'buyer',
-    width: 100,
-    ellipsis: true,
-  },
-  {
-    title: '价格',
-    dataIndex: 'price',
-    key: 'price',
-    width: 120,
-    align: 'right' as const,
-  },
-  {
-    title: '状态',
-    dataIndex: 'status',
-    key: 'status',
-    width: 80,
-  },
-  {
-    title: '创建时间',
-    dataIndex: 'createTime',
-    key: 'createTime',
-    width: 160,
-  },
-  {
-    title: '更新时间',
-    dataIndex: 'updateTime',
-    key: 'updateTime',
-    width: 160,
-  },
-  {
-    title: '操作',
-    key: 'action',
-    fixed: 'right',
-    width: 120,
-    align: 'center' as const,
-  },
-];
-
-const filteredTransactionList = computed(() => {
-  if (!statusFilter.value) {
-    return transactionList.value;
-  }
-  return transactionList.value.filter(item => item.status === statusFilter.value);
-});
+const statusFilter = ref('');
 
 const loadTransactionList = async () => {
   try {
@@ -206,12 +110,13 @@ const loadTransactionList = async () => {
     const result = await transactionApi.getTransactionList({
       pageSize: 10,
       bookmark: bookmark.value,
+      status: statusFilter.value,
     });
-    const records = result.records.map((record: any) => ({
-      ...record,
-      loading: false,
-    }));
-    transactionList.value = [...transactionList.value, ...records];
+    if (!bookmark.value) {
+      transactionList.value = result.records;
+    } else {
+      transactionList.value = [...transactionList.value, ...result.records];
+    }
     bookmark.value = result.bookmark;
   } catch (error: any) {
     message.error(error.message || '加载交易列表失败');
@@ -246,13 +151,10 @@ const getStatusText = (status: string) => {
   }
 };
 
-const completeTransaction = async (txId: string) => {
-  const transaction = transactionList.value.find((t) => t.id === txId);
-  if (!transaction) return;
-
+const handleComplete = async (record: any) => {
   try {
-    transaction.loading = true;
-    await transactionApi.completeTransaction(txId);
+    record.completing = true;
+    await transactionApi.completeTransaction(record.id);
     message.success('交易完成');
     // 刷新列表
     transactionList.value = [];
@@ -261,11 +163,103 @@ const completeTransaction = async (txId: string) => {
   } catch (error: any) {
     message.error(error.message || '完成交易失败');
   } finally {
-    transaction.loading = false;
+    record.completing = false;
   }
 };
 
-// 初始加载
+const handleCopy = async (text: string) => {
+  try {
+    await navigator.clipboard.writeText(text);
+    message.success('已复制到剪贴板');
+  } catch (err) {
+    message.error('复制失败');
+  }
+};
+
+// 监听状态筛选变化
+watch(statusFilter, () => {
+  // 重置列表和书签
+  transactionList.value = [];
+  bookmark.value = '';
+  // 重新加载数据
+  loadTransactionList();
+});
+
+const columns = [
+  {
+    title: '交易ID',
+    dataIndex: 'id',
+    key: 'id',
+    width: 180,
+    ellipsis: false,
+    customCell: () => ({
+      style: {
+        whiteSpace: 'nowrap',
+        overflow: 'hidden',
+      }
+    }),
+  },
+  {
+    title: '房产ID',
+    dataIndex: 'realEstateId',
+    key: 'realEstateId',
+    width: 180,
+    ellipsis: false,
+    customCell: () => ({
+      style: {
+        whiteSpace: 'nowrap',
+        overflow: 'hidden',
+      }
+    }),
+  },
+  {
+    title: '卖家',
+    dataIndex: 'seller',
+    key: 'seller',
+    width: 120,
+    ellipsis: true,
+  },
+  {
+    title: '买家',
+    dataIndex: 'buyer',
+    key: 'buyer',
+    width: 120,
+    ellipsis: true,
+  },
+  {
+    title: '价格',
+    dataIndex: 'price',
+    key: 'price',
+    width: 120,
+    customRender: ({ text }: { text: number }) => 
+      `¥ ${text}`.replace(/\B(?=(\d{3})+(?!\d))/g, ','),
+  },
+  {
+    title: '状态',
+    dataIndex: 'status',
+    key: 'status',
+    width: 100,
+  },
+  {
+    title: '创建时间',
+    dataIndex: 'createTime',
+    key: 'createTime',
+    width: 180,
+  },
+  {
+    title: '更新时间',
+    dataIndex: 'updateTime',
+    key: 'updateTime',
+    width: 180,
+  },
+  {
+    title: '操作',
+    key: 'action',
+    width: 100,
+    fixed: 'right',
+  },
+];
+
 onMounted(() => {
   loadTransactionList();
 });
@@ -322,6 +316,14 @@ onMounted(() => {
   opacity: 1;
 }
 
+.load-more {
+  text-align: center;
+  margin-top: 16px;
+  padding: 8px 0;
+  background: #fff;
+  border-top: 1px solid #f0f0f0;
+}
+
 .table-container {
   height: calc(100vh - 200px);
   position: relative;
@@ -334,28 +336,11 @@ onMounted(() => {
   overflow: hidden;
 }
 
-:deep(.ant-table) {
-  height: calc(100vh - 300px);
-}
-
-:deep(.ant-table-body) {
-  max-height: calc(100vh - 360px) !important;
-}
-
-/* 固定表头样式 */
 :deep(.ant-table-header) {
   background: #fff;
 }
 
 :deep(.ant-table-header::-webkit-scrollbar) {
   display: none;
-}
-
-.load-more {
-  text-align: center;
-  margin-top: 16px;
-  padding: 8px 0;
-  background: #fff;
-  border-top: 1px solid #f0f0f0;
 }
 </style> 

@@ -30,7 +30,7 @@
         <div class="table-container">
           <a-table
             :columns="columns"
-            :data-source="filteredRealEstateList"
+            :data-source="realEstateList"
             :loading="loading"
             :pagination="false"
             :scroll="{ x: 1500, y: 'calc(100vh - 350px)' }"
@@ -245,8 +245,13 @@ const loadRealEstateList = async () => {
     const result = await realtyApi.getRealEstateList({
       pageSize: 10,
       bookmark: bookmark.value,
+      status: statusFilter.value,
     });
-    realEstateList.value = [...realEstateList.value, ...result.records];
+    if (!bookmark.value) {
+      realEstateList.value = result.records;
+    } else {
+      realEstateList.value = [...realEstateList.value, ...result.records];
+    }
     bookmark.value = result.bookmark;
   } catch (error: any) {
     message.error(error.message || '加载房产列表失败');
@@ -320,12 +325,13 @@ const generateRandomAddress = () => {
 // 添加状态筛选的响应式变量
 const statusFilter = ref('');
 
-// 添加筛选后的列表计算属性
-const filteredRealEstateList = computed(() => {
-  if (!statusFilter.value) {
-    return realEstateList.value;
-  }
-  return realEstateList.value.filter(item => item.status === statusFilter.value);
+// 监听状态筛选变化
+watch(statusFilter, () => {
+  // 重置列表和书签
+  realEstateList.value = [];
+  bookmark.value = '';
+  // 重新加载数据
+  loadRealEstateList();
 });
 
 // 添加复制函数
