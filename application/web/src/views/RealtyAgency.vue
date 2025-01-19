@@ -145,7 +145,7 @@
 
 <script setup lang="ts">
 import { message } from 'ant-design-vue';
-import { PlusOutlined, EyeOutlined, DownOutlined, InfoCircleOutlined, ReloadOutlined, CopyOutlined } from '@ant-design/icons-vue';
+import { PlusOutlined, InfoCircleOutlined, ReloadOutlined, CopyOutlined } from '@ant-design/icons-vue';
 import { realtyApi } from '../api';
 import type { FormInstance } from 'ant-design-vue';
 
@@ -154,7 +154,6 @@ const showCreateModal = ref(false);
 const modalLoading = ref(false);
 
 const formState = reactive({
-  id: '',
   address: '',
   area: undefined as number | undefined,
   owner: '',

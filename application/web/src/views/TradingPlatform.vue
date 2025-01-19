@@ -140,7 +140,7 @@
 
 <script setup lang="ts">
 import { message } from 'ant-design-vue';
-import { PlusOutlined, EyeOutlined, DownOutlined, InfoCircleOutlined, CopyOutlined } from '@ant-design/icons-vue';
+import { PlusOutlined, InfoCircleOutlined, CopyOutlined } from '@ant-design/icons-vue';
 import { transactionApi } from '../api';
 import type { FormInstance } from 'ant-design-vue';
 
@@ -149,7 +149,6 @@ const showCreateModal = ref(false);
 const modalLoading = ref(false);
 
 const formState = reactive({
-  txId: '',
   realEstateId: '',
   seller: '',
   buyer: '',
