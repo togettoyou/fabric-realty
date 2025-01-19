@@ -106,8 +106,9 @@ func (h *RealtyHandler) QueryRealEstateList(c *gin.Context) {
 	// 获取分页参数
 	pageSize, _ := strconv.Atoi(c.DefaultQuery("pageSize", "10"))
 	bookmark := c.DefaultQuery("bookmark", "")
+	status := c.DefaultQuery("status", "")
 
-	result, err := h.realtyService.QueryRealEstateList(int32(pageSize), bookmark)
+	result, err := h.realtyService.QueryRealEstateList(int32(pageSize), bookmark, status)
 	if err != nil {
 		utils.ServerError(c, err.Error())
 		return
@@ -121,8 +122,9 @@ func (h *RealtyHandler) QueryTransactionList(c *gin.Context) {
 	// 获取分页参数
 	pageSize, _ := strconv.Atoi(c.DefaultQuery("pageSize", "10"))
 	bookmark := c.DefaultQuery("bookmark", "")
+	status := c.DefaultQuery("status", "")
 
-	result, err := h.realtyService.QueryTransactionList(int32(pageSize), bookmark)
+	result, err := h.realtyService.QueryTransactionList(int32(pageSize), bookmark, status)
 	if err != nil {
 		utils.ServerError(c, err.Error())
 		return

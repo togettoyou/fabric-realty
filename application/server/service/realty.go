@@ -110,10 +110,10 @@ func (s *RealtyService) QueryTransaction(txID string) (map[string]interface{}, e
 }
 
 // QueryRealEstateList 分页查询房产列表
-func (s *RealtyService) QueryRealEstateList(pageSize int32, bookmark string) (map[string]interface{}, error) {
+func (s *RealtyService) QueryRealEstateList(pageSize int32, bookmark string, status string) (map[string]interface{}, error) {
 	// 查询操作可以使用任意组织身份
 	contract := utils.GetContract(REALTY_ORG)
-	result, err := contract.EvaluateTransaction("QueryRealEstateList", fmt.Sprintf("%d", pageSize), bookmark, "")
+	result, err := contract.EvaluateTransaction("QueryRealEstateList", fmt.Sprintf("%d", pageSize), bookmark, status)
 	if err != nil {
 		return nil, fmt.Errorf("查询房产列表失败：%s", extractErrorMessage(err))
 	}
@@ -127,10 +127,10 @@ func (s *RealtyService) QueryRealEstateList(pageSize int32, bookmark string) (ma
 }
 
 // QueryTransactionList 分页查询交易列表
-func (s *RealtyService) QueryTransactionList(pageSize int32, bookmark string) (map[string]interface{}, error) {
+func (s *RealtyService) QueryTransactionList(pageSize int32, bookmark string, status string) (map[string]interface{}, error) {
 	// 查询操作可以使用任意组织身份
 	contract := utils.GetContract(REALTY_ORG)
-	result, err := contract.EvaluateTransaction("QueryTransactionList", fmt.Sprintf("%d", pageSize), bookmark, "")
+	result, err := contract.EvaluateTransaction("QueryTransactionList", fmt.Sprintf("%d", pageSize), bookmark, status)
 	if err != nil {
 		return nil, fmt.Errorf("查询交易列表失败：%s", extractErrorMessage(err))
 	}
