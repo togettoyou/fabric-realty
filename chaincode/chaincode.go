@@ -373,58 +373,54 @@ func (s *SmartContract) CompleteTransaction(ctx contractapi.TransactionContextIn
 
 // QueryRealEstate 查询房产信息
 func (s *SmartContract) QueryRealEstate(ctx contractapi.TransactionContextInterface, id string) (*RealEstate, error) {
-	// 查询所有状态的房产
-	iterator, err := ctx.GetStub().GetStateByPartialCompositeKey(REAL_ESTATE, []string{id})
-	if err != nil {
-		return nil, fmt.Errorf("查询房产信息失败：%v", err)
-	}
-	defer iterator.Close()
+	// 遍历所有可能的状态查询房产
+	for _, status := range []RealEstateStatus{NORMAL, IN_TRANSACTION} {
+		key, err := s.getCompositeKey(ctx, REAL_ESTATE, []string{string(status), id})
+		if err != nil {
+			return nil, fmt.Errorf("创建复合键失败：%v", err)
+		}
 
-	if !iterator.HasNext() {
-		return nil, fmt.Errorf("房产ID %s 不存在", id)
-	}
-
-	// 获取第一条记录（因为一个ID只会有一个状态）
-	queryResponse, err := iterator.Next()
-	if err != nil {
-		return nil, fmt.Errorf("获取房产信息失败：%v", err)
-	}
-
-	var realEstate RealEstate
-	err = json.Unmarshal(queryResponse.Value, &realEstate)
-	if err != nil {
-		return nil, fmt.Errorf("解析房产信息失败：%v", err)
+		bytes, err := ctx.GetStub().GetState(key)
+		if err != nil {
+			return nil, fmt.Errorf("查询房产信息失败：%v", err)
+		}
+		if bytes != nil {
+			var realEstate RealEstate
+			err = json.Unmarshal(bytes, &realEstate)
+			if err != nil {
+				return nil, fmt.Errorf("解析房产信息失败：%v", err)
+			}
+			return &realEstate, nil
+		}
 	}
 
-	return &realEstate, nil
+	return nil, fmt.Errorf("房产ID %s 不存在", id)
 }
 
 // QueryTransaction 查询交易信息
 func (s *SmartContract) QueryTransaction(ctx contractapi.TransactionContextInterface, txID string) (*Transaction, error) {
-	// 查询所有状态的交易
-	iterator, err := ctx.GetStub().GetStateByPartialCompositeKey(TRANSACTION, []string{txID})
-	if err != nil {
-		return nil, fmt.Errorf("查询交易信息失败：%v", err)
-	}
-	defer iterator.Close()
+	// 遍历所有可能的状态查询交易
+	for _, status := range []TransactionStatus{PENDING, COMPLETED} {
+		key, err := s.getCompositeKey(ctx, TRANSACTION, []string{string(status), txID})
+		if err != nil {
+			return nil, fmt.Errorf("创建复合键失败：%v", err)
+		}
 
-	if !iterator.HasNext() {
-		return nil, fmt.Errorf("交易ID %s 不存在", txID)
-	}
-
-	// 获取第一条记录（因为一个ID只会有一个状态）
-	queryResponse, err := iterator.Next()
-	if err != nil {
-		return nil, fmt.Errorf("获取交易信息失败：%v", err)
-	}
-
-	var transaction Transaction
-	err = json.Unmarshal(queryResponse.Value, &transaction)
-	if err != nil {
-		return nil, fmt.Errorf("解析交易信息失败：%v", err)
+		bytes, err := ctx.GetStub().GetState(key)
+		if err != nil {
+			return nil, fmt.Errorf("查询交易信息失败：%v", err)
+		}
+		if bytes != nil {
+			var transaction Transaction
+			err = json.Unmarshal(bytes, &transaction)
+			if err != nil {
+				return nil, fmt.Errorf("解析交易信息失败：%v", err)
+			}
+			return &transaction, nil
+		}
 	}
 
-	return &transaction, nil
+	return nil, fmt.Errorf("交易ID %s 不存在", txID)
 }
 
 // QueryRealEstateList 分页查询房产列表
