@@ -3,14 +3,14 @@
     <div class="page-header">
       <a-page-header
         title="交易平台"
-        sub-title="负责创建和管理交易信息"
+        sub-title="负责生成交易信息"
         @back="() => $router.push('/')"
       >
         <template #extra>
           <a-tooltip title="点击创建新的交易">
             <a-button type="primary" @click="showCreateModal = true">
               <template #icon><PlusOutlined /></template>
-              创建新交易
+              生成新交易
             </a-button>
           </a-tooltip>
         </template>
@@ -90,10 +90,10 @@
       </a-card>
     </div>
 
-    <!-- 创建交易的对话框 -->
+    <!-- 生成交易的对话框 -->
     <a-modal
       v-model:visible="showCreateModal"
-      title="创建新交易"
+      title="生成新交易"
       @ok="handleModalOk"
       @cancel="handleModalCancel"
       :confirmLoading="modalLoading"
@@ -376,7 +376,7 @@ const handleRealEstateIdChange = async (e: Event) => {
   try {
     const result = await realtyApi.getRealEstate(id);
     if (result.status !== 'NORMAL') {
-      message.error('该房产不是正常状态，无法创建交易');
+      message.error('该房产不是正常状态，无法生成交易');
       formState.realEstateId = '';
       formState.seller = '';
       return;

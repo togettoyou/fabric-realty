@@ -3,7 +3,7 @@
     <div class="page-header">
       <a-page-header
         title="不动产登记机构"
-        sub-title="负责房产信息的登记和所有权变更"
+        sub-title="负责房产信息的登记"
         @back="() => $router.push('/')"
       >
         <template #extra>

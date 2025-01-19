@@ -19,7 +19,7 @@
           <ShopOutlined />
         </div>
         <div class="card-title">交易平台（Org3）</div>
-        <div class="card-description">负责创建交易信息</div>
+        <div class="card-description">负责生成交易信息</div>
       </router-link>
 
       <router-link to="/bank" class="card">

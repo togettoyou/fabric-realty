@@ -21,7 +21,7 @@ export const realtyApi = {
 
 // 交易相关接口
 export const transactionApi = {
-  // 创建交易
+  // 生成交易
   createTransaction: (data: {
     txId: string;
     realEstateId: string;

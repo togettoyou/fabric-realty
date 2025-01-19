@@ -41,7 +41,7 @@ func (h *RealtyHandler) CreateRealEstate(c *gin.Context) {
 	utils.SuccessWithMessage(c, "房产信息创建成功", nil)
 }
 
-// CreateTransaction 创建交易（仅交易平台组织可以调用）
+// CreateTransaction 生成交易（仅交易平台组织可以调用）
 func (h *RealtyHandler) CreateTransaction(c *gin.Context) {
 	var req struct {
 		TxID         string  `json:"txId"`
@@ -58,7 +58,7 @@ func (h *RealtyHandler) CreateTransaction(c *gin.Context) {
 
 	err := h.realtyService.CreateTransaction(req.TxID, req.RealEstateID, req.Seller, req.Buyer, req.Price)
 	if err != nil {
-		utils.ServerError(c, "创建交易失败："+err.Error())
+		utils.ServerError(c, "生成交易失败："+err.Error())
 		return
 	}
 

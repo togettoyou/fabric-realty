@@ -194,7 +194,7 @@ func (s *SmartContract) CreateRealEstate(ctx contractapi.TransactionContextInter
 	return nil
 }
 
-// CreateTransaction 创建交易（仅交易平台组织可以调用）
+// CreateTransaction 生成交易（仅交易平台组织可以调用）
 func (s *SmartContract) CreateTransaction(ctx contractapi.TransactionContextInterface, txID string, realEstateID string, seller string, buyer string, price float64, createTime time.Time) error {
 	// 检查调用者身份
 	clientMSPID, err := s.getClientIdentityMSPID(ctx)
@@ -204,7 +204,7 @@ func (s *SmartContract) CreateTransaction(ctx contractapi.TransactionContextInte
 
 	// 验证是否是交易平台组织的成员
 	if clientMSPID != TRADE_ORG_MSPID {
-		return fmt.Errorf("只有交易平台组织成员才能创建交易")
+		return fmt.Errorf("只有交易平台组织成员才能生成交易")
 	}
 
 	// 参数验证
@@ -244,7 +244,7 @@ func (s *SmartContract) CreateTransaction(ctx contractapi.TransactionContextInte
 		return fmt.Errorf("卖家不是房产所有者")
 	}
 
-	// 创建交易信息
+	// 生成交易信息
 	transaction := Transaction{
 		ID:           txID,
 		RealEstateID: realEstateID,

@@ -19,7 +19,7 @@
     - 维护两个 Peer 节点：peer0.org2 和 peer1.org2
 
 3. 交易平台（Org3）
-    - 负责创建交易信息
+    - 负责生成交易信息
     - 维护两个 Peer 节点：peer0.org3 和 peer1.org3
 
 ### 智能合约（Chaincode）
@@ -32,7 +32,7 @@
     - 分页查询房产列表
 
 2. 交易管理
-    - 创建交易（仅交易平台可操作）
+    - 生成交易（仅交易平台可操作）
     - 完成交易（仅银行可操作）
     - 查询交易信息
     - 分页查询交易列表
@@ -46,7 +46,7 @@ API 接口设计：
   POST /realty/create         # 创建房产信息（使用不动产登记机构身份操作）
 
 /api/trading-platform
-  POST /transaction/create    # 创建交易（使用交易平台身份操作）
+  POST /transaction/create    # 生成交易（使用交易平台身份操作）
 
 /api/bank
   POST /transaction/complete/:txId  # 完成交易（使用银行身份操作）

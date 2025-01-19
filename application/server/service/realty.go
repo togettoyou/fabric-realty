@@ -51,14 +51,14 @@ func (s *RealtyService) CreateRealEstate(id, address string, area float64, owner
 	return nil
 }
 
-// CreateTransaction 创建交易（仅交易平台组织可以调用）
+// CreateTransaction 生成交易（仅交易平台组织可以调用）
 func (s *RealtyService) CreateTransaction(txID, realEstateID, seller, buyer string, price float64) error {
 	// 使用交易平台组织身份
 	contract := utils.GetContract(TRADE_ORG)
 	now := time.Now().Format(time.RFC3339)
 	_, err := contract.SubmitTransaction("CreateTransaction", txID, realEstateID, seller, buyer, fmt.Sprintf("%f", price), now)
 	if err != nil {
-		return fmt.Errorf("创建交易失败：%s", extractErrorMessage(err))
+		return fmt.Errorf("生成交易失败：%s", extractErrorMessage(err))
 	}
 	return nil
 }

@@ -40,7 +40,7 @@ func main() {
 	// 交易平台的接口
 	trading := apiGroup.Group("/trading-platform")
 	{
-		// 创建交易
+		// 生成交易
 		trading.POST("/transaction/create", realtyHandler.CreateTransaction)
 	}
 
