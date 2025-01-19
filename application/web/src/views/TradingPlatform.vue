@@ -20,11 +20,21 @@
     <div class="content">
       <a-card :bordered="false">
         <template #extra>
-          <a-radio-group v-model:value="statusFilter" button-style="solid">
-            <a-radio-button value="">全部</a-radio-button>
-            <a-radio-button value="PENDING">待完成</a-radio-button>
-            <a-radio-button value="COMPLETED">已完成</a-radio-button>
-          </a-radio-group>
+          <div class="card-extra">
+            <a-input-search
+              v-model:value="searchId"
+              placeholder="输入交易ID进行精确查询"
+              style="width: 300px; margin-right: 16px;"
+              @search="handleSearch"
+              @change="handleSearchChange"
+              allow-clear
+            />
+            <a-radio-group v-model:value="statusFilter" button-style="solid">
+              <a-radio-button value="">全部</a-radio-button>
+              <a-radio-button value="PENDING">待完成</a-radio-button>
+              <a-radio-button value="COMPLETED">已完成</a-radio-button>
+            </a-radio-group>
+          </div>
         </template>
 
         <div class="table-container">
@@ -168,7 +178,7 @@
 
 <script setup lang="ts">
 import { message } from 'ant-design-vue';
-import { PlusOutlined, InfoCircleOutlined, CopyOutlined, ReloadOutlined } from '@ant-design/icons-vue';
+import { PlusOutlined, InfoCircleOutlined, CopyOutlined, ReloadOutlined, SearchOutlined } from '@ant-design/icons-vue';
 import { transactionApi, realtyApi } from '../api';
 import type { FormInstance } from 'ant-design-vue';
 
@@ -404,6 +414,35 @@ const generateRandomPrice = () => {
   formState.price = Number((Math.random() * (10000000 - 500000) + 500000).toFixed(2));
 };
 
+// 添加搜索相关的变量和方法
+const searchId = ref('');
+
+const handleSearch = async (value: string) => {
+  if (!value) {
+    message.warning('请输入要查询的交易ID');
+    return;
+  }
+  
+  try {
+    const result = await transactionApi.getTransaction(value);
+    transactionList.value = [result];
+    bookmark.value = '';
+  } catch (error: any) {
+    message.error(error.message || '查询交易信息失败');
+    transactionList.value = [];
+  }
+};
+
+const handleSearchChange = (e: Event) => {
+  const value = (e.target as HTMLInputElement).value;
+  if (!value) {
+    // 当搜索框清空时，重新加载列表
+    transactionList.value = [];
+    bookmark.value = '';
+    loadTransactionList();
+  }
+};
+
 onMounted(() => {
   loadTransactionList();
 });
@@ -496,5 +535,11 @@ onMounted(() => {
 
 :deep(.ant-table-header::-webkit-scrollbar) {
   display: none;
+}
+
+.card-extra {
+  display: flex;
+  align-items: center;
+  gap: 16px;
 }
 </style> 

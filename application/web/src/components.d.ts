@@ -17,6 +17,7 @@ declare module 'vue' {
     AInput: typeof import('ant-design-vue/es')['Input']
     AInputGroup: typeof import('ant-design-vue/es')['InputGroup']
     AInputNumber: typeof import('ant-design-vue/es')['InputNumber']
+    AInputSearch: typeof import('ant-design-vue/es')['InputSearch']
     AModal: typeof import('ant-design-vue/es')['Modal']
     APageHeader: typeof import('ant-design-vue/es')['PageHeader']
     ARadioButton: typeof import('ant-design-vue/es')['RadioButton']

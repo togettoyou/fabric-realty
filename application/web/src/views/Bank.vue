@@ -11,11 +11,21 @@
     <div class="content">
       <a-card :bordered="false">
         <template #extra>
-          <a-radio-group v-model:value="statusFilter" button-style="solid">
-            <a-radio-button value="">全部</a-radio-button>
-            <a-radio-button value="PENDING">待完成</a-radio-button>
-            <a-radio-button value="COMPLETED">已完成</a-radio-button>
-          </a-radio-group>
+          <div class="card-extra">
+            <a-input-search
+              v-model:value="searchId"
+              placeholder="输入交易ID进行精确查询"
+              style="width: 300px; margin-right: 16px;"
+              @search="handleSearch"
+              @change="handleSearchChange"
+              allow-clear
+            />
+            <a-radio-group v-model:value="statusFilter" button-style="solid">
+              <a-radio-button value="">全部</a-radio-button>
+              <a-radio-button value="PENDING">待完成</a-radio-button>
+              <a-radio-button value="COMPLETED">已完成</a-radio-button>
+            </a-radio-group>
+          </div>
         </template>
 
         <div class="table-container">
@@ -96,13 +106,14 @@
 
 <script setup lang="ts">
 import { message } from 'ant-design-vue';
-import { CopyOutlined } from '@ant-design/icons-vue';
+import { CheckCircleOutlined, CopyOutlined, SearchOutlined } from '@ant-design/icons-vue';
 import { transactionApi } from '../api';
 
 const transactionList = ref<any[]>([]);
 const loading = ref(false);
 const bookmark = ref('');
 const statusFilter = ref('');
+const searchId = ref('');
 
 const loadTransactionList = async () => {
   try {
@@ -173,6 +184,32 @@ const handleCopy = async (text: string) => {
     message.success('已复制到剪贴板');
   } catch (err) {
     message.error('复制失败');
+  }
+};
+
+const handleSearch = async (value: string) => {
+  if (!value) {
+    message.warning('请输入要查询的交易ID');
+    return;
+  }
+  
+  try {
+    const result = await transactionApi.getTransaction(value);
+    transactionList.value = [result];
+    bookmark.value = '';
+  } catch (error: any) {
+    message.error(error.message || '查询交易信息失败');
+    transactionList.value = [];
+  }
+};
+
+const handleSearchChange = (e: Event) => {
+  const value = (e.target as HTMLInputElement).value;
+  if (!value) {
+    // 当搜索框清空时，重新加载列表
+    transactionList.value = [];
+    bookmark.value = '';
+    loadTransactionList();
   }
 };
 
@@ -342,5 +379,11 @@ onMounted(() => {
 
 :deep(.ant-table-header::-webkit-scrollbar) {
   display: none;
+}
+
+.card-extra {
+  display: flex;
+  align-items: center;
+  gap: 16px;
 }
 </style> 

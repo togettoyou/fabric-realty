@@ -20,11 +20,21 @@
     <div class="content">
       <a-card :bordered="false">
         <template #extra>
-          <a-radio-group v-model:value="statusFilter" button-style="solid">
-            <a-radio-button value="">全部</a-radio-button>
-            <a-radio-button value="NORMAL">正常</a-radio-button>
-            <a-radio-button value="IN_TRANSACTION">交易中</a-radio-button>
-          </a-radio-group>
+          <div class="card-extra">
+            <a-input-search
+              v-model:value="searchId"
+              placeholder="输入房产ID进行精确查询"
+              style="width: 300px; margin-right: 16px;"
+              @search="handleSearch"
+              @change="handleSearchChange"
+              allow-clear
+            />
+            <a-radio-group v-model:value="statusFilter" button-style="solid">
+              <a-radio-button value="">全部</a-radio-button>
+              <a-radio-button value="NORMAL">正常</a-radio-button>
+              <a-radio-button value="IN_TRANSACTION">交易中</a-radio-button>
+            </a-radio-group>
+          </div>
         </template>
 
         <div class="table-container">
@@ -165,7 +175,7 @@
 
 <script setup lang="ts">
 import { message } from 'ant-design-vue';
-import { PlusOutlined, InfoCircleOutlined, ReloadOutlined, CopyOutlined } from '@ant-design/icons-vue';
+import { PlusOutlined, InfoCircleOutlined, ReloadOutlined, CopyOutlined, SearchOutlined } from '@ant-design/icons-vue';
 import { realtyApi } from '../api';
 import type { FormInstance } from 'ant-design-vue';
 
@@ -379,6 +389,35 @@ const handleCopy = async (text: string) => {
   }
 };
 
+// 添加搜索相关的变量和方法
+const searchId = ref('');
+
+const handleSearch = async (value: string) => {
+  if (!value) {
+    message.warning('请输入要查询的房产ID');
+    return;
+  }
+  
+  try {
+    const result = await realtyApi.getRealEstate(value);
+    realEstateList.value = [result];
+    bookmark.value = '';
+  } catch (error: any) {
+    message.error(error.message || '查询房产信息失败');
+    realEstateList.value = [];
+  }
+};
+
+const handleSearchChange = (e: Event) => {
+  const value = (e.target as HTMLInputElement).value;
+  if (!value) {
+    // 当搜索框清空时，重新加载列表
+    realEstateList.value = [];
+    bookmark.value = '';
+    loadRealEstateList();
+  }
+};
+
 // 初始加载
 onMounted(() => {
   loadRealEstateList();
@@ -478,5 +517,11 @@ onMounted(() => {
 
 :deep(.ant-table-header::-webkit-scrollbar) {
   display: none;
+}
+
+.card-extra {
+  display: flex;
+  align-items: center;
+  gap: 16px;
 }
 </style> 
