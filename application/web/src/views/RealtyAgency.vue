@@ -88,8 +88,8 @@
             </template>
           </a-table>
           <div class="load-more">
-            <a-button 
-              :loading="loading" 
+            <a-button
+              :loading="loading"
               @click="loadMore"
               :disabled="!bookmark"
             >
@@ -150,8 +150,8 @@
 
         <a-form-item label="所有者" name="owner" extra="可以输入任意模拟用户名">
           <a-input-group compact>
-            <a-input 
-              v-model:value="formState.owner" 
+            <a-input
+              v-model:value="formState.owner"
               placeholder="请输入所有者姓名"
               style="width: calc(100% - 110px)"
             />
@@ -175,7 +175,7 @@
 
 <script setup lang="ts">
 import { message } from 'ant-design-vue';
-import { PlusOutlined, InfoCircleOutlined, ReloadOutlined, CopyOutlined, SearchOutlined } from '@ant-design/icons-vue';
+import { PlusOutlined, InfoCircleOutlined, ReloadOutlined, CopyOutlined } from '@ant-design/icons-vue';
 import { realtyAgencyApi } from '../api';
 import type { FormInstance } from 'ant-design-vue';
 
@@ -225,7 +225,7 @@ const columns = [
     key: 'area',
     width: 80,
     customCell: () => ({
-      style: { 
+      style: {
         fontVariantNumeric: 'tabular-nums',
       },
     }),
@@ -347,7 +347,7 @@ const generateRandomAddress = () => {
   const building = Math.floor(Math.random() * 20 + 1);
   const unit = Math.floor(Math.random() * 6 + 1);
   const room = Math.floor(Math.random() * 2000 + 101);
-  
+
   formState.address = `${city}${district}${street}${community}${building}号楼${unit}单元${room}室`;
 };
 
@@ -397,7 +397,7 @@ const handleSearch = async (value: string) => {
     message.warning('请输入要查询的房产ID');
     return;
   }
-  
+
   try {
     const result = await realtyAgencyApi.getRealEstate(value);
     realEstateList.value = [result];
@@ -481,7 +481,7 @@ onMounted(() => {
   cursor: pointer;
   opacity: 0;
   transition: opacity 0.2s;
-  
+
   &:hover {
     color: #1890ff;
   }
@@ -524,4 +524,4 @@ onMounted(() => {
   align-items: center;
   gap: 16px;
 }
-</style> 
+</style>

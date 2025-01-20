@@ -88,8 +88,8 @@
             </template>
           </a-table>
           <div class="load-more">
-            <a-button 
-              :loading="loading" 
+            <a-button
+              :loading="loading"
               @click="loadMore"
               :disabled="!bookmark"
             >
@@ -116,25 +116,25 @@
         layout="vertical"
       >
         <a-form-item label="房产ID" name="realEstateId" extra="请输入要交易的房产ID">
-          <a-input 
-            v-model:value="formState.realEstateId" 
-            placeholder="请输入房产ID" 
+          <a-input
+            v-model:value="formState.realEstateId"
+            placeholder="请输入房产ID"
             @change="handleRealEstateIdChange"
           />
         </a-form-item>
 
         <a-form-item label="卖家" name="seller" extra="当前房产所有者">
-          <a-input 
-            v-model:value="formState.seller" 
-            placeholder="自动填入当前所有者" 
+          <a-input
+            v-model:value="formState.seller"
+            placeholder="自动填入当前所有者"
             disabled
           />
         </a-form-item>
 
         <a-form-item label="买家" name="buyer" extra="可以输入任意模拟用户名作为买家">
           <a-input-group compact>
-            <a-input 
-              v-model:value="formState.buyer" 
+            <a-input
+              v-model:value="formState.buyer"
               placeholder="请输入买家姓名"
               style="width: calc(100% - 110px)"
             />
@@ -178,8 +178,8 @@
 
 <script setup lang="ts">
 import { message } from 'ant-design-vue';
-import { PlusOutlined, InfoCircleOutlined, CopyOutlined, ReloadOutlined, SearchOutlined } from '@ant-design/icons-vue';
-import { tradingPlatformApi, realtyAgencyApi } from '../api';
+import { PlusOutlined, InfoCircleOutlined, CopyOutlined, ReloadOutlined } from '@ant-design/icons-vue';
+import { tradingPlatformApi } from '../api';
 import type { FormInstance } from 'ant-design-vue';
 
 const formRef = ref<FormInstance>();
@@ -249,7 +249,7 @@ const columns = [
     dataIndex: 'price',
     key: 'price',
     width: 120,
-    customRender: ({ text }: { text: number }) => 
+    customRender: ({ text }: { text: number }) =>
       `¥ ${text}`.replace(/\B(?=(\d{3})+(?!\d))/g, ','),
   },
   {
@@ -422,7 +422,7 @@ const handleSearch = async (value: string) => {
     message.warning('请输入要查询的交易ID');
     return;
   }
-  
+
   try {
     const result = await tradingPlatformApi.getTransaction(value);
     transactionList.value = [result];
@@ -499,7 +499,7 @@ onMounted(() => {
   cursor: pointer;
   opacity: 0;
   transition: opacity 0.2s;
-  
+
   &:hover {
     color: #1890ff;
   }
@@ -542,4 +542,4 @@ onMounted(() => {
   align-items: center;
   gap: 16px;
 }
-</style> 
+</style>

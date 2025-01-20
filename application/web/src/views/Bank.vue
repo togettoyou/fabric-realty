@@ -90,8 +90,8 @@
             </template>
           </a-table>
           <div class="load-more">
-            <a-button 
-              :loading="loading" 
+            <a-button
+              :loading="loading"
               @click="loadMore"
               :disabled="!bookmark"
             >
@@ -106,7 +106,7 @@
 
 <script setup lang="ts">
 import { message } from 'ant-design-vue';
-import { CheckCircleOutlined, CopyOutlined, SearchOutlined } from '@ant-design/icons-vue';
+import { CopyOutlined } from '@ant-design/icons-vue';
 import { bankApi } from '../api';
 
 const transactionList = ref<any[]>([]);
@@ -192,7 +192,7 @@ const handleSearch = async (value: string) => {
     message.warning('请输入要查询的交易ID');
     return;
   }
-  
+
   try {
     const result = await bankApi.getTransaction(value);
     transactionList.value = [result];
@@ -268,7 +268,7 @@ const columns = [
     dataIndex: 'price',
     key: 'price',
     width: 120,
-    customRender: ({ text }: { text: number }) => 
+    customRender: ({ text }: { text: number }) =>
       `¥ ${text}`.replace(/\B(?=(\d{3})+(?!\d))/g, ','),
   },
   {
@@ -343,7 +343,7 @@ onMounted(() => {
   cursor: pointer;
   opacity: 0;
   transition: opacity 0.2s;
-  
+
   &:hover {
     color: #1890ff;
   }
@@ -386,4 +386,4 @@ onMounted(() => {
   align-items: center;
   gap: 16px;
 }
-</style> 
+</style>
