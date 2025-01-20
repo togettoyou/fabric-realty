@@ -3,7 +3,7 @@ package main
 import (
 	"application/api"
 	"application/config"
-	"application/utils"
+	"application/pkg/fabric"
 	"fmt"
 	"log"
 
@@ -17,7 +17,7 @@ func main() {
 	}
 
 	// 初始化 Fabric 客户端
-	if err := utils.InitFabric(); err != nil {
+	if err := fabric.InitFabric(); err != nil {
 		log.Fatalf("初始化Fabric客户端失败：%v", err)
 	}
 

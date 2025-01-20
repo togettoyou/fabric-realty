@@ -1,4 +1,4 @@
-package utils
+package fabric
 
 import (
 	"application/config"
@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"path"
+	"path/filepath"
 	"time"
 
 	"github.com/hyperledger/fabric-gateway/pkg/client"
@@ -23,6 +24,9 @@ var (
 
 // InitFabric 初始化 Fabric 客户端
 func InitFabric() error {
+	// 初始化区块监听器
+	InitBlockListener(filepath.Join("data", "blocks"))
+
 	// 为每个组织创建合约客户端
 	for orgName, orgConfig := range config.GlobalConfig.Fabric.Organizations {
 		// 创建 gRPC 连接
@@ -60,6 +64,11 @@ func InitFabric() error {
 
 		network := gw.GetNetwork(config.GlobalConfig.Fabric.ChannelName)
 		contracts[orgName] = network.GetContract(config.GlobalConfig.Fabric.ChaincodeName)
+
+		// 添加网络到区块监听器
+		if err := AddNetwork(orgName, network); err != nil {
+			return fmt.Errorf("添加网络到区块监听器失败：%v", err)
+		}
 	}
 
 	return nil

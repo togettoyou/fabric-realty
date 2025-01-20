@@ -1,7 +1,7 @@
 package service
 
 import (
-	"application/utils"
+	"application/pkg/fabric"
 	"encoding/json"
 	"fmt"
 	"time"
@@ -13,21 +13,21 @@ const TRADE_ORG = "org3" // 交易平台组织
 
 // CreateTransaction 生成交易
 func (s *TradingPlatformService) CreateTransaction(txID, realEstateID, seller, buyer string, price float64) error {
-	contract := utils.GetContract(TRADE_ORG)
+	contract := fabric.GetContract(TRADE_ORG)
 	now := time.Now().Format(time.RFC3339)
 	_, err := contract.SubmitTransaction("CreateTransaction", txID, realEstateID, seller, buyer, fmt.Sprintf("%f", price), now)
 	if err != nil {
-		return fmt.Errorf("生成交易失败：%s", utils.ExtractErrorMessage(err))
+		return fmt.Errorf("生成交易失败：%s", fabric.ExtractErrorMessage(err))
 	}
 	return nil
 }
 
 // QueryRealEstate 查询房产信息
 func (s *TradingPlatformService) QueryRealEstate(id string) (map[string]interface{}, error) {
-	contract := utils.GetContract(TRADE_ORG)
+	contract := fabric.GetContract(TRADE_ORG)
 	result, err := contract.EvaluateTransaction("QueryRealEstate", id)
 	if err != nil {
-		return nil, fmt.Errorf("查询房产信息失败：%s", utils.ExtractErrorMessage(err))
+		return nil, fmt.Errorf("查询房产信息失败：%s", fabric.ExtractErrorMessage(err))
 	}
 
 	var realEstate map[string]interface{}
@@ -40,10 +40,10 @@ func (s *TradingPlatformService) QueryRealEstate(id string) (map[string]interfac
 
 // QueryRealEstateList 分页查询房产列表
 func (s *TradingPlatformService) QueryRealEstateList(pageSize int32, bookmark string, status string) (map[string]interface{}, error) {
-	contract := utils.GetContract(TRADE_ORG)
+	contract := fabric.GetContract(TRADE_ORG)
 	result, err := contract.EvaluateTransaction("QueryRealEstateList", fmt.Sprintf("%d", pageSize), bookmark, status)
 	if err != nil {
-		return nil, fmt.Errorf("查询房产列表失败：%s", utils.ExtractErrorMessage(err))
+		return nil, fmt.Errorf("查询房产列表失败：%s", fabric.ExtractErrorMessage(err))
 	}
 
 	var queryResult map[string]interface{}
@@ -56,10 +56,10 @@ func (s *TradingPlatformService) QueryRealEstateList(pageSize int32, bookmark st
 
 // QueryTransaction 查询交易信息
 func (s *TradingPlatformService) QueryTransaction(txID string) (map[string]interface{}, error) {
-	contract := utils.GetContract(TRADE_ORG)
+	contract := fabric.GetContract(TRADE_ORG)
 	result, err := contract.EvaluateTransaction("QueryTransaction", txID)
 	if err != nil {
-		return nil, fmt.Errorf("查询交易信息失败：%s", utils.ExtractErrorMessage(err))
+		return nil, fmt.Errorf("查询交易信息失败：%s", fabric.ExtractErrorMessage(err))
 	}
 
 	var transaction map[string]interface{}
@@ -72,10 +72,10 @@ func (s *TradingPlatformService) QueryTransaction(txID string) (map[string]inter
 
 // QueryTransactionList 分页查询交易列表
 func (s *TradingPlatformService) QueryTransactionList(pageSize int32, bookmark string, status string) (map[string]interface{}, error) {
-	contract := utils.GetContract(TRADE_ORG)
+	contract := fabric.GetContract(TRADE_ORG)
 	result, err := contract.EvaluateTransaction("QueryTransactionList", fmt.Sprintf("%d", pageSize), bookmark, status)
 	if err != nil {
-		return nil, fmt.Errorf("查询交易列表失败：%s", utils.ExtractErrorMessage(err))
+		return nil, fmt.Errorf("查询交易列表失败：%s", fabric.ExtractErrorMessage(err))
 	}
 
 	var queryResult map[string]interface{}
