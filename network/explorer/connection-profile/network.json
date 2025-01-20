@@ -19,7 +19,7 @@
     }
   },
   "channels": {
-    "channeltogettoyou": {
+    "mychannel": {
       "peers": {
         "peer0.org1.togettoyou.com": {}
       }
