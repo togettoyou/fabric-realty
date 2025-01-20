@@ -13,6 +13,7 @@ import (
 	"github.com/hyperledger/fabric-gateway/pkg/identity"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
+	"google.golang.org/grpc/status"
 )
 
 var (
@@ -67,6 +68,28 @@ func InitFabric() error {
 // GetContract 获取指定组织的合约客户端
 func GetContract(orgName string) *client.Contract {
 	return contracts[orgName]
+}
+
+// ExtractErrorMessage 从错误中提取详细信息
+func ExtractErrorMessage(err error) string {
+	if err == nil {
+		return ""
+	}
+	// 尝试获取 gRPC 状态
+	if st, ok := status.FromError(err); ok {
+		// 获取详细信息
+		msg := st.Message()
+		details := st.Details()
+		code := st.Code()
+
+		// 构建完整的错误信息
+		fullError := fmt.Sprintf("错误码: %v, 消息: %v", code, msg)
+		if len(details) > 0 {
+			fullError += fmt.Sprintf(", 详情: %+v", details)
+		}
+		return fullError
+	}
+	return err.Error()
 }
 
 // newGrpcConnection 创建 gRPC 连接

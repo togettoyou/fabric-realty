@@ -28,49 +28,41 @@ func main() {
 	apiGroup := r.Group("/api")
 
 	// 注册路由
-	realtyHandler := api.NewRealtyHandler()
+	realtyAgencyHandler := api.NewRealtyAgencyHandler()
+	tradingPlatformHandler := api.NewTradingPlatformHandler()
+	bankHandler := api.NewBankHandler()
 
 	// 不动产登记机构的接口
 	realty := apiGroup.Group("/realty-agency")
 	{
 		// 创建房产信息
-		realty.POST("/realty/create", realtyHandler.CreateRealEstate)
+		realty.POST("/realty/create", realtyAgencyHandler.CreateRealEstate)
+		// 查询房产接口
+		realty.GET("/realty/:id", realtyAgencyHandler.QueryRealEstate)
+		realty.GET("/realty/list", realtyAgencyHandler.QueryRealEstateList)
 	}
 
 	// 交易平台的接口
 	trading := apiGroup.Group("/trading-platform")
 	{
 		// 生成交易
-		trading.POST("/transaction/create", realtyHandler.CreateTransaction)
+		trading.POST("/transaction/create", tradingPlatformHandler.CreateTransaction)
+		// 查询房产接口
+		trading.GET("/realty/:id", tradingPlatformHandler.QueryRealEstate)
+		trading.GET("/realty/list", tradingPlatformHandler.QueryRealEstateList)
+		// 查询交易接口
+		trading.GET("/transaction/:txId", tradingPlatformHandler.QueryTransaction)
+		trading.GET("/transaction/list", tradingPlatformHandler.QueryTransactionList)
 	}
 
 	// 银行的接口
 	bank := apiGroup.Group("/bank")
 	{
 		// 完成交易
-		bank.POST("/transaction/complete/:txId", realtyHandler.CompleteTransaction)
-	}
-
-	// 公共查询接口（所有组织都可以访问）
-	query := apiGroup.Group("/query")
-	{
-		// 房产相关查询
-		realty := query.Group("/realty")
-		{
-			// 查询房产信息
-			realty.GET("/:id", realtyHandler.QueryRealEstate)
-			// 分页查询房产列表
-			realty.GET("/list", realtyHandler.QueryRealEstateList)
-		}
-
-		// 交易相关查询
-		transaction := query.Group("/transaction")
-		{
-			// 查询交易信息
-			transaction.GET("/:txId", realtyHandler.QueryTransaction)
-			// 分页查询交易列表
-			transaction.GET("/list", realtyHandler.QueryTransactionList)
-		}
+		bank.POST("/transaction/complete/:txId", bankHandler.CompleteTransaction)
+		// 查询交易接口
+		bank.GET("/transaction/:txId", bankHandler.QueryTransaction)
+		bank.GET("/transaction/list", bankHandler.QueryTransactionList)
 	}
 
 	// 启动服务器
