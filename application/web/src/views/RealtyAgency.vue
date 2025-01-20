@@ -176,7 +176,7 @@
 <script setup lang="ts">
 import { message } from 'ant-design-vue';
 import { PlusOutlined, InfoCircleOutlined, ReloadOutlined, CopyOutlined, SearchOutlined } from '@ant-design/icons-vue';
-import { realtyApi } from '../api';
+import { realtyAgencyApi } from '../api';
 import type { FormInstance } from 'ant-design-vue';
 
 const formRef = ref<FormInstance>();
@@ -271,7 +271,7 @@ const bookmark = ref('');
 const loadRealEstateList = async () => {
   try {
     loading.value = true;
-    const result = await realtyApi.getRealEstateList({
+    const result = await realtyAgencyApi.getRealEstateList({
       pageSize: 10,
       bookmark: bookmark.value,
       status: statusFilter.value,
@@ -311,7 +311,7 @@ const handleModalOk = () => {
         ...formState,
         id: generateUUID(),
       };
-      await realtyApi.createRealEstate(realEstateData);
+      await realtyAgencyApi.createRealEstate(realEstateData);
       message.success('房产信息登记成功');
       showCreateModal.value = false;
       // 重置表单
@@ -399,7 +399,7 @@ const handleSearch = async (value: string) => {
   }
   
   try {
-    const result = await realtyApi.getRealEstate(value);
+    const result = await realtyAgencyApi.getRealEstate(value);
     realEstateList.value = [result];
     bookmark.value = '';
   } catch (error: any) {

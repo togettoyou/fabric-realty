@@ -107,7 +107,7 @@
 <script setup lang="ts">
 import { message } from 'ant-design-vue';
 import { CheckCircleOutlined, CopyOutlined, SearchOutlined } from '@ant-design/icons-vue';
-import { transactionApi } from '../api';
+import { bankApi } from '../api';
 
 const transactionList = ref<any[]>([]);
 const loading = ref(false);
@@ -118,7 +118,7 @@ const searchId = ref('');
 const loadTransactionList = async () => {
   try {
     loading.value = true;
-    const result = await transactionApi.getTransactionList({
+    const result = await bankApi.getTransactionList({
       pageSize: 10,
       bookmark: bookmark.value,
       status: statusFilter.value,
@@ -165,7 +165,7 @@ const getStatusText = (status: string) => {
 const handleComplete = async (record: any) => {
   try {
     record.completing = true;
-    await transactionApi.completeTransaction(record.id);
+    await bankApi.completeTransaction(record.id);
     message.success('交易完成');
     // 刷新列表
     transactionList.value = [];
@@ -194,7 +194,7 @@ const handleSearch = async (value: string) => {
   }
   
   try {
-    const result = await transactionApi.getTransaction(value);
+    const result = await bankApi.getTransaction(value);
     transactionList.value = [result];
     bookmark.value = '';
   } catch (error: any) {

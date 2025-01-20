@@ -1,8 +1,8 @@
 import request from '../utils/request';
 import type { RealEstatePageResult, TransactionPageResult, RealEstate, Transaction } from '../types';
 
-// 房产相关接口
-export const realtyApi = {
+// 不动产登记机构接口
+export const realtyAgencyApi = {
   // 创建房产信息
   createRealEstate: (data: {
     id: string;
@@ -12,15 +12,15 @@ export const realtyApi = {
   }) => request.post<never, void>('/realty-agency/realty/create', data),
 
   // 查询房产信息
-  getRealEstate: (id: string) => request.get<never, RealEstate>(`/query/realty/${id}`),
+  getRealEstate: (id: string) => request.get<never, RealEstate>(`/realty-agency/realty/${id}`),
 
   // 分页查询房产列表
-  getRealEstateList: (params: { pageSize: number; bookmark: string }) =>
-    request.get<never, RealEstatePageResult>('/query/realty/list', { params }),
+  getRealEstateList: (params: { pageSize: number; bookmark: string; status?: string }) =>
+    request.get<never, RealEstatePageResult>('/realty-agency/realty/list', { params }),
 };
 
-// 交易相关接口
-export const transactionApi = {
+// 交易平台接口
+export const tradingPlatformApi = {
   // 生成交易
   createTransaction: (data: {
     txId: string;
@@ -30,14 +30,31 @@ export const transactionApi = {
     price: number;
   }) => request.post<never, void>('/trading-platform/transaction/create', data),
 
+  // 查询房产信息
+  getRealEstate: (id: string) => request.get<never, RealEstate>(`/trading-platform/realty/${id}`),
+
+  // 分页查询房产列表
+  getRealEstateList: (params: { pageSize: number; bookmark: string; status?: string }) =>
+    request.get<never, RealEstatePageResult>('/trading-platform/realty/list', { params }),
+
+  // 查询交易信息
+  getTransaction: (txId: string) => request.get<never, Transaction>(`/trading-platform/transaction/${txId}`),
+
+  // 分页查询交易列表
+  getTransactionList: (params: { pageSize: number; bookmark: string; status?: string }) =>
+    request.get<never, TransactionPageResult>('/trading-platform/transaction/list', { params }),
+};
+
+// 银行接口
+export const bankApi = {
   // 完成交易
   completeTransaction: (txId: string) =>
     request.post<never, void>(`/bank/transaction/complete/${txId}`),
 
   // 查询交易信息
-  getTransaction: (txId: string) => request.get<never, Transaction>(`/query/transaction/${txId}`),
+  getTransaction: (txId: string) => request.get<never, Transaction>(`/bank/transaction/${txId}`),
 
   // 分页查询交易列表
-  getTransactionList: (params: { pageSize: number; bookmark: string }) =>
-    request.get<never, TransactionPageResult>('/query/transaction/list', { params }),
+  getTransactionList: (params: { pageSize: number; bookmark: string; status?: string }) =>
+    request.get<never, TransactionPageResult>('/bank/transaction/list', { params }),
 }; 

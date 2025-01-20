@@ -179,7 +179,7 @@
 <script setup lang="ts">
 import { message } from 'ant-design-vue';
 import { PlusOutlined, InfoCircleOutlined, CopyOutlined, ReloadOutlined, SearchOutlined } from '@ant-design/icons-vue';
-import { transactionApi, realtyApi } from '../api';
+import { tradingPlatformApi, realtyAgencyApi } from '../api';
 import type { FormInstance } from 'ant-design-vue';
 
 const formRef = ref<FormInstance>();
@@ -279,7 +279,7 @@ const bookmark = ref('');
 const loadTransactionList = async () => {
   try {
     loading.value = true;
-    const result = await transactionApi.getTransactionList({
+    const result = await tradingPlatformApi.getTransactionList({
       pageSize: 10,
       bookmark: bookmark.value,
       status: statusFilter.value,
@@ -339,7 +339,7 @@ const handleModalOk = () => {
         ...formState,
         txId: generateUUID(),
       };
-      await transactionApi.createTransaction(transactionData);
+      await tradingPlatformApi.createTransaction(transactionData);
       message.success('交易创建成功');
       showCreateModal.value = false;
       formRef.value?.resetFields();
@@ -384,7 +384,7 @@ const handleRealEstateIdChange = async (e: Event) => {
   }
 
   try {
-    const result = await realtyApi.getRealEstate(id);
+    const result = await tradingPlatformApi.getRealEstate(id);
     if (result.status !== 'NORMAL') {
       message.error('该房产不是正常状态，无法生成交易');
       formState.realEstateId = '';
@@ -424,7 +424,7 @@ const handleSearch = async (value: string) => {
   }
   
   try {
-    const result = await transactionApi.getTransaction(value);
+    const result = await tradingPlatformApi.getTransaction(value);
     transactionList.value = [result];
     bookmark.value = '';
   } catch (error: any) {
