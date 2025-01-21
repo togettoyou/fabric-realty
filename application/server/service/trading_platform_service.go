@@ -38,22 +38,6 @@ func (s *TradingPlatformService) QueryRealEstate(id string) (map[string]interfac
 	return realEstate, nil
 }
 
-// QueryRealEstateList 分页查询房产列表
-func (s *TradingPlatformService) QueryRealEstateList(pageSize int32, bookmark string, status string) (map[string]interface{}, error) {
-	contract := fabric.GetContract(TRADE_ORG)
-	result, err := contract.EvaluateTransaction("QueryRealEstateList", fmt.Sprintf("%d", pageSize), bookmark, status)
-	if err != nil {
-		return nil, fmt.Errorf("查询房产列表失败：%s", fabric.ExtractErrorMessage(err))
-	}
-
-	var queryResult map[string]interface{}
-	if err := json.Unmarshal(result, &queryResult); err != nil {
-		return nil, fmt.Errorf("解析查询结果失败：%v", err)
-	}
-
-	return queryResult, nil
-}
-
 // QueryTransaction 查询交易信息
 func (s *TradingPlatformService) QueryTransaction(txID string) (map[string]interface{}, error) {
 	contract := fabric.GetContract(TRADE_ORG)

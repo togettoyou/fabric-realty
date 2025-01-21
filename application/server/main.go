@@ -51,7 +51,6 @@ func main() {
 		trading.POST("/transaction/create", tradingPlatformHandler.CreateTransaction)
 		// 查询房产接口
 		trading.GET("/realty/:id", tradingPlatformHandler.QueryRealEstate)
-		trading.GET("/realty/list", tradingPlatformHandler.QueryRealEstateList)
 		// 查询交易接口
 		trading.GET("/transaction/:txId", tradingPlatformHandler.QueryTransaction)
 		trading.GET("/transaction/list", tradingPlatformHandler.QueryTransactionList)

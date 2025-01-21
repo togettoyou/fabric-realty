@@ -43,23 +43,36 @@ API 接口设计：
 
 ```
 /api/realty-agency
-  POST /realty/create         # 创建房产信息（使用不动产登记机构身份操作）
-
-/api/trading-platform
-  POST /transaction/create    # 生成交易（使用交易平台身份操作）
-
-/api/bank
-  POST /transaction/complete/:txId  # 完成交易（使用银行身份操作）
-
-/api/query
+  POST /realty/create         # 创建房产信息
   GET  /realty/:id           # 查询房产信息
   GET  /realty/list          # 分页查询房产列表
     - pageSize: 每页记录数
     - bookmark: 分页标记
     - status: 房产状态（可选，NORMAL-正常、IN_TRANSACTION-交易中）
+  GET  /block/list           # 分页查询区块列表
+    - pageSize: 每页记录数，默认10
+    - pageNum: 页码，默认1
+
+/api/trading-platform
+  POST /transaction/create    # 生成交易
+  GET  /realty/:id           # 查询房产信息
   GET  /transaction/:txId    # 查询交易信息
   GET  /transaction/list     # 分页查询交易列表
     - pageSize: 每页记录数
     - bookmark: 分页标记
     - status: 交易状态（可选，PENDING-待付款、COMPLETED-已完成）
+  GET  /block/list           # 分页查询区块列表
+    - pageSize: 每页记录数，默认10
+    - pageNum: 页码，默认1
+
+/api/bank
+  POST /transaction/complete/:txId  # 完成交易
+  GET  /transaction/:txId    # 查询交易信息
+  GET  /transaction/list     # 分页查询交易列表
+    - pageSize: 每页记录数
+    - bookmark: 分页标记
+    - status: 交易状态（可选，PENDING-待付款、COMPLETED-已完成）
+  GET  /block/list           # 分页查询区块列表
+    - pageSize: 每页记录数，默认10
+    - pageNum: 页码，默认1
 ```

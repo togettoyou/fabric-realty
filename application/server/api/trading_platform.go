@@ -54,21 +54,6 @@ func (h *TradingPlatformHandler) QueryRealEstate(c *gin.Context) {
 	utils.Success(c, realEstate)
 }
 
-// QueryRealEstateList 分页查询房产列表
-func (h *TradingPlatformHandler) QueryRealEstateList(c *gin.Context) {
-	pageSize, _ := strconv.Atoi(c.DefaultQuery("pageSize", "10"))
-	bookmark := c.DefaultQuery("bookmark", "")
-	status := c.DefaultQuery("status", "")
-
-	result, err := h.tradingService.QueryRealEstateList(int32(pageSize), bookmark, status)
-	if err != nil {
-		utils.ServerError(c, err.Error())
-		return
-	}
-
-	utils.Success(c, result)
-}
-
 // QueryTransaction 查询交易信息
 func (h *TradingPlatformHandler) QueryTransaction(c *gin.Context) {
 	txID := c.Param("txId")
