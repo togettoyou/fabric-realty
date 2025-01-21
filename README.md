@@ -43,13 +43,23 @@ http://localhost:8000
 
 ### 操作流程演示
 
+首页选择组织身份，进入到对应系统：
+
 ![1](https://github.com/user-attachments/assets/43e370d1-8dd0-4009-993f-b914eaece974)
+
+不动产登记机构操作界面：
 
 ![2](https://github.com/user-attachments/assets/7a561605-8f5a-40ef-a21b-f1917e0cd7f8)
 
+交易平台操作界面：
+
 ![3](https://github.com/user-attachments/assets/f88ac09c-6683-43a0-b51b-3982f2a07c9a)
 
+银行操作界面：
+
 ![4](https://github.com/user-attachments/assets/fe454da5-f537-4597-a2fe-19755fbef005)
+
+任何组织都可以查看区块信息：
 
 ![5](https://github.com/user-attachments/assets/e1468e15-81b7-46a7-801a-d0b10b03edfe)
 
