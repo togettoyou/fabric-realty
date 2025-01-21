@@ -118,6 +118,32 @@ func addNetwork(orgName string, network *client.Network) error {
 	return nil
 }
 
+// getLastBlockNum 获取最后保存的区块号
+func (l *blockEventListener) getLastBlockNum(orgName string) (uint64, bool) {
+	var lastBlock LatestBlock
+
+	err := l.db.View(func(tx *bolt.Tx) error {
+		b := tx.Bucket([]byte(_LatestBucket))
+		data := b.Get([]byte(orgName))
+		if data == nil {
+			return nil
+		}
+		return json.Unmarshal(data, &lastBlock)
+	})
+
+	if err != nil {
+		fmt.Printf("获取最后区块号失败：%v\n", err)
+		return 0, false
+	}
+
+	// 如果没有数据，返回false表示是首次启动
+	if lastBlock.BlockNum == 0 && lastBlock.SaveTime.IsZero() {
+		return 0, false
+	}
+
+	return lastBlock.BlockNum, true
+}
+
 // startBlockListener 启动区块监听
 func (l *blockEventListener) startBlockListener(orgName string) {
 	network := l.networks[orgName]
@@ -126,8 +152,15 @@ func (l *blockEventListener) startBlockListener(orgName string) {
 		return
 	}
 
-	lastBlockNum := l.getLastBlockNum(orgName)
-	startBlock := lastBlockNum + 1
+	lastBlockNum, exists := l.getLastBlockNum(orgName)
+	var startBlock uint64
+	if !exists {
+		// 首次启动，从0开始
+		startBlock = 0
+	} else {
+		// 已有数据，从下一个开始
+		startBlock = lastBlockNum + 1
+	}
 
 	events, err := network.BlockEvents(l.ctx, client.WithStartBlock(startBlock))
 	if err != nil {
@@ -143,27 +176,6 @@ func (l *blockEventListener) startBlockListener(orgName string) {
 			l.saveBlock(orgName, block)
 		}
 	}
-}
-
-// getLastBlockNum 获取最后保存的区块号
-func (l *blockEventListener) getLastBlockNum(orgName string) uint64 {
-	var lastBlock LatestBlock
-
-	err := l.db.View(func(tx *bolt.Tx) error {
-		b := tx.Bucket([]byte(_LatestBucket))
-		data := b.Get([]byte(orgName))
-		if data == nil {
-			return nil
-		}
-		return json.Unmarshal(data, &lastBlock)
-	})
-
-	if err != nil {
-		fmt.Printf("获取最后区块号失败：%v\n", err)
-		return 0
-	}
-
-	return lastBlock.BlockNum
 }
 
 // saveBlock 保存区块数据
