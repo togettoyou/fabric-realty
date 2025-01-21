@@ -64,12 +64,12 @@ clean_chaincode() {
 # 清理数据文件
 clean_files() {
     log_info "清理数据文件..."
-    mkdir -p config
-    mkdir -p crypto-config
-    mkdir -p data
-    rm -rf config/*
-    rm -rf crypto-config/*
-    rm -rf data/*
+    rm -rf config
+    rm -rf crypto-config
+    rm -rf data
+    mkdir config
+    mkdir crypto-config
+    mkdir data
     log_success "数据文件清理完成"
 }
 
