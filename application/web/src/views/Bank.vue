@@ -191,9 +191,8 @@
 
 <script setup lang="ts">
 import { message } from 'ant-design-vue';
-import { PlusOutlined, InfoCircleOutlined, ReloadOutlined, CopyOutlined, ApartmentOutlined } from '@ant-design/icons-vue';
+import { CopyOutlined, ApartmentOutlined } from '@ant-design/icons-vue';
 import { bankApi } from '../api';
-import type { FormInstance } from 'ant-design-vue';
 import { ref, reactive } from 'vue';
 import type { BlockData } from '../types';
 

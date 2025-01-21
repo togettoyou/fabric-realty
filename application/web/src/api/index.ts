@@ -1,5 +1,5 @@
 import request from '../utils/request';
-import type { RealEstatePageResult, TransactionPageResult, RealEstate, Transaction, BlockData, BlockQueryResult } from '../types';
+import type { RealEstatePageResult, TransactionPageResult, RealEstate, Transaction, BlockQueryResult } from '../types';
 
 // 不动产登记机构接口
 export const realtyAgencyApi = {
