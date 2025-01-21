@@ -125,8 +125,6 @@ handle_error() {
 
 # 健康检查函数
 check_prerequisites() {
-    local start_time=${1:-$(date +%s)}
-    show_progress 1 "检查环境依赖" $start_time
     local prerequisites=("docker" "docker-compose")
 
     for cmd in "${prerequisites[@]}"; do
@@ -244,7 +242,7 @@ main() {
 
     # 执行前置检查
     show_progress 1 "检查环境依赖" $start_time
-    execute_with_timer "检查环境依赖" "check_prerequisites"
+    execute_with_timer "检查前置条件" "check_prerequisites"
     execute_with_timer "检查Docker服务" "check_docker_service"
 
     # 确认执行
