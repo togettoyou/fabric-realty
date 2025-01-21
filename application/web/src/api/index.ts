@@ -33,10 +33,6 @@ export const tradingPlatformApi = {
   // 查询房产信息
   getRealEstate: (id: string) => request.get<never, RealEstate>(`/trading-platform/realty/${id}`),
 
-  // 分页查询房产列表
-  getRealEstateList: (params: { pageSize: number; bookmark: string; status?: string }) =>
-    request.get<never, RealEstatePageResult>('/trading-platform/realty/list', { params }),
-
   // 查询交易信息
   getTransaction: (txId: string) => request.get<never, Transaction>(`/trading-platform/transaction/${txId}`),
 
@@ -57,4 +53,4 @@ export const bankApi = {
   // 分页查询交易列表
   getTransactionList: (params: { pageSize: number; bookmark: string; status?: string }) =>
     request.get<never, TransactionPageResult>('/bank/transaction/list', { params }),
-}; 
+};
