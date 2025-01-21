@@ -1,24 +1,5 @@
 import request from '../utils/request';
-import type { RealEstatePageResult, TransactionPageResult, RealEstate, Transaction } from '../types';
-
-// 区块数据类型
-interface BlockData {
-  block_num: number;
-  block_hash: string;
-  data_hash: string;
-  prev_hash: string;
-  tx_count: number;
-  save_time: string;
-}
-
-// 区块查询结果类型
-interface BlockQueryResult {
-  blocks: BlockData[];
-  total: number;
-  page_size: number;
-  page_num: number;
-  has_more: boolean;
-}
+import type { RealEstatePageResult, TransactionPageResult, RealEstate, Transaction, BlockData, BlockQueryResult } from '../types';
 
 // 不动产登记机构接口
 export const realtyAgencyApi = {

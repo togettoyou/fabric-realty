@@ -5,6 +5,25 @@ export interface ApiResponse<T> {
   data: T;
 }
 
+// 区块数据类型
+export interface BlockData {
+  block_num: number;
+  block_hash: string;
+  data_hash: string;
+  prev_hash: string;
+  tx_count: number;
+  save_time: string;
+}
+
+// 区块查询结果类型
+export interface BlockQueryResult {
+  blocks: BlockData[];
+  total: number;
+  page_size: number;
+  page_num: number;
+  has_more: boolean;
+}
+
 // 分页查询结果
 export interface PageResult<T> {
   bookmark: string;

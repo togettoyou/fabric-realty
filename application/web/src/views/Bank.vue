@@ -177,7 +177,7 @@ import { PlusOutlined, InfoCircleOutlined, ReloadOutlined, CopyOutlined, Apartme
 import { bankApi } from '../api';
 import type { FormInstance } from 'ant-design-vue';
 import { ref, reactive } from 'vue';
-import type { BlockData } from '../api';
+import type { BlockData } from '../types';
 
 const transactionList = ref<any[]>([]);
 const loading = ref(false);
