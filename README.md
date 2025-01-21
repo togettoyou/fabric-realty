@@ -4,6 +4,37 @@
 
 系统采用联盟链技术，由不动产登记机构、交易平台和银行三个组织共同维护。
 
+## 快速部署
+
+### 环境要求
+
+- Docker
+- Docker Compose
+
+### 部署步骤
+
+1. 拉取项目并设置权限
+
+   ```bash
+   git clone --depth 1 https://github.com/togettoyou/fabric-realty.git && cd fabric-realty && find . -name "*.sh" -exec chmod +x {} \;
+   ```
+
+2. 一键部署
+
+   ```bash
+   ./install.sh
+   ```
+
+3. 一键卸载
+
+   ```bash
+   ./uninstall.sh
+   ```
+
+### 访问服务
+
+http://localhost:8000
+
 ## 系统架构
 
 ### 网络架构（Network）
