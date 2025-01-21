@@ -1,0 +1,28 @@
+version: '2.1'
+
+networks:
+  fabric_togettoyou_network:
+    name: fabric_togettoyou_network
+    external: true
+
+services:
+  # 后端
+  fabric-realty.server:
+    image: togettoyou/fabric-realty.server:latest
+    container_name: fabric-realty.server
+    ports:
+      - "8888:8888"
+    volumes:
+      - /usr/share/zoneinfo/Asia/Shanghai:/usr/share/zoneinfo/Asia/Shanghai
+      - ./../network/crypto-config:/network/crypto-config
+      - ./../network/data/application:/app/data
+    networks:
+      - fabric_togettoyou_network
+  # 前端
+  fabric-realty.web:
+    image: togettoyou/fabric-realty.web:latest
+    container_name: fabric-realty.web
+    ports:
+      - "8000:80"
+    networks:
+      - fabric_togettoyou_network
