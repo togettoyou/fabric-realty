@@ -214,17 +214,35 @@
                 <a-tooltip :title="block.block_hash">
                   <span class="field-value hash">{{ block.block_hash }}</span>
                 </a-tooltip>
+                <a-tooltip title="点击复制">
+                  <copy-outlined
+                    class="copy-icon"
+                    @click="handleCopy(block.block_hash)"
+                  />
+                </a-tooltip>
               </div>
               <div class="block-field">
                 <span class="field-label">数据哈希：</span>
                 <a-tooltip :title="block.data_hash">
                   <span class="field-value hash">{{ block.data_hash }}</span>
                 </a-tooltip>
+                <a-tooltip title="点击复制">
+                  <copy-outlined
+                    class="copy-icon"
+                    @click="handleCopy(block.data_hash)"
+                  />
+                </a-tooltip>
               </div>
               <div class="block-field">
                 <span class="field-label">前块哈希：</span>
                 <a-tooltip :title="block.prev_hash">
                   <span class="field-value hash">{{ block.prev_hash }}</span>
+                </a-tooltip>
+                <a-tooltip title="点击复制">
+                  <copy-outlined
+                    class="copy-icon"
+                    @click="handleCopy(block.prev_hash)"
+                  />
                 </a-tooltip>
               </div>
               <div class="block-field">
@@ -730,6 +748,7 @@ const handleBlockPageChange = async (page: number, pageSize: number) => {
 .field-value {
   color: rgba(0, 0, 0, 0.85);
   font-size: 14px;
+  flex: 1;
 }
 
 .field-value.hash {
@@ -748,6 +767,20 @@ const handleBlockPageChange = async (page: number, pageSize: number) => {
 .field-value.hash:hover {
   background: #e6f7ff;
   color: #1890ff;
+}
+
+.block-field .copy-icon {
+  color: #1890ff;
+  font-size: 16px;
+  cursor: pointer;
+  margin-left: 8px;
+  transition: all 0.3s;
+  opacity: 0.7;
+}
+
+.block-field .copy-icon:hover {
+  color: #40a9ff;
+  opacity: 1;
 }
 
 :deep(.ant-drawer-header) {
