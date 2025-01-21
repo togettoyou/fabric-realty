@@ -25,7 +25,9 @@ var (
 // InitFabric 初始化 Fabric 客户端
 func InitFabric() error {
 	// 初始化区块监听器
-	InitBlockListener(filepath.Join("data", "blocks"))
+	if err := InitBlockListener(filepath.Join("data", "blocks")); err != nil {
+		return fmt.Errorf("初始化区块监听器失败: %w", err)
+	}
 
 	// 为每个组织创建合约客户端
 	for orgName, orgConfig := range config.GlobalConfig.Fabric.Organizations {

@@ -54,11 +54,12 @@ var (
 )
 
 // InitBlockListener 初始化区块监听器
-func InitBlockListener(dataDir string) {
+func InitBlockListener(dataDir string) error {
+	var initErr error
 	listenerOnce.Do(func() {
 		// 创建数据目录
 		if err := os.MkdirAll(dataDir, 0755); err != nil {
-			fmt.Printf("创建数据目录失败：%v\n", err)
+			initErr = fmt.Errorf("创建数据目录失败：%w", err)
 			return
 		}
 
@@ -66,22 +67,22 @@ func InitBlockListener(dataDir string) {
 		dbPath := filepath.Join(dataDir, "blocks.db")
 		db, err := bolt.Open(dbPath, 0600, &bolt.Options{Timeout: 10 * time.Second})
 		if err != nil {
-			fmt.Printf("打开数据库失败：%v\n", err)
+			initErr = fmt.Errorf("打开数据库失败：%w", err)
 			return
 		}
 
 		// 创建Buckets
 		if err := db.Update(func(tx *bolt.Tx) error {
 			if _, err := tx.CreateBucketIfNotExists([]byte(BlocksBucket)); err != nil {
-				return fmt.Errorf("创建blocks bucket失败: %v", err)
+				return fmt.Errorf("创建blocks bucket失败: %w", err)
 			}
 			if _, err := tx.CreateBucketIfNotExists([]byte(LatestBucket)); err != nil {
-				return fmt.Errorf("创建latest_blocks bucket失败: %v", err)
+				return fmt.Errorf("创建latest_blocks bucket失败: %w", err)
 			}
 			return nil
 		}); err != nil {
-			fmt.Printf("初始化数据库失败：%v\n", err)
 			db.Close()
+			initErr = fmt.Errorf("初始化数据库失败：%w", err)
 			return
 		}
 
@@ -94,6 +95,8 @@ func InitBlockListener(dataDir string) {
 			db:       db,
 		}
 	})
+
+	return initErr
 }
 
 // AddNetwork 添加网络
