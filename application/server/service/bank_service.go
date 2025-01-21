@@ -53,3 +53,12 @@ func (s *BankService) QueryTransactionList(pageSize int32, bookmark string, stat
 
 	return queryResult, nil
 }
+
+// QueryBlockList 分页查询区块列表
+func (s *BankService) QueryBlockList(pageSize int, pageNum int) (*fabric.BlockQueryResult, error) {
+	result, err := fabric.GetBlockListener().GetBlocksByOrg(BANK_ORG, pageSize, pageNum)
+	if err != nil {
+		return nil, fmt.Errorf("查询区块列表失败：%v", err)
+	}
+	return result, nil
+}

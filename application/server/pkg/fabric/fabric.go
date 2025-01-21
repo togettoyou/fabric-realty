@@ -25,7 +25,7 @@ var (
 // InitFabric 初始化 Fabric 客户端
 func InitFabric() error {
 	// 初始化区块监听器
-	if err := InitBlockListener(filepath.Join("data", "blocks")); err != nil {
+	if err := initBlockListener(filepath.Join("data", "blocks")); err != nil {
 		return fmt.Errorf("初始化区块监听器失败: %w", err)
 	}
 
@@ -68,7 +68,7 @@ func InitFabric() error {
 		contracts[orgName] = network.GetContract(config.GlobalConfig.Fabric.ChaincodeName)
 
 		// 添加网络到区块监听器
-		if err := AddNetwork(orgName, network); err != nil {
+		if err := addNetwork(orgName, network); err != nil {
 			return fmt.Errorf("添加网络到区块监听器失败：%v", err)
 		}
 	}

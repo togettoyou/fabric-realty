@@ -95,3 +95,17 @@ func (h *TradingPlatformHandler) QueryTransactionList(c *gin.Context) {
 
 	utils.Success(c, result)
 }
+
+// QueryBlockList 分页查询区块列表
+func (h *TradingPlatformHandler) QueryBlockList(c *gin.Context) {
+	pageSize, _ := strconv.Atoi(c.DefaultQuery("pageSize", "10"))
+	pageNum, _ := strconv.Atoi(c.DefaultQuery("pageNum", "1"))
+
+	result, err := h.tradingService.QueryBlockList(pageSize, pageNum)
+	if err != nil {
+		utils.ServerError(c, err.Error())
+		return
+	}
+
+	utils.Success(c, result)
+}

@@ -85,3 +85,12 @@ func (s *TradingPlatformService) QueryTransactionList(pageSize int32, bookmark s
 
 	return queryResult, nil
 }
+
+// QueryBlockList 分页查询区块列表
+func (s *TradingPlatformService) QueryBlockList(pageSize int, pageNum int) (*fabric.BlockQueryResult, error) {
+	result, err := fabric.GetBlockListener().GetBlocksByOrg(TRADE_ORG, pageSize, pageNum)
+	if err != nil {
+		return nil, fmt.Errorf("查询区块列表失败：%v", err)
+	}
+	return result, nil
+}

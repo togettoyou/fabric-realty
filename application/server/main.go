@@ -40,6 +40,8 @@ func main() {
 		// 查询房产接口
 		realty.GET("/realty/:id", realtyAgencyHandler.QueryRealEstate)
 		realty.GET("/realty/list", realtyAgencyHandler.QueryRealEstateList)
+		// 查询区块接口
+		realty.GET("/block/list", realtyAgencyHandler.QueryBlockList)
 	}
 
 	// 交易平台的接口
@@ -53,6 +55,8 @@ func main() {
 		// 查询交易接口
 		trading.GET("/transaction/:txId", tradingPlatformHandler.QueryTransaction)
 		trading.GET("/transaction/list", tradingPlatformHandler.QueryTransactionList)
+		// 查询区块接口
+		trading.GET("/block/list", tradingPlatformHandler.QueryBlockList)
 	}
 
 	// 银行的接口
@@ -63,6 +67,8 @@ func main() {
 		// 查询交易接口
 		bank.GET("/transaction/:txId", bankHandler.QueryTransaction)
 		bank.GET("/transaction/list", bankHandler.QueryTransactionList)
+		// 查询区块接口
+		bank.GET("/block/list", bankHandler.QueryBlockList)
 	}
 
 	// 启动服务器

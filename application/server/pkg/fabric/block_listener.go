@@ -18,8 +18,8 @@ import (
 )
 
 const (
-	BlocksBucket = "blocks"        // 存储区块数据
-	LatestBucket = "latest_blocks" // 存储最新区块信息
+	_BlocksBucket = "blocks"        // 存储区块数据
+	_LatestBucket = "latest_blocks" // 存储最新区块信息
 )
 
 // BlockData 区块数据结构
@@ -38,8 +38,8 @@ type LatestBlock struct {
 	SaveTime time.Time `json:"save_time"`
 }
 
-// BlockEventListener 区块事件监听器
-type BlockEventListener struct {
+// blockEventListener 区块事件监听器
+type blockEventListener struct {
 	sync.RWMutex
 	networks map[string]*client.Network
 	ctx      context.Context
@@ -49,12 +49,16 @@ type BlockEventListener struct {
 }
 
 var (
-	listener     *BlockEventListener
+	listener     *blockEventListener
 	listenerOnce sync.Once
 )
 
-// InitBlockListener 初始化区块监听器
-func InitBlockListener(dataDir string) error {
+// GetBlockListener 获取区块监听器实例
+func GetBlockListener() *blockEventListener {
+	return listener
+}
+
+func initBlockListener(dataDir string) error {
 	var initErr error
 	listenerOnce.Do(func() {
 		// 创建数据目录
@@ -73,10 +77,10 @@ func InitBlockListener(dataDir string) error {
 
 		// 创建Buckets
 		if err := db.Update(func(tx *bolt.Tx) error {
-			if _, err := tx.CreateBucketIfNotExists([]byte(BlocksBucket)); err != nil {
+			if _, err := tx.CreateBucketIfNotExists([]byte(_BlocksBucket)); err != nil {
 				return fmt.Errorf("创建blocks bucket失败: %w", err)
 			}
-			if _, err := tx.CreateBucketIfNotExists([]byte(LatestBucket)); err != nil {
+			if _, err := tx.CreateBucketIfNotExists([]byte(_LatestBucket)); err != nil {
 				return fmt.Errorf("创建latest_blocks bucket失败: %w", err)
 			}
 			return nil
@@ -87,7 +91,7 @@ func InitBlockListener(dataDir string) error {
 		}
 
 		ctx, cancel := context.WithCancel(context.Background())
-		listener = &BlockEventListener{
+		listener = &blockEventListener{
 			networks: make(map[string]*client.Network),
 			ctx:      ctx,
 			cancel:   cancel,
@@ -99,8 +103,8 @@ func InitBlockListener(dataDir string) error {
 	return initErr
 }
 
-// AddNetwork 添加网络
-func AddNetwork(orgName string, network *client.Network) error {
+// addNetwork 添加网络
+func addNetwork(orgName string, network *client.Network) error {
 	if listener == nil {
 		return fmt.Errorf("区块监听器未初始化")
 	}
@@ -115,7 +119,7 @@ func AddNetwork(orgName string, network *client.Network) error {
 }
 
 // startBlockListener 启动区块监听
-func (l *BlockEventListener) startBlockListener(orgName string) {
+func (l *blockEventListener) startBlockListener(orgName string) {
 	network := l.networks[orgName]
 	if network == nil {
 		fmt.Printf("组织[%s]的网络未找到\n", orgName)
@@ -142,11 +146,11 @@ func (l *BlockEventListener) startBlockListener(orgName string) {
 }
 
 // getLastBlockNum 获取最后保存的区块号
-func (l *BlockEventListener) getLastBlockNum(orgName string) uint64 {
+func (l *blockEventListener) getLastBlockNum(orgName string) uint64 {
 	var lastBlock LatestBlock
 
 	err := l.db.View(func(tx *bolt.Tx) error {
-		b := tx.Bucket([]byte(LatestBucket))
+		b := tx.Bucket([]byte(_LatestBucket))
 		data := b.Get([]byte(orgName))
 		if data == nil {
 			return nil
@@ -163,7 +167,7 @@ func (l *BlockEventListener) getLastBlockNum(orgName string) uint64 {
 }
 
 // saveBlock 保存区块数据
-func (l *BlockEventListener) saveBlock(orgName string, block *common.Block) {
+func (l *blockEventListener) saveBlock(orgName string, block *common.Block) {
 	blockNum := block.GetHeader().GetNumber()
 
 	// 计算区块哈希
@@ -196,18 +200,18 @@ func (l *BlockEventListener) saveBlock(orgName string, block *common.Block) {
 	// 使用事务保存数据
 	err = l.db.Update(func(tx *bolt.Tx) error {
 		// 保存区块数据
-		blocksBucket := tx.Bucket([]byte(BlocksBucket))
+		_BlocksBucket := tx.Bucket([]byte(_BlocksBucket))
 		blockKey := fmt.Sprintf("%s_%d", orgName, blockNum)
 		blockJSON, err := json.Marshal(blockData)
 		if err != nil {
 			return fmt.Errorf("序列化区块数据失败：%v", err)
 		}
-		if err := blocksBucket.Put([]byte(blockKey), blockJSON); err != nil {
+		if err := _BlocksBucket.Put([]byte(blockKey), blockJSON); err != nil {
 			return fmt.Errorf("保存区块数据失败：%v", err)
 		}
 
 		// 更新最新区块信息
-		latestBucket := tx.Bucket([]byte(LatestBucket))
+		_LatestBucket := tx.Bucket([]byte(_LatestBucket))
 		latestBlock := LatestBlock{
 			BlockNum: blockNum,
 			SaveTime: time.Now(),
@@ -216,7 +220,7 @@ func (l *BlockEventListener) saveBlock(orgName string, block *common.Block) {
 		if err != nil {
 			return fmt.Errorf("序列化最新区块信息失败：%v", err)
 		}
-		if err := latestBucket.Put([]byte(orgName), latestJSON); err != nil {
+		if err := _LatestBucket.Put([]byte(orgName), latestJSON); err != nil {
 			return fmt.Errorf("保存最新区块信息失败：%v", err)
 		}
 
@@ -232,7 +236,7 @@ func (l *BlockEventListener) saveBlock(orgName string, block *common.Block) {
 }
 
 // Close 关闭监听器
-func (l *BlockEventListener) Close() error {
+func (l *blockEventListener) Close() error {
 	if l.cancel != nil {
 		l.cancel()
 	}
@@ -243,11 +247,11 @@ func (l *BlockEventListener) Close() error {
 }
 
 // GetBlockByNumber 根据组织名和区块号查询区块
-func (l *BlockEventListener) GetBlockByNumber(orgName string, blockNum uint64) (*BlockData, error) {
+func (l *blockEventListener) GetBlockByNumber(orgName string, blockNum uint64) (*BlockData, error) {
 	var blockData BlockData
 
 	err := l.db.View(func(tx *bolt.Tx) error {
-		b := tx.Bucket([]byte(BlocksBucket))
+		b := tx.Bucket([]byte(_BlocksBucket))
 		if b == nil {
 			return fmt.Errorf("blocks bucket不存在")
 		}
@@ -278,7 +282,7 @@ type BlockQueryResult struct {
 }
 
 // GetBlocksByOrg 分页查询组织的区块列表（按区块号降序）
-func (l *BlockEventListener) GetBlocksByOrg(orgName string, pageSize, pageNum int) (*BlockQueryResult, error) {
+func (l *blockEventListener) GetBlocksByOrg(orgName string, pageSize, pageNum int) (*BlockQueryResult, error) {
 	if pageSize <= 0 {
 		pageSize = 10
 	}
@@ -291,19 +295,19 @@ func (l *BlockEventListener) GetBlocksByOrg(orgName string, pageSize, pageNum in
 	result.PageNum = pageNum
 
 	err := l.db.View(func(tx *bolt.Tx) error {
-		b := tx.Bucket([]byte(BlocksBucket))
+		b := tx.Bucket([]byte(_BlocksBucket))
 		if b == nil {
 			return fmt.Errorf("blocks bucket不存在")
 		}
 
 		// 获取组织的最新区块号
-		latestBucket := tx.Bucket([]byte(LatestBucket))
-		if latestBucket == nil {
+		_LatestBucket := tx.Bucket([]byte(_LatestBucket))
+		if _LatestBucket == nil {
 			return fmt.Errorf("latest_blocks bucket不存在")
 		}
 
 		var latestBlock LatestBlock
-		latestData := latestBucket.Get([]byte(orgName))
+		latestData := _LatestBucket.Get([]byte(orgName))
 		if latestData == nil {
 			return fmt.Errorf("组织数据不存在")
 		}
