@@ -40,7 +40,36 @@ log_info "检查必要的依赖..."
 check_command docker
 check_command docker-compose
 
-# 显示欢迎信息
+# 拉取国内镜像
+log_info "开始拉取必要的 Docker 镜像..."
+
+# 定义镜像数组
+declare -A images=(
+    ["hyperledger/fabric-orderer:2.5.10"]="registry.cn-hangzhou.aliyuncs.com/hubmirrorbytogettoyou/hyperledger.fabric-orderer:2.5.10"
+    ["hyperledger/fabric-peer:2.5.10"]="registry.cn-hangzhou.aliyuncs.com/hubmirrorbytogettoyou/hyperledger.fabric-peer:2.5.10"
+    ["hyperledger/fabric-baseos:2.5"]="registry.cn-hangzhou.aliyuncs.com/hubmirrorbytogettoyou/hyperledger.fabric-baseos:2.5"
+    ["hyperledger/fabric-tools:2.5.10"]="registry.cn-hangzhou.aliyuncs.com/hubmirrorbytogettoyou/hyperledger.fabric-tools:2.5.10"
+    ["hyperledger/fabric-ccenv:2.5"]="registry.cn-hangzhou.aliyuncs.com/hubmirrorbytogettoyou/hyperledger.fabric-ccenv:2.5"
+    ["togettoyou/fabric-realty.server:latest"]="registry.cn-hangzhou.aliyuncs.com/hubmirrorbytogettoyou/togettoyou.fabric-realty.server:latest"
+    ["togettoyou/fabric-realty.web:latest"]="registry.cn-hangzhou.aliyuncs.com/hubmirrorbytogettoyou/togettoyou.fabric-realty.web:latest"
+)
+
+# 拉取并重命名镜像
+for target in "${!images[@]}"; do
+    mirror="${images[$target]}"
+    log_info "拉取镜像: $mirror"
+    if ! docker pull "$mirror"; then
+        log_error "拉取镜像失败: $mirror"
+        exit 1
+    fi
+    log_info "重命名镜像: $mirror -> $target"
+    if ! docker tag "$mirror" "$target"; then
+        log_error "重命名镜像失败: $target"
+        exit 1
+    fi
+    log_success "镜像 $target 准备完成"
+done
+
 echo -e "\n${GREEN}================================${NC}"
 echo -e "${GREEN}   Fabric-Realty 一键安装脚本${NC}"
 echo -e "${GREEN}================================${NC}\n"

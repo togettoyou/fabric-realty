@@ -27,7 +27,6 @@ log_error() {
     echo -e "${RED}[ERROR]${NC} $1"
 }
 
-# 显示欢迎信息
 echo -e "\n${RED}================================${NC}"
 echo -e "${RED}   Fabric-Realty 一键卸载脚本${NC}"
 echo -e "${RED}================================${NC}\n"
@@ -58,7 +57,7 @@ if [ -d "network" ]; then
         log_error "network/uninstall.sh 文件不存在！"
         exit 1
     fi
-    
+
     log_info "执行 network/uninstall.sh..."
     ./uninstall.sh
     if [ $? -ne 0 ]; then
@@ -73,4 +72,4 @@ echo -e "${GREEN}   卸载完成！   ${NC}"
 echo -e "${GREEN}================================${NC}\n"
 
 log_success "所有组件已成功清理"
-log_info "如果您想重新安装，请运行 ./install.sh" 
+log_info "如果您想重新安装，请运行 ./install.sh"
