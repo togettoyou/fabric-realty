@@ -100,6 +100,13 @@
       </a-card>
     </div>
 
+    <div
+      class="block-icon"
+      @click="openBlockDrawer"
+    >
+      <ApartmentOutlined />
+    </div>
+
     <!-- 创建房产的对话框 -->
     <a-modal
       v-model:visible="showCreateModal"
@@ -170,14 +177,76 @@
         </div>
       </a-form>
     </a-modal>
+
+    <!-- 区块信息抽屉 -->
+    <a-drawer
+      v-model:visible="blockDrawer"
+      title="区块信息"
+      placement="right"
+      :width="960"
+      :closable="true"
+    >
+      <div class="block-container">
+        <div class="block-header">
+          <h3>区块列表</h3>
+          <a-pagination
+            v-model:current="blockQuery.pageNum"
+            v-model:pageSize="blockQuery.pageSize"
+            :total="blockTotal"
+            :show-total="total => `共 ${total} 条`"
+            :page-size-options="['5', '10', '20', '50']"
+            show-size-changer
+            @change="handleBlockPageChange"
+          />
+        </div>
+
+        <div class="block-list">
+          <a-card v-for="block in blockList" :key="block.block_num" class="block-item">
+            <template #title>
+              <div class="block-item-header">
+                <span class="block-number">区块 #{{ block.block_num }}</span>
+                <span class="block-time">{{ new Date(block.save_time).toLocaleString() }}</span>
+              </div>
+            </template>
+            <div class="block-item-content">
+              <div class="block-field">
+                <span class="field-label">区块哈希：</span>
+                <a-tooltip :title="block.block_hash">
+                  <span class="field-value hash">{{ block.block_hash }}</span>
+                </a-tooltip>
+              </div>
+              <div class="block-field">
+                <span class="field-label">数据哈希：</span>
+                <a-tooltip :title="block.data_hash">
+                  <span class="field-value hash">{{ block.data_hash }}</span>
+                </a-tooltip>
+              </div>
+              <div class="block-field">
+                <span class="field-label">前块哈希：</span>
+                <a-tooltip :title="block.prev_hash">
+                  <span class="field-value hash">{{ block.prev_hash }}</span>
+                </a-tooltip>
+              </div>
+              <div class="block-field">
+                <span class="field-label">交易数量：</span>
+                <span class="field-value">{{ block.tx_count }}</span>
+              </div>
+            </div>
+          </a-card>
+        </div>
+      </div>
+    </a-drawer>
+
   </div>
 </template>
 
 <script setup lang="ts">
 import { message } from 'ant-design-vue';
-import { PlusOutlined, InfoCircleOutlined, ReloadOutlined, CopyOutlined } from '@ant-design/icons-vue';
+import { PlusOutlined, InfoCircleOutlined, ReloadOutlined, CopyOutlined, ApartmentOutlined } from '@ant-design/icons-vue';
 import { realtyAgencyApi } from '../api';
 import type { FormInstance } from 'ant-design-vue';
+import { ref, reactive } from 'vue';
+import type { BlockData } from '../api';
 
 const formRef = ref<FormInstance>();
 const showCreateModal = ref(false);
@@ -422,6 +491,43 @@ const handleSearchChange = (e: Event) => {
 onMounted(() => {
   loadRealEstateList();
 });
+
+// 区块查询相关
+const blockDrawer = ref(false);
+const blockList = ref<BlockData[]>([]);
+const blockTotal = ref(0);
+const blockQuery = reactive({
+  pageSize: 10,
+  pageNum: 1,
+});
+
+// 打开区块抽屉
+const openBlockDrawer = async () => {
+  blockDrawer.value = true;
+  await fetchBlockList();
+};
+
+// 获取区块列表
+const fetchBlockList = async () => {
+  try {
+    const res = await realtyAgencyApi.getBlockList({
+      pageSize: blockQuery.pageSize,
+      pageNum: blockQuery.pageNum,
+    });
+    blockList.value = res.blocks;
+    blockTotal.value = res.total;
+  } catch (error) {
+    console.error('获取区块列表失败：', error);
+  }
+};
+
+// 处理分页变化
+const handleBlockPageChange = async (page: number, pageSize: number) => {
+  blockQuery.pageNum = page;
+  blockQuery.pageSize = pageSize;
+  await fetchBlockList();
+};
+
 </script>
 
 <style scoped>
@@ -523,5 +629,148 @@ onMounted(() => {
   display: flex;
   align-items: center;
   gap: 16px;
+}
+
+.block-icon {
+  position: fixed;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 24px;
+  height: 48px;
+  background: #1890ff;
+  color: #fff;
+  border-radius: 4px 0 0 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: -2px 0 8px rgba(0,0,0,0.15);
+  transition: all 0.3s;
+}
+
+.block-icon:hover {
+  background: #40a9ff;
+  width: 32px;
+}
+
+/* 区块列表样式 */
+.block-container {
+  padding: 0 24px;
+}
+
+.block-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.block-header h3 {
+  margin: 0;
+  color: rgba(0, 0, 0, 0.85);
+  font-weight: 500;
+}
+
+.block-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.block-item {
+  border: 1px solid #f0f0f0;
+  border-radius: 8px;
+  transition: all 0.3s;
+}
+
+.block-item:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border-color: #e6f7ff;
+}
+
+.block-item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.block-number {
+  font-size: 16px;
+  font-weight: 500;
+  color: #1890ff;
+}
+
+.block-time {
+  color: rgba(0, 0, 0, 0.45);
+  font-size: 14px;
+}
+
+.block-item-content {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.block-field {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.field-label {
+  min-width: 80px;
+  color: rgba(0, 0, 0, 0.65);
+  font-size: 14px;
+}
+
+.field-value {
+  color: rgba(0, 0, 0, 0.85);
+  font-size: 14px;
+}
+
+.field-value.hash {
+  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace;
+  background: #f5f5f5;
+  padding: 4px 8px;
+  border-radius: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 360px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.field-value.hash:hover {
+  background: #e6f7ff;
+  color: #1890ff;
+}
+
+:deep(.ant-drawer-header) {
+  padding: 16px 24px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+:deep(.ant-drawer-title) {
+  font-size: 16px;
+  font-weight: 500;
+}
+
+:deep(.ant-drawer-body) {
+  padding: 24px 0;
+}
+
+:deep(.ant-card-head) {
+  min-height: auto;
+  padding: 12px 16px;
+  border-bottom: none;
+}
+
+:deep(.ant-card-body) {
+  padding: 0 16px 16px;
 }
 </style>
