@@ -10,8 +10,6 @@ services:
   fabric-realty.server:
     image: togettoyou/fabric-realty.server:latest
     container_name: fabric-realty.server
-    ports:
-      - "8888:8888"
     volumes:
       - /usr/share/zoneinfo/Asia/Shanghai:/usr/share/zoneinfo/Asia/Shanghai
       - ./../network/crypto-config:/network/crypto-config
