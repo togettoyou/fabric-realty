@@ -45,7 +45,7 @@ http://localhost:8000
 
 系统包含三个组织身份，每个组织都有独立的操作界面和权限
 
-![1](https://github.com/user-attachments/assets/43e370d1-8dd0-4009-993f-b914eaece974)
+<img width="1337" alt="1" src="https://github.com/user-attachments/assets/982bffa4-0280-4161-bbef-bcbfe90b97ac" />
 
 #### 业务操作流程
 
@@ -54,14 +54,14 @@ http://localhost:8000
     - 点击"登记新房产"，填写房产信息
     - 提交后，房产信息将上链保存
 
-![2](https://github.com/user-attachments/assets/7a561605-8f5a-40ef-a21b-f1917e0cd7f8)
+<img width="1337" alt="2" src="https://github.com/user-attachments/assets/ce7818b4-5231-4843-a722-d8401bbdafcd" />
 
 2. 发起房产交易
     - 交易平台登录系统
     - 点击"生成新交易"，填写交易信息
     - 提交后，交易信息将上链保存
 
-![3](https://github.com/user-attachments/assets/f88ac09c-6683-43a0-b51b-3982f2a07c9a)
+<img width="1337" alt="3" src="https://github.com/user-attachments/assets/7a6ae362-e5b1-407d-a34d-8ed2aa2b9c58" />
 
 3. 银行确认交易
     - 银行登录系统
@@ -69,13 +69,13 @@ http://localhost:8000
     - 点击"完成交易"，完成交易
     - 交易完成后，房产所有权将自动变更
 
-![4](https://github.com/user-attachments/assets/fe454da5-f537-4597-a2fe-19755fbef005)
+<img width="1337" alt="4" src="https://github.com/user-attachments/assets/fd07a5ef-fb6e-453a-adf2-fffba580e72b" />
 
 4. 区块链浏览
     - 所有组织都可以查看区块信息
     - 确保信息公开透明且不可篡改
 
-![5](https://github.com/user-attachments/assets/e1468e15-81b7-46a7-801a-d0b10b03edfe)
+<img width="1337" alt="5" src="https://github.com/user-attachments/assets/61dd8966-a84d-440d-ab56-dc3482402c83" />
 
 > 💡 系统特点：
 > - 基于区块链的分布式账本，确保数据不可篡改
