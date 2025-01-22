@@ -20,6 +20,8 @@ import (
 const (
 	_BlocksBucket = "blocks"        // 存储区块数据
 	_LatestBucket = "latest_blocks" // 存储最新区块信息
+
+	_RetryInterval = 30 * time.Second // 重试间隔时间
 )
 
 // BlockData 区块数据结构
@@ -146,40 +148,66 @@ func (l *blockEventListener) getLastBlockNum(orgName string) (uint64, bool) {
 
 // startBlockListener 启动区块监听
 func (l *blockEventListener) startBlockListener(orgName string) {
+	retryCount := 0
 	network := l.networks[orgName]
 	if network == nil {
 		fmt.Printf("组织[%s]的网络未找到\n", orgName)
 		return
 	}
-
-	lastBlockNum, exists := l.getLastBlockNum(orgName)
-	var startBlock uint64
-	if !exists {
-		// 首次启动，从0开始
-		startBlock = 0
-	} else {
-		// 已有数据，从下一个开始
-		startBlock = lastBlockNum + 1
-	}
-
-	events, err := network.BlockEvents(l.ctx, client.WithStartBlock(startBlock))
-	if err != nil {
-		fmt.Printf("创建区块事件请求失败：%v\n", err)
-		return
-	}
-
 	for {
-		select {
-		case <-l.ctx.Done():
-			return
-		case block := <-events:
-			l.saveBlock(orgName, block)
+		lastBlockNum, exists := l.getLastBlockNum(orgName)
+		var startBlock uint64
+		if !exists {
+			// 首次启动，从0开始
+			startBlock = 0
+		} else {
+			// 已有数据，从下一个开始
+			startBlock = lastBlockNum + 1
 		}
+
+		events, err := network.BlockEvents(l.ctx, client.WithStartBlock(startBlock))
+		if err != nil {
+			retryCount++
+			fmt.Printf("创建区块事件请求失败（已重试%d次）：%v\n", retryCount, err)
+			select {
+			case <-l.ctx.Done():
+				return
+			case <-time.After(_RetryInterval):
+				continue
+			}
+		}
+
+		for {
+			select {
+			case <-l.ctx.Done():
+				return
+			case block, ok := <-events:
+				if !ok {
+					retryCount++
+					fmt.Printf("组织[%s]的区块事件监听中断（已重试%d次），准备重试...\n", orgName, retryCount)
+					select {
+					case <-l.ctx.Done():
+						return
+					case <-time.After(_RetryInterval):
+						break
+					}
+					goto RETRY
+				}
+				l.saveBlock(orgName, block)
+			}
+		}
+
+	RETRY:
+		continue
 	}
 }
 
 // saveBlock 保存区块数据
 func (l *blockEventListener) saveBlock(orgName string, block *common.Block) {
+	if block == nil {
+		return
+	}
+
 	blockNum := block.GetHeader().GetNumber()
 
 	// 计算区块哈希
