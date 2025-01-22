@@ -195,6 +195,7 @@ import { CopyOutlined, ApartmentOutlined } from '@ant-design/icons-vue';
 import { bankApi } from '../api';
 import { ref, reactive } from 'vue';
 import type { BlockData } from '../types';
+import { copyToClipboard, getStatusText, getStatusColor, formatPrice } from '../utils';
 
 const transactionList = ref<any[]>([]);
 const loading = ref(false);
@@ -235,28 +236,6 @@ const loadMore = () => {
   loadTransactionList();
 };
 
-const getStatusColor = (status: string) => {
-  switch (status) {
-    case 'PENDING':
-      return 'blue';
-    case 'COMPLETED':
-      return 'green';
-    default:
-      return 'default';
-  }
-};
-
-const getStatusText = (status: string) => {
-  switch (status) {
-    case 'PENDING':
-      return '待完成';
-    case 'COMPLETED':
-      return '已完成';
-    default:
-      return '未知';
-  }
-};
-
 const handleComplete = async (record: any) => {
   try {
     record.completing = true;
@@ -273,13 +252,8 @@ const handleComplete = async (record: any) => {
   }
 };
 
-const handleCopy = async (text: string) => {
-  try {
-    await navigator.clipboard.writeText(text);
-    message.success('已复制到剪贴板');
-  } catch (err) {
-    message.error('复制失败');
-  }
+const handleCopy = (text: string) => {
+  copyToClipboard(text);
 };
 
 const handleSearch = async (value: string) => {
@@ -363,8 +337,7 @@ const columns = [
     dataIndex: 'price',
     key: 'price',
     width: 120,
-    customRender: ({ text }: { text: number }) =>
-      `¥ ${text}`.replace(/\B(?=(\d{3})+(?!\d))/g, ','),
+    customRender: ({ text }: { text: number }) => formatPrice(text),
   },
   {
     title: '状态',

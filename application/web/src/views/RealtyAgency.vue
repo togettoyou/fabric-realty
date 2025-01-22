@@ -129,7 +129,7 @@
               style="width: calc(100% - 110px)"
             />
             <a-tooltip title="随机生成一个地址">
-              <a-button @click="generateRandomAddress">
+              <a-button @click="generateRandomAddressHandler">
                 <template #icon><ReloadOutlined /></template>
                 随机生成
               </a-button>
@@ -147,7 +147,7 @@
               placeholder="请输入面积"
             />
             <a-tooltip title="随机生成一个面积">
-              <a-button @click="generateRandomArea">
+              <a-button @click="generateRandomAreaHandler">
                 <template #icon><ReloadOutlined /></template>
                 随机生成
               </a-button>
@@ -265,6 +265,7 @@ import { realtyAgencyApi } from '../api';
 import type { FormInstance } from 'ant-design-vue';
 import { ref, reactive } from 'vue';
 import type { BlockData } from '../types';
+import { copyToClipboard, generateRandomName, generateRandomAddress, generateRandomArea, generateUUID } from '../utils';
 
 const formRef = ref<FormInstance>();
 const showCreateModal = ref(false);
@@ -380,20 +381,10 @@ const loadMore = () => {
   loadRealEstateList();
 };
 
-// 生成UUID
-const generateUUID = () => {
-  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-    const r = Math.random() * 16 | 0;
-    const v = c === 'x' ? r : (r & 0x3 | 0x8);
-    return v.toString(16);
-  });
-};
-
 const handleModalOk = () => {
   formRef.value?.validate().then(async () => {
     modalLoading.value = true;
     try {
-      // 自动生成房产ID
       const realEstateData = {
         ...formState,
         id: generateUUID(),
@@ -401,9 +392,7 @@ const handleModalOk = () => {
       await realtyAgencyApi.createRealEstate(realEstateData);
       message.success('房产信息登记成功');
       showCreateModal.value = false;
-      // 重置表单
       formRef.value?.resetFields();
-      // 刷新列表
       realEstateList.value = [];
       bookmark.value = '';
       loadRealEstateList();
@@ -420,63 +409,30 @@ const handleModalCancel = () => {
   formRef.value?.resetFields();
 };
 
-// 随机生成地址
-const cities = ['北京市', '上海市', '广州市', '深圳市', '杭州市', '南京市', '成都市', '武汉市'];
-const districts = ['东城区', '西城区', '朝阳区', '海淀区', '丰台区', '昌平区'];
-const streets = ['长安街', '建国路', '复兴路', '中关村大街', '金融街', '望京街'];
-const communities = ['阳光小区', '和平花园', '翠湖园', '金色家园', '龙湖花园', '碧桂园'];
-
-const generateRandomAddress = () => {
-  const city = cities[Math.floor(Math.random() * cities.length)];
-  const district = districts[Math.floor(Math.random() * districts.length)];
-  const street = streets[Math.floor(Math.random() * streets.length)];
-  const community = communities[Math.floor(Math.random() * communities.length)];
-  const building = Math.floor(Math.random() * 20 + 1);
-  const unit = Math.floor(Math.random() * 6 + 1);
-  const room = Math.floor(Math.random() * 2000 + 101);
-
-  formState.address = `${city}${district}${street}${community}${building}号楼${unit}单元${room}室`;
+const generateRandomAddressHandler = () => {
+  formState.address = generateRandomAddress();
 };
 
-// 随机生成面积
-const generateRandomArea = () => {
-  // 生成 50-300 之间的随机面积，保留2位小数
-  formState.area = Number((Math.random() * (300 - 50) + 50).toFixed(2));
+const generateRandomAreaHandler = () => {
+  formState.area = generateRandomArea();
 };
-
-// 随机生成所有者姓名
-const lastNames = ['张', '王', '李', '赵', '刘', '陈', '杨', '黄', '周', '吴'];
-const firstNames = ['伟', '芳', '娜', '秀英', '敏', '静', '丽', '强', '磊', '洋', '艳', '勇', '军', '杰', '娟', '涛', '明', '超', '秀兰', '霞'];
 
 const generateRandomOwner = () => {
-  const lastName = lastNames[Math.floor(Math.random() * lastNames.length)];
-  const firstName = firstNames[Math.floor(Math.random() * firstNames.length)];
-  formState.owner = lastName + firstName;
+  formState.owner = generateRandomName();
 };
 
-// 添加状态筛选的响应式变量
+const handleCopy = (text: string) => {
+  copyToClipboard(text);
+};
+
 const statusFilter = ref('');
 
-// 监听状态筛选变化
 watch(statusFilter, () => {
-  // 重置列表和书签
   realEstateList.value = [];
   bookmark.value = '';
-  // 重新加载数据
   loadRealEstateList();
 });
 
-// 添加复制函数
-const handleCopy = async (text: string) => {
-  try {
-    await navigator.clipboard.writeText(text);
-    message.success('已复制到剪贴板');
-  } catch (err) {
-    message.error('复制失败');
-  }
-};
-
-// 添加搜索相关的变量和方法
 const searchId = ref('');
 
 const handleSearch = async (value: string) => {
@@ -498,19 +454,16 @@ const handleSearch = async (value: string) => {
 const handleSearchChange = (e: Event) => {
   const value = (e.target as HTMLInputElement).value;
   if (!value) {
-    // 当搜索框清空时，重新加载列表
     realEstateList.value = [];
     bookmark.value = '';
     loadRealEstateList();
   }
 };
 
-// 初始加载
 onMounted(() => {
   loadRealEstateList();
 });
 
-// 区块查询相关
 const blockDrawer = ref(false);
 const blockList = ref<BlockData[]>([]);
 const blockTotal = ref(0);
@@ -519,13 +472,11 @@ const blockQuery = reactive({
   pageNum: 1,
 });
 
-// 打开区块抽屉
 const openBlockDrawer = async () => {
   blockDrawer.value = true;
   await fetchBlockList();
 };
 
-// 获取区块列表
 const fetchBlockList = async () => {
   try {
     const res = await realtyAgencyApi.getBlockList({
@@ -539,7 +490,6 @@ const fetchBlockList = async () => {
   }
 };
 
-// 处理分页变化
 const handleBlockPageChange = async (page: number, pageSize: number) => {
   blockQuery.pageNum = page;
   blockQuery.pageSize = pageSize;

@@ -159,7 +159,7 @@
               :parser="value => value!.replace(/\¥\s?|(,*)/g, '')"
             />
             <a-tooltip title="随机生成一个价格">
-              <a-button @click="generateRandomPrice">
+              <a-button @click="generateRandomPriceHandler">
                 <template #icon><ReloadOutlined /></template>
                 随机生成
               </a-button>
@@ -267,6 +267,7 @@ import { tradingPlatformApi } from '../api';
 import type { FormInstance } from 'ant-design-vue';
 import { ref, reactive } from 'vue';
 import type { BlockData } from '../types';
+import { copyToClipboard, generateRandomName, generateRandomPrice, generateUUID, getStatusText, getStatusColor, formatPrice } from '../utils';
 
 const formRef = ref<FormInstance>();
 const showCreateModal = ref(false);
@@ -335,8 +336,7 @@ const columns = [
     dataIndex: 'price',
     key: 'price',
     width: 120,
-    customRender: ({ text }: { text: number }) =>
-      `¥ ${text}`.replace(/\B(?=(\d{3})+(?!\d))/g, ','),
+    customRender: ({ text }: { text: number }) => formatPrice(text),
   },
   {
     title: '状态',
@@ -409,14 +409,6 @@ const getStatusText = (status: string) => {
   }
 };
 
-const generateUUID = () => {
-  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-    const r = Math.random() * 16 | 0;
-    const v = c === 'x' ? r : (r & 0x3 | 0x8);
-    return v.toString(16);
-  });
-};
-
 const handleModalOk = () => {
   formRef.value?.validate().then(async () => {
     modalLoading.value = true;
@@ -453,13 +445,8 @@ watch(statusFilter, () => {
   loadTransactionList();
 });
 
-const handleCopy = async (text: string) => {
-  try {
-    await navigator.clipboard.writeText(text);
-    message.success('已复制到剪贴板');
-  } catch (err) {
-    message.error('复制失败');
-  }
+const handleCopy = (text: string) => {
+  copyToClipboard(text);
 };
 
 const handleRealEstateIdChange = async (e: Event) => {
@@ -484,23 +471,14 @@ const handleRealEstateIdChange = async (e: Event) => {
   }
 };
 
-// 随机生成买家姓名
-const lastNames = ['张', '王', '李', '赵', '刘', '陈', '杨', '黄', '周', '吴'];
-const firstNames = ['伟', '芳', '娜', '秀英', '敏', '静', '丽', '强', '磊', '洋', '艳', '勇', '军', '杰', '娟', '涛', '明', '超', '秀兰', '霞'];
-
 const generateRandomBuyer = () => {
-  const lastName = lastNames[Math.floor(Math.random() * lastNames.length)];
-  const firstName = firstNames[Math.floor(Math.random() * firstNames.length)];
-  formState.buyer = lastName + firstName;
+  formState.buyer = generateRandomName();
 };
 
-// 随机生成价格
-const generateRandomPrice = () => {
-  // 生成 50-1000 万之间的随机价格（单位：元），保留2位小数
-  formState.price = Number((Math.random() * (10000000 - 500000) + 500000).toFixed(2));
+const generateRandomPriceHandler = () => {
+  formState.price = generateRandomPrice();
 };
 
-// 添加搜索相关的变量和方法
 const searchId = ref('');
 
 const handleSearch = async (value: string) => {
@@ -522,14 +500,12 @@ const handleSearch = async (value: string) => {
 const handleSearchChange = (e: Event) => {
   const value = (e.target as HTMLInputElement).value;
   if (!value) {
-    // 当搜索框清空时，重新加载列表
     transactionList.value = [];
     bookmark.value = '';
     loadTransactionList();
   }
 };
 
-// 区块查询相关
 const blockDrawer = ref(false);
 const blockList = ref<BlockData[]>([]);
 const blockTotal = ref(0);
@@ -538,13 +514,11 @@ const blockQuery = reactive({
   pageNum: 1,
 });
 
-// 打开区块抽屉
 const openBlockDrawer = async () => {
   blockDrawer.value = true;
   await fetchBlockList();
 };
 
-// 获取区块列表
 const fetchBlockList = async () => {
   try {
     const res = await tradingPlatformApi.getBlockList({
@@ -558,7 +532,6 @@ const fetchBlockList = async () => {
   }
 };
 
-// 处理分页变化
 const handleBlockPageChange = async (page: number, pageSize: number) => {
   blockQuery.pageNum = page;
   blockQuery.pageSize = pageSize;
