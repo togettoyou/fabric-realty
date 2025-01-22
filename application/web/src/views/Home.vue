@@ -1,11 +1,11 @@
 <template>
   <div class="home">
-    <div class="page-header">
+    <div class="home-page-header">
       <h1 class="page-title">选择您的组织身份</h1>
       <p class="page-description">本系统由三个组织构成的联盟链网络共同维护</p>
     </div>
 
-    <div class="content">
+    <div class="home-content">
       <router-link to="/realty-agency" class="card">
         <div class="card-icon">
           <HomeOutlined />
@@ -45,7 +45,7 @@ import { HomeOutlined, ShopOutlined, BankOutlined } from '@ant-design/icons-vue'
   background-color: #f0f2f5;
 }
 
-.content {
+.home-content {
   flex: 1;
   display: flex;
   gap: 24px;
@@ -92,7 +92,7 @@ import { HomeOutlined, ShopOutlined, BankOutlined } from '@ant-design/icons-vue'
   text-align: center;
 }
 
-.page-header {
+.home-page-header {
   padding: 24px;
   background-color: #fff;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
@@ -113,7 +113,7 @@ import { HomeOutlined, ShopOutlined, BankOutlined } from '@ant-design/icons-vue'
 }
 
 @media (max-width: 768px) {
-  .content {
+  .home-content {
     flex-direction: column;
   }
 }
