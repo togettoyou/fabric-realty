@@ -251,7 +251,7 @@ main() {
 
     if [[ "$confirm" != "Y" && "$confirm" != "y" ]]; then
         log_info "用户取消执行"
-        exit 0
+        exit 2
     fi
 
     # 清理环境
