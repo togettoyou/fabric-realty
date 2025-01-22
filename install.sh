@@ -43,6 +43,12 @@ echo -e "\n${GREEN}================================${NC}"
 echo -e "${GREEN}   Fabric-Realty 一键安装脚本${NC}"
 echo -e "${GREEN}================================${NC}\n"
 
+# 镜像加速说明
+echo -e "${BLUE}镜像加速说明：${NC}"
+echo -e "1. 本项目依赖的 Docker 镜像默认从 Docker Hub 下载"
+echo -e "2. 若下载速度较慢，可选择使用镜像加速功能"
+echo -e "3. 镜像加速采用 ${YELLOW}https://github.com/togettoyou/hub-mirror${NC} 项目提供的阿里云镜像服务\n"
+
 read -p "$(echo -e ${YELLOW}"是否使用镜像加速下载？若 Docker Hub 下载较慢可选择使用 [y/N] "${NC})" use_mirror
 if [[ $use_mirror == [yY] ]]; then
     log_info "将使用镜像加速下载..."
@@ -74,7 +80,7 @@ if [[ $use_mirror == [yY] ]]; then
         log_success "镜像 $target 准备完成"
     done
 else
-    log_info "将直接从 Docker Hub 下载镜像..."
+    log_info "跳过镜像加速，后续将直接从 Docker Hub 下载镜像..."
 fi
 
 # 部署区块链网络
