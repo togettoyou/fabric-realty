@@ -53,32 +53,14 @@ read -p "$(echo -e ${YELLOW}"是否使用镜像加速下载？若 Docker Hub 下
 if [[ $use_mirror == [yY] ]]; then
     log_info "将使用镜像加速下载..."
 
-    # 定义镜像数组
-    declare -A images=(
-        ["togettoyou/fabric-realty.server:latest"]="registry.cn-hangzhou.aliyuncs.com/hubmirrorbytogettoyou/togettoyou.fabric-realty.server:latest"
-        ["hyperledger/fabric-orderer:2.5.10"]="registry.cn-hangzhou.aliyuncs.com/hubmirrorbytogettoyou/hyperledger.fabric-orderer:2.5.10"
-        ["hyperledger/fabric-peer:2.5.10"]="registry.cn-hangzhou.aliyuncs.com/hubmirrorbytogettoyou/hyperledger.fabric-peer:2.5.10"
-        ["hyperledger/fabric-baseos:2.5"]="registry.cn-hangzhou.aliyuncs.com/hubmirrorbytogettoyou/hyperledger.fabric-baseos:2.5"
-        ["togettoyou/fabric-realty.web:latest"]="registry.cn-hangzhou.aliyuncs.com/hubmirrorbytogettoyou/togettoyou.fabric-realty.web:latest"
-        ["hyperledger/fabric-tools:2.5.10"]="registry.cn-hangzhou.aliyuncs.com/hubmirrorbytogettoyou/hyperledger.fabric-tools:2.5.10"
-        ["hyperledger/fabric-ccenv:2.5"]="registry.cn-hangzhou.aliyuncs.com/hubmirrorbytogettoyou/hyperledger.fabric-ccenv:2.5"
-    )
-
     # 拉取并重命名镜像
-    for target in "${!images[@]}"; do
-        mirror="${images[$target]}"
-        log_info "拉取镜像: $mirror"
-        if ! docker pull "$mirror"; then
-            log_error "拉取镜像失败: $mirror"
-            exit 1
-        fi
-        log_info "重命名镜像: $mirror -> $target"
-        if ! docker tag "$mirror" "$target"; then
-            log_error "重命名镜像失败: $target"
-            exit 1
-        fi
-        log_success "镜像 $target 准备完成"
-    done
+    docker pull registry.cn-hangzhou.aliyuncs.com/hubmirrorbytogettoyou/togettoyou.fabric-realty.server:latest && docker tag registry.cn-hangzhou.aliyuncs.com/hubmirrorbytogettoyou/togettoyou.fabric-realty.server:latest togettoyou/fabric-realty.server:latest
+    docker pull registry.cn-hangzhou.aliyuncs.com/hubmirrorbytogettoyou/hyperledger.fabric-orderer:2.5.10 && docker tag registry.cn-hangzhou.aliyuncs.com/hubmirrorbytogettoyou/hyperledger.fabric-orderer:2.5.10 hyperledger/fabric-orderer:2.5.10
+    docker pull registry.cn-hangzhou.aliyuncs.com/hubmirrorbytogettoyou/hyperledger.fabric-baseos:2.5 && docker tag registry.cn-hangzhou.aliyuncs.com/hubmirrorbytogettoyou/hyperledger.fabric-baseos:2.5 hyperledger/fabric-baseos:2.5
+    docker pull registry.cn-hangzhou.aliyuncs.com/hubmirrorbytogettoyou/togettoyou.fabric-realty.web:latest && docker tag registry.cn-hangzhou.aliyuncs.com/hubmirrorbytogettoyou/togettoyou.fabric-realty.web:latest togettoyou/fabric-realty.web:latest
+    docker pull registry.cn-hangzhou.aliyuncs.com/hubmirrorbytogettoyou/hyperledger.fabric-tools:2.5.10 && docker tag registry.cn-hangzhou.aliyuncs.com/hubmirrorbytogettoyou/hyperledger.fabric-tools:2.5.10 hyperledger/fabric-tools:2.5.10
+    docker pull registry.cn-hangzhou.aliyuncs.com/hubmirrorbytogettoyou/hyperledger.fabric-ccenv:2.5 && docker tag registry.cn-hangzhou.aliyuncs.com/hubmirrorbytogettoyou/hyperledger.fabric-ccenv:2.5 hyperledger/fabric-ccenv:2.5
+    docker pull registry.cn-hangzhou.aliyuncs.com/hubmirrorbytogettoyou/hyperledger.fabric-peer:2.5.10 && docker tag registry.cn-hangzhou.aliyuncs.com/hubmirrorbytogettoyou/hyperledger.fabric-peer:2.5.10 hyperledger/fabric-peer:2.5.10
 else
     log_info "跳过镜像加速，后续将直接从 Docker Hub 下载镜像..."
 fi
