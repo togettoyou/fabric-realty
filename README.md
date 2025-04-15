@@ -10,6 +10,12 @@
 
 👆 扫码或搜索关注公众号：**gopher云原生**
 
+## 本地开发
+
+参考：[本地开发指南](dev.md)
+
+推荐首次使用时选择快速部署方式，以便快速体验系统功能，往下看 👇
+
 ## 快速部署
 
 ### 环境要求
@@ -19,19 +25,26 @@
 
 ### 部署步骤
 
-1. 拉取项目并设置权限
+1. 拉取项目（或手动下载）
 
    ```bash
-   git clone --depth 1 https://github.com/togettoyou/fabric-realty.git && cd fabric-realty && find . -name "*.sh" -exec chmod +x {} \;
+   git clone --depth 1 https://github.com/togettoyou/fabric-realty.git
    ```
 
-2. 一键部署
+2. 设置脚本权限
+
+   ```bash
+   cd fabric-realty
+   find . -name "*.sh" -exec chmod +x {} \;
+   ```
+
+3. 一键部署
 
    ```bash
    ./install.sh
    ```
 
-3. 一键卸载
+4. 一键卸载
 
    ```bash
    ./uninstall.sh
